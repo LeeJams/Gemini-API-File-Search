@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini File Search API</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 쿼리 실행 -->
+        <div class="section">
+            <div class="section-header">
+                <h2>RAG 쿼리 실행</h2>
+                <p class="section-description">업로드된 문서를 기반으로 질문하고 답변을 받아보세요</p>
+            </div>
+            <div class="store-info">
+                <div class="store-badge">
+                    <span class="badge-icon">🏪</span>
+                    <span>스토어: <strong>sellpick</strong></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>질문 입력</label>
+                <textarea id="query-input" placeholder="예: 업로드된 문서의 주요 내용을 요약해주세요" class="textarea"></textarea>
+            </div>
+            <div class="form-group">
+                <label>메타데이터 필터 <span class="optional">(선택사항)</span></label>
+                <input type="text" id="metadata-filter" placeholder="예: doc_type='manual'" class="input">
+            </div>
+            <button onclick="executeQuery()" class="btn btn-primary btn-large">
+                <span class="btn-icon">🚀</span>
+                <span>쿼리 실행</span>
+            </button>
+            <div id="query-result" class="result-container"></div>
+        </div>
+
+        <!-- 로딩 오버레이 -->
+        <div id="loading-overlay" class="loading-overlay hidden">
+            <div class="spinner"></div>
+            <p>처리 중...</p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+
