@@ -87,7 +87,24 @@ router.post(
         }
       }
 
-      res.json({
+      const hasError = uploadResults.some(
+        (result) => result.status === "error"
+      );
+
+      if (hasError) {
+        const errorDetails = uploadResults
+          .filter((result) => result.status === "error")
+          .map((result) => `${result.filename}: ${result.error}`)
+          .join(", ");
+
+        return res.status(500).json({
+          success: false,
+          error: `일부 파일 업로드에 실패했습니다: ${errorDetails}`,
+          data: uploadResults,
+        });
+      }
+
+      return res.json({
         success: true,
         message: "파일 업로드가 완료되었습니다",
         data: uploadResults,

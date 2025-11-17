@@ -28,6 +28,37 @@ const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY || "",
 });
 
+/**
+ * 스토어 캐시 (서버 메모리)
+ *
+ * displayName을 키로, 실제 File Search Store 객체를 캐싱합니다.
+ * 같은 스토어에 대해 반복해서 Gemini API를 호출하는 것을 방지합니다.
+ */
+const storeCache = new Map();
+
+/**
+ * 스토어 캐시에서 조회
+ *
+ * @param {string} displayName - 스토어 표시 이름
+ * @returns {Object|null} 캐시된 스토어 또는 null
+ */
+function getCachedStore(displayName) {
+  const cached = storeCache.get(displayName);
+  if (!cached) return null;
+  return cached;
+}
+
+/**
+ * 스토어 캐시에 저장
+ *
+ * @param {string} displayName - 스토어 표시 이름
+ * @param {Object} store - 스토어 객체
+ */
+function setCachedStore(displayName, store) {
+  if (!displayName || !store) return;
+  storeCache.set(displayName, store);
+}
+
 // ============================================
 // File Search Store 관리 함수
 // ============================================
@@ -48,6 +79,8 @@ async function createFileSearchStore(displayName) {
   });
 
   console.log(`✅ 스토어가 생성되었습니다: ${createStoreOp.name}`);
+  // 새로 생성된 스토어는 캐시에 바로 저장해 둡니다.
+  setCachedStore(displayName, createStoreOp);
   return createStoreOp;
 }
 
@@ -62,7 +95,14 @@ async function createFileSearchStore(displayName) {
  * @throws {Error} 스토어를 찾을 수 없을 경우
  */
 async function findStoreByDisplayName(displayName) {
-  console.log(`\n🔍 스토어 검색 중: ${displayName}`);
+  // 1. 캐시 먼저 조회
+  const cached = getCachedStore(displayName);
+  if (cached) {
+    console.log(`\n🔍 스토어 캐시 히트: ${displayName} -> ${cached.name}`);
+    return cached;
+  }
+
+  console.log(`\n🔍 스토어 검색 중(원격): ${displayName}`);
 
   let fileStore = null;
   const pager = await ai.fileSearchStores.list({ config: { pageSize: 10 } });
@@ -84,6 +124,8 @@ async function findStoreByDisplayName(displayName) {
   }
 
   console.log(`✅ 스토어를 찾았습니다: ${fileStore.name}`);
+  // 2. 찾은 스토어를 캐시에 저장
+  setCachedStore(displayName, fileStore);
   return fileStore;
 }
 
@@ -164,6 +206,7 @@ async function uploadMultipleFiles(fileStore, docsDir) {
  * @param {Array} [options.customMetadata] - 커스텀 메타데이터 배열
  * @param {number} [options.maxTokensPerChunk=500] - 청크당 최대 토큰 수
  * @param {number} [options.maxOverlapTokens=50] - 청크 간 최대 겹치는 토큰 수
+ * @param {string} [options.mimeType] - 파일 MIME 타입 (예: 'text/markdown')
  * @returns {Promise<Object>} 업로드 완료된 파일의 operation 결과
  */
 async function uploadWithCustomChunking(fileStore, filePath, options = {}) {
@@ -174,7 +217,27 @@ async function uploadWithCustomChunking(fileStore, filePath, options = {}) {
     customMetadata = [],
     maxTokensPerChunk = 500,
     maxOverlapTokens = 50,
+    mimeType,
   } = options;
+
+  // MIME 타입 자동 지정 (비ASCII 파일명 등으로 인한 감지 실패 대비)
+  let resolvedMimeType = mimeType;
+  if (!resolvedMimeType) {
+    const ext = path.extname(filePath).toLowerCase();
+    const mimeMap = {
+      ".md": "text/markdown",
+      ".markdown": "text/markdown",
+      ".txt": "text/plain",
+      ".text": "text/plain",
+      ".pdf": "application/pdf",
+      ".csv": "text/csv",
+      ".json": "application/json",
+      ".html": "text/html",
+      ".htm": "text/html",
+    };
+
+    resolvedMimeType = mimeMap[ext] || "application/octet-stream";
+  }
 
   let advancedUploadOp = await ai.fileSearchStores.uploadToFileSearchStore({
     file: filePath,
@@ -182,6 +245,7 @@ async function uploadWithCustomChunking(fileStore, filePath, options = {}) {
     config: {
       displayName,
       customMetadata,
+      mimeType: resolvedMimeType,
       chunkingConfig: {
         whiteSpaceConfig: {
           maxTokensPerChunk,
@@ -390,6 +454,8 @@ async function deleteFileSearchStore(fileStore) {
   });
 
   console.log(`✅ 스토어가 성공적으로 삭제되었습니다`);
+  // 캐시에서도 제거
+  storeCache.delete(fileStore.displayName);
 }
 
 // ============================================

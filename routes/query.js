@@ -56,9 +56,19 @@ router.post("/:displayName/query", async (req, res) => {
     });
   } catch (error) {
     console.error("쿼리 실행 오류:", error);
+
+    // Gemini 모델 과부하(503)인 경우, 보다 친절한 메시지와 함께 그대로 503으로 전달
+    if (error.status === 503 || error.statusCode === 503) {
+      return res.status(503).json({
+        success: false,
+        error:
+          "현재 Gemini 모델이 과부하 상태입니다. 잠시 후 다시 시도해주세요. (503 UNAVAILABLE)",
+      });
+    }
+
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: error.message || "쿼리 실행 중 알 수 없는 오류가 발생했습니다",
     });
   }
 });

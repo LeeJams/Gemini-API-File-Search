@@ -7,6 +7,7 @@ import storesRouter from "./routes/stores.js";
 import uploadRouter from "./routes/upload.js";
 import queryRouter from "./routes/query.js";
 import documentsRouter from "./routes/documents.js";
+import docsRouter from "./routes/docs.js";
 import { notFoundHandler, errorHandler } from "./middleware/errorHandler.js";
 import { logServerStart } from "./utils/logger.js";
 
@@ -44,6 +45,7 @@ app.use("/api/stores", storesRouter);
 app.use("/api/stores", uploadRouter);
 app.use("/api/stores", queryRouter);
 app.use("/api/stores", documentsRouter);
+app.use("/api/docs", docsRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

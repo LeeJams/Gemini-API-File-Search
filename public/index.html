@@ -3,46 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini File Search API</title>
+    <title>Stores - Gemini File Search</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <!-- 쿼리 실행 -->
-        <div class="section">
-            <div class="section-header">
-                <h2>RAG 쿼리 실행</h2>
-                <p class="section-description">업로드된 문서를 기반으로 질문하고 답변을 받아보세요</p>
-            </div>
-            <div class="store-info">
-                <div class="store-badge">
-                    <span class="badge-icon">🏪</span>
-                    <span>스토어: <strong>sellpick</strong></span>
-                </div>
-            </div>
-            <div class="form-group">
-                <label>질문 입력</label>
-                <textarea id="query-input" placeholder="예: 업로드된 문서의 주요 내용을 요약해주세요" class="textarea"></textarea>
-            </div>
-            <div class="form-group">
-                <label>메타데이터 필터 <span class="optional">(선택사항)</span></label>
-                <input type="text" id="metadata-filter" placeholder="예: doc_type='manual'" class="input">
-            </div>
-            <button onclick="executeQuery()" class="btn btn-primary btn-large">
-                <span class="btn-icon">🚀</span>
-                <span>쿼리 실행</span>
-            </button>
-            <div id="query-result" class="result-container"></div>
+    <!-- Store Selection Screen -->
+    <div class="store-selection-container">
+
+        <!-- Header -->
+        <div class="store-selection-header">
+            <h1 class="store-selection-title">Select Store</h1>
+            <p class="store-selection-description">스토어를 선택하거나 새로운 스토어를 추가하세요</p>
         </div>
 
-        <!-- 로딩 오버레이 -->
-        <div id="loading-overlay" class="loading-overlay hidden">
-            <div class="spinner"></div>
-            <p>처리 중...</p>
+        <!-- Store Grid -->
+        <div id="store-grid" class="store-grid">
+            <!-- Stores will be loaded here -->
+        </div>
+
+    </div>
+
+    <!-- Add Store Modal -->
+    <div id="add-store-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="closeAddStoreModal()"></div>
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2 class="modal-title">Add New Store</h2>
+                <button class="modal-close-btn" onclick="closeAddStoreModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Store Name</label>
+                    <input
+                        type="text"
+                        id="new-store-name"
+                        placeholder="예: mystore"
+                        class="input"
+                    />
+                    <p class="form-hint">영문, 숫자, 하이픈(-), 언더스코어(_)만 사용 가능</p>
+                </div>
+                <button onclick="createStore()" class="btn btn-primary btn-lg btn-full">
+                    <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>Create Store</span>
+                </button>
+            </div>
         </div>
     </div>
 
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p class="loading-text">처리 중...</p>
+    </div>
+
     <script src="app.js"></script>
+    <script>
+        // Auto-load stores on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadStores();
+        });
+    </script>
 </body>
 </html>
-

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini File Search - Bento UI</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Markdown Parser -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+</head>
+
+<body>
+    <!-- 2-Column Bento Layout -->
+    <div class="app-container">
+
+        <!-- Left Sidebar: Knowledge Base -->
+        <aside class="sidebar">
+            <!-- Knowledge Base Info Card -->
+            <div class="bento-card kb-info-card">
+                <h2 class="kb-title" id="kb-store-name">Knowledge Base</h2>
+                <div class="kb-status">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Active</span>
+                </div>
+
+                <div class="kb-divider"></div>
+
+                <div class="kb-stats">
+                    <div class="kb-stat-item">
+                        <span class="kb-stat-label">Documents</span>
+                        <span class="kb-stat-value" id="kb-doc-count">0</span>
+                    </div>
+                    <div class="kb-stat-item">
+                        <span class="kb-stat-label">Updated</span>
+                        <span class="kb-stat-value" id="kb-updated-date">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <button onclick="window.location.href='documents.html'" class="kb-action-btn">
+                <svg class="kb-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+                <span>View Documents List</span>
+            </button>
+
+            <button onclick="openDocsModal()" class="kb-action-btn kb-action-btn-secondary">
+                <svg class="kb-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                    <polyline points="13 2 13 9 20 9"></polyline>
+                </svg>
+                <span>Open Original Files</span>
+            </button>
+
+        </aside>
+
+        <!-- Right Main Panel: Query & Results -->
+        <main class="main-panel">
+
+            <!-- Query Input Card -->
+            <div class="bento-card">
+                <div class="section-header">
+                    <h1 class="heading-lg section-title">RAG Query</h1>
+                    <p class="text-sm section-description">업로드된 문서를 기반으로 질문하고 답변을 받아보세요</p>
+                </div>
+
+                <div class="query-section">
+                    <div class="form-group">
+                        <label class="form-label">
+                            질문 입력
+                        </label>
+                        <textarea id="query-input" placeholder="예: 업로드된 문서의 주요 내용을 요약해주세요" class="textarea"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            메타데이터 필터
+                            <span class="form-label-optional">(선택사항)</span>
+                        </label>
+                        <input type="text" id="metadata-filter" placeholder="예: doc_type='manual'" class="input" />
+                    </div>
+
+                    <button onclick="executeQuery()" class="btn btn-primary btn-lg btn-full">
+                        <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                        <span>Execute Query</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results Card -->
+            <div id="query-result"></div>
+
+        </main>
+
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p class="loading-text">처리 중...</p>
+    </div>
+
+    <!-- Docs File List Modal -->
+    <div id="docs-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="closeDocsModal()"></div>
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 class="modal-title">Original Files</h2>
+                <button class="modal-close-btn" onclick="closeDocsModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div id="docs-file-list" class="docs-file-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Content Modal -->
+    <div id="file-content-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="closeFileContentModal()"></div>
+        <div class="modal-content modal-xlarge">
+            <div class="modal-header">
+                <h2 class="modal-title" id="file-content-title">파일명</h2>
+                <button class="modal-close-btn" onclick="closeFileContentModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div id="file-content" class="file-content markdown-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Get store name from URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const storeName = urlParams.get('store') || 'sellpick';
+
+        // Set store name in global variable
+        window.CURRENT_STORE = storeName;
+
+        // Auto-load documents on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            // Update store name display
+            const kbStoreNameEl = document.getElementById('kb-store-name');
+            if (kbStoreNameEl) {
+                kbStoreNameEl.textContent = storeName;
+            }
+
+            loadDocuments();
+        });
+    </script>
+</body>
+
+</html>

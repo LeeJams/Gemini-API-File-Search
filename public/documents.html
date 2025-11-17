@@ -1,45 +1,140 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>문서 목록 - Gemini File Search</title>
+    <title>Documents - Gemini File Search</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-    <div class="container">
-        <div class="section">
-            <div class="section-header">
-                <h2>문서 목록</h2>
-                <p class="section-description">sellpick 스토어에 업로드된 모든 문서를 확인하세요</p>
-            </div>
-            <div class="store-info">
-                <div class="store-badge">
-                    <span class="badge-icon">🏪</span>
-                    <span>스토어: <strong>sellpick</strong></span>
-                </div>
-                <button onclick="loadDocuments()" class="btn btn-secondary btn-refresh">
-                    <span class="btn-icon">🔄</span>
-                    <span>새로고침</span>
-                </button>
-            </div>
-            <div id="documents-list" class="list-container"></div>
-        </div>
 
-        <!-- 로딩 오버레이 -->
-        <div id="loading-overlay" class="loading-overlay hidden">
-            <div class="spinner"></div>
-            <p>처리 중...</p>
+<body>
+    <div class="app-container" style="grid-template-columns: 1fr; max-width: 1200px;">
+
+        <main class="main-panel">
+
+            <!-- Header Card -->
+            <div class="bento-card">
+                <div class="section-header">
+                    <h1 class="heading-lg section-title" id="doc-store-name">Documents</h1>
+                    <p class="text-sm section-description">업로드된 모든 문서를 확인하세요</p>
+                </div>
+
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                    <div class="store-badge">
+                        <svg class="store-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg>
+                        <span>Store: <strong class="store-name" id="doc-badge-name">sellpick</strong></span>
+                    </div>
+
+                    <div style="display: flex; gap: 8px;">
+                        <button onclick="loadDocuments()" class="btn btn-secondary btn-sm">
+                            <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="23 4 23 10 17 10"></polyline>
+                                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                            </svg>
+                            <span>Refresh</span>
+                        </button>
+                        <button onclick="openUploadModal()" class="btn btn-primary btn-sm">
+                            <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <span>Upload</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documents List -->
+            <div class="bento-card">
+                <div id="documents-list" class="documents-list"></div>
+            </div>
+
+        </main>
+
+    </div>
+
+    <!-- Upload Modal -->
+    <div id="upload-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="closeUploadModal()"></div>
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2 class="modal-title">Upload Files</h2>
+                <button class="modal-close-btn" onclick="closeUploadModal()">✕</button>
+            </div>
+            <div class="modal-body">
+
+                <div class="form-group" style="margin-bottom: 24px;">
+                    <label class="form-label">파일 선택</label>
+                    <div class="file-upload-area">
+                        <input type="file" id="file-input" multiple class="file-input">
+                        <div class="file-upload-label">
+                            <svg class="upload-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <span class="upload-text">파일을 선택하거나 여기에 드래그하세요</span>
+                            <span class="upload-hint">여러 파일을 동시에 선택할 수 있습니다</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="selected-files" class="selected-files"></div>
+
+                <button onclick="uploadFiles()" class="btn btn-primary btn-lg btn-full">
+                    <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <span>Upload Files</span>
+                </button>
+
+                <div id="upload-status" class="status-message" style="margin-top: 12px;"></div>
+            </div>
         </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p class="loading-text">처리 중...</p>
     </div>
 
     <script src="app.js"></script>
     <script>
-        // 페이지 로드 시 문서 목록 자동 로드
+        // Get store name from URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const storeName = urlParams.get('store') || 'sellpick';
+        window.CURRENT_STORE = storeName;
+
+        // Auto-load documents on page load
         window.addEventListener('DOMContentLoaded', () => {
+            // Update store name display
+            const titleEl = document.getElementById('doc-store-name');
+            const badgeEl = document.getElementById('doc-badge-name');
+            if (titleEl) titleEl.textContent = storeName;
+            if (badgeEl) badgeEl.textContent = storeName;
+
+            // Upload modal store name 표시
+            const uploadTitleEl = document.getElementById('upload-store-name');
+            const uploadBadgeEl = document.getElementById('upload-badge-name');
+            if (uploadTitleEl) uploadTitleEl.textContent = storeName;
+            if (uploadBadgeEl) uploadBadgeEl.textContent = storeName;
+
             loadDocuments();
         });
     </script>
 </body>
-</html>
 
+</html>
