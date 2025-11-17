@@ -171,20 +171,34 @@ async function uploadFiles() {
  * 메타데이터 필터를 사용하여 특정 문서만 검색할 수 있습니다.
  */
 async function executeQuery() {
-  const query = document.getElementById("query-input").value.trim();
-  const metadataFilter = document
-    .getElementById("metadata-filter")
-    .value.trim();
+  const queryInput = document.getElementById("query-input");
+  const query = queryInput.value.trim();
+  const metadataFilterInput = document.getElementById("metadata-filter");
+  const metadataFilter = metadataFilterInput
+    ? metadataFilterInput.value.trim()
+    : "";
 
   if (!query) {
-    alert("쿼리를 입력하세요");
+    alert("질문을 입력하세요");
     return;
+  }
+
+  // Check if chat interface exists
+  const isChatInterface = document.getElementById("chat-history") !== null;
+
+  if (isChatInterface) {
+    // Chat interface: add user message first
+    addMessageToUI("user", query);
+
+    // Clear input
+    queryInput.value = "";
+    queryInput.style.height = "auto";
   }
 
   showLoading();
   try {
     const data = await apiCall(
-      `/api/stores/${encodeURIComponent(STORE_NAME)}/query`,
+      `/api/stores/${encodeURIComponent(getStoreName())}/query`,
       {
         method: "POST",
         body: JSON.stringify({
@@ -194,113 +208,131 @@ async function executeQuery() {
       }
     );
 
-    const resultContainer = document.getElementById("query-result");
+    if (isChatInterface) {
+      // Chat interface: add AI response
+      const metadata = data.data.groundingMetadata || null;
 
-    // Markdown 렌더링
-    const renderedText =
-      typeof marked !== "undefined"
-        ? marked.parse(data.data.text)
-        : escapeHtml(data.data.text).replace(/\n/g, "<br>");
-
-    // Grounding Metadata 처리
-    let groundingHTML = "";
-    if (data.data.groundingMetadata) {
-      const metadata = data.data.groundingMetadata;
-
-      // 최근 인용 정보를 전역에 저장하여 모달에서 사용
-      window.LAST_GROUNDING_METADATA = metadata;
-
-      // 검색된 문서 정보 추출
-      if (metadata.retrievalQueries && metadata.retrievalQueries.length > 0) {
-        groundingHTML += `
-          <div class="grounding-section">
-            <div class="grounding-title">
-              <svg class="grounding-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="11" cy="11" r="8"></circle>
-                <path d="m21 21-4.35-4.35"></path>
-              </svg>
-              검색 쿼리
-            </div>
-            ${metadata.retrievalQueries
-              .map(
-                (query) =>
-                  `<div class="grounding-item">${escapeHtml(query)}</div>`
-              )
-              .join("")}
-          </div>
-        `;
+      // Save grounding metadata globally
+      if (metadata) {
+        window.LAST_GROUNDING_METADATA = metadata;
       }
 
-      // 인용된 소스 정보 (참조 문서)
-      if (metadata.groundingChunks && metadata.groundingChunks.length > 0) {
-        groundingHTML += `
-          <div class="grounding-section">
-            <div class="grounding-title">
-              <svg class="grounding-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-              </svg>
-              참조 문서 (${metadata.groundingChunks.length}개)
-            </div>
-            <div class="grounding-chunks">
-              ${metadata.groundingChunks
+      addMessageToUI("ai", data.data.text, metadata);
+    } else {
+      // Old interface: display in result container
+      const resultContainer = document.getElementById("query-result");
+
+      // Markdown 렌더링
+      const renderedText =
+        typeof marked !== "undefined"
+          ? marked.parse(data.data.text)
+          : escapeHtml(data.data.text).replace(/\n/g, "<br>");
+
+      // Grounding Metadata 처리
+      let groundingHTML = "";
+      if (data.data.groundingMetadata) {
+        const metadata = data.data.groundingMetadata;
+
+        // 최근 인용 정보를 전역에 저장하여 모달에서 사용
+        window.LAST_GROUNDING_METADATA = metadata;
+
+        // 검색된 문서 정보 추출
+        if (metadata.retrievalQueries && metadata.retrievalQueries.length > 0) {
+          groundingHTML += `
+            <div class="grounding-section">
+              <div class="grounding-title">
+                <svg class="grounding-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                검색 쿼리
+              </div>
+              ${metadata.retrievalQueries
                 .map(
-                  (chunk, idx) => `
-                <div class="grounding-chunk">
-                  <div class="chunk-header">
-                    <span class="chunk-number">#${idx + 1}</span>
-                    ${(() => {
-                      const title =
-                        (chunk.retrievedContext &&
-                          chunk.retrievedContext.title) ||
-                        (chunk.web && (chunk.web.title || chunk.web.uri));
-                      if (!title) return "";
-                      return `
-                        <button type="button" class="chunk-link chunk-link-button" onclick="openGroundingContext(${idx})">
-                          ${escapeHtml(title)}
-                        </button>
-                      `;
-                    })()}
-                  </div>
-                </div>
-              `
+                  (query) =>
+                    `<div class="grounding-item">${escapeHtml(query)}</div>`
                 )
                 .join("")}
             </div>
+          `;
+        }
+
+        // 인용된 소스 정보 (참조 문서)
+        if (metadata.groundingChunks && metadata.groundingChunks.length > 0) {
+          groundingHTML += `
+            <div class="grounding-section">
+              <div class="grounding-title">
+                <svg class="grounding-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                </svg>
+                참조 문서 (${metadata.groundingChunks.length}개)
+              </div>
+              <div class="grounding-chunks">
+                ${metadata.groundingChunks
+                  .map(
+                    (chunk, idx) => `
+                  <div class="grounding-chunk">
+                    <div class="chunk-header">
+                      <span class="chunk-number">#${idx + 1}</span>
+                      ${(() => {
+                        const title =
+                          (chunk.retrievedContext &&
+                            chunk.retrievedContext.title) ||
+                          (chunk.web && (chunk.web.title || chunk.web.uri));
+                        if (!title) return "";
+                        return `
+                          <button type="button" class="chunk-link chunk-link-button" onclick="openGroundingContext(${idx})">
+                            ${escapeHtml(title)}
+                          </button>
+                        `;
+                      })()}
+                    </div>
+                  </div>
+                `
+                  )
+                  .join("")}
+              </div>
+            </div>
+          `;
+        }
+      }
+
+      resultContainer.innerHTML = `
+        <div class="bento-card result-card">
+          <div class="result-header">
+            <svg class="result-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span class="result-label">AI Response</span>
           </div>
-        `;
+          <div class="result-text markdown-content">${renderedText}</div>
+          ${
+            groundingHTML
+              ? `
+            <div class="result-meta">
+              <svg class="result-meta-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+              </svg>
+              <span>인용 정보</span>
+            </div>
+            ${groundingHTML}
+          `
+              : ""
+          }
+        </div>
+      `;
+    }
+  } catch (error) {
+    if (isChatInterface) {
+      addMessageToUI("ai", `오류: ${error.message}`);
+    } else {
+      const resultContainer = document.getElementById("query-result");
+      if (resultContainer) {
+        resultContainer.innerHTML = `<div class="status-message error">오류: ${error.message}</div>`;
       }
     }
-
-    resultContainer.innerHTML = `
-      <div class="bento-card result-card">
-        <div class="result-header">
-          <svg class="result-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-          </svg>
-          <span class="result-label">AI Response</span>
-        </div>
-        <div class="result-text markdown-content">${renderedText}</div>
-        ${
-          groundingHTML
-            ? `
-          <div class="result-meta">
-            <svg class="result-meta-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-            </svg>
-            <span>인용 정보</span>
-          </div>
-          ${groundingHTML}
-        `
-            : ""
-        }
-      </div>
-    `;
-  } catch (error) {
-    document.getElementById(
-      "query-result"
-    ).innerHTML = `<div class="status-message error">오류: ${error.message}</div>`;
   } finally {
     hideLoading();
   }
@@ -945,3 +977,251 @@ async function createStore() {
     hideLoading();
   }
 }
+
+// ============================================
+// CHAT INTERFACE FUNCTIONS
+// ============================================
+
+/**
+ * Chat History Storage Key
+ */
+const CHAT_HISTORY_KEY = "gemini_chat_history";
+
+/**
+ * Get Chat History from LocalStorage
+ */
+function getChatHistory() {
+  try {
+    const storeName = getStoreName();
+    const key = `${CHAT_HISTORY_KEY}_${storeName}`;
+    const history = localStorage.getItem(key);
+    return history ? JSON.parse(history) : [];
+  } catch (e) {
+    console.error("채팅 기록 로드 실패:", e);
+    return [];
+  }
+}
+
+/**
+ * Save Chat History to LocalStorage
+ */
+function saveChatHistory(history) {
+  try {
+    const storeName = getStoreName();
+    const key = `${CHAT_HISTORY_KEY}_${storeName}`;
+    localStorage.setItem(key, JSON.stringify(history));
+  } catch (e) {
+    console.error("채팅 기록 저장 실패:", e);
+  }
+}
+
+/**
+ * Load Chat History from Storage and Display
+ */
+function loadChatHistory() {
+  const history = getChatHistory();
+  const chatHistory = document.getElementById("chat-history");
+
+  if (!chatHistory) return;
+
+  // Clear existing messages except welcome
+  const welcome = chatHistory.querySelector(".chat-welcome");
+  chatHistory.innerHTML = "";
+
+  if (history.length === 0 && welcome) {
+    chatHistory.appendChild(welcome);
+    return;
+  }
+
+  // Display all messages from history
+  history.forEach((message) => {
+    addMessageToUI(message.type, message.text, message.grounding, false);
+  });
+
+  // Scroll to bottom
+  scrollToBottom();
+}
+
+/**
+ * Add Message to Chat UI
+ */
+function addMessageToUI(type, text, grounding = null, save = true) {
+  const chatHistory = document.getElementById("chat-history");
+  if (!chatHistory) return;
+
+  // Hide welcome message on first message
+  const welcome = chatHistory.querySelector(".chat-welcome");
+  if (welcome) {
+    welcome.remove();
+  }
+
+  const messageDiv = document.createElement("div");
+  messageDiv.className = `chat-message chat-message-${type}`;
+
+  const bubble = document.createElement("div");
+  bubble.className = "chat-message-bubble";
+
+  const textDiv = document.createElement("div");
+  textDiv.className = "chat-message-text";
+
+  if (type === "ai") {
+    // Render markdown for AI responses
+    const renderedText =
+      typeof marked !== "undefined"
+        ? marked.parse(text)
+        : escapeHtml(text).replace(/\n/g, "<br>");
+    textDiv.innerHTML = renderedText;
+    textDiv.classList.add("markdown-content");
+
+    // Add grounding info if available
+    if (grounding && grounding.groundingChunks) {
+      const groundingDiv = document.createElement("div");
+      groundingDiv.className = "chat-grounding";
+
+      const groundingTitle = document.createElement("div");
+      groundingTitle.className = "chat-grounding-title";
+      groundingTitle.innerHTML = `
+        <svg class="chat-grounding-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+        </svg>
+        참조 문서 (${grounding.groundingChunks.length}개)
+      `;
+
+      const groundingList = document.createElement("div");
+      groundingList.className = "chat-grounding-list";
+
+      grounding.groundingChunks.forEach((chunk, idx) => {
+        const chip = document.createElement("div");
+        chip.className = "chat-grounding-chip";
+        chip.onclick = () => openGroundingContext(idx);
+
+        const title =
+          (chunk.retrievedContext && chunk.retrievedContext.title) ||
+          (chunk.web && (chunk.web.title || chunk.web.uri)) ||
+          `문서 #${idx + 1}`;
+
+        chip.innerHTML = `
+          <span class="chat-grounding-number">${idx + 1}</span>
+          <span>${escapeHtml(title)}</span>
+        `;
+
+        groundingList.appendChild(chip);
+      });
+
+      groundingDiv.appendChild(groundingTitle);
+      groundingDiv.appendChild(groundingList);
+      bubble.appendChild(textDiv);
+      bubble.appendChild(groundingDiv);
+    } else {
+      bubble.appendChild(textDiv);
+    }
+  } else {
+    textDiv.textContent = text;
+    bubble.appendChild(textDiv);
+  }
+
+  const time = document.createElement("div");
+  time.className = "chat-message-time";
+  time.textContent = new Date().toLocaleTimeString("ko-KR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  messageDiv.appendChild(bubble);
+  messageDiv.appendChild(time);
+  chatHistory.appendChild(messageDiv);
+
+  // Save to history
+  if (save) {
+    const history = getChatHistory();
+    history.push({ type, text, grounding, timestamp: Date.now() });
+    saveChatHistory(history);
+  }
+
+  scrollToBottom();
+}
+
+/**
+ * Scroll Chat to Bottom
+ */
+function scrollToBottom() {
+  const container = document.querySelector(".chat-history-container");
+  if (container) {
+    setTimeout(() => {
+      container.scrollTop = container.scrollHeight;
+    }, 100);
+  }
+}
+
+/**
+ * Clear Chat History
+ */
+function clearChatHistory() {
+  if (!confirm("대화 기록을 모두 삭제하시겠습니까?")) {
+    return;
+  }
+
+  const storeName = getStoreName();
+  const key = `${CHAT_HISTORY_KEY}_${storeName}`;
+  localStorage.removeItem(key);
+
+  // Reset UI
+  const chatHistory = document.getElementById("chat-history");
+  if (chatHistory) {
+    chatHistory.innerHTML = `
+      <div class="chat-welcome">
+        <h2 class="chat-welcome-title">RAG Query Chat</h2>
+        <p class="chat-welcome-description">업로드된 문서를 기반으로 질문하고 답변을 받아보세요</p>
+      </div>
+    `;
+  }
+
+  // Clear grounding metadata
+  window.LAST_GROUNDING_METADATA = null;
+}
+
+/**
+ * Toggle Metadata Panel
+ */
+function toggleMetadataPanel() {
+  const panel = document.getElementById("metadata-panel");
+  if (panel) {
+    panel.classList.toggle("hidden");
+  }
+}
+
+/**
+ * Auto-resize Textarea
+ */
+function autoResizeTextarea(textarea) {
+  textarea.style.height = "auto";
+  textarea.style.height = Math.min(textarea.scrollHeight, 200) + "px";
+}
+
+// ============================================
+// CHAT EVENT LISTENERS
+// ============================================
+
+window.addEventListener("DOMContentLoaded", () => {
+  // Load chat history on page load (workspace page only)
+  if (document.getElementById("chat-history")) {
+    loadChatHistory();
+  }
+
+  // Auto-resize textarea
+  const queryInput = document.getElementById("query-input");
+  if (queryInput && queryInput.classList.contains("chat-textarea")) {
+    queryInput.addEventListener("input", function () {
+      autoResizeTextarea(this);
+    });
+
+    // Handle Enter key (send) and Shift+Enter (newline)
+    queryInput.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        executeQuery();
+      }
+    });
+  }
+});

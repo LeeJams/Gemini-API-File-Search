@@ -58,45 +58,71 @@
 
         </aside>
 
-        <!-- Right Main Panel: Query & Results -->
-        <main class="main-panel">
+        <!-- Right Main Panel: Chat Interface -->
+        <main class="main-panel chat-layout">
 
-            <!-- Query Input Card -->
-            <div class="bento-card">
-                <div class="section-header">
-                    <h1 class="heading-lg section-title">RAG Query</h1>
-                    <p class="text-sm section-description">업로드된 문서를 기반으로 질문하고 답변을 받아보세요</p>
-                </div>
-
-                <div class="query-section">
-                    <div class="form-group">
-                        <label class="form-label">
-                            질문 입력
-                        </label>
-                        <textarea id="query-input" placeholder="예: 업로드된 문서의 주요 내용을 요약해주세요" class="textarea"></textarea>
+            <!-- Chat History Area (scrollable) -->
+            <div class="chat-history-container">
+                <div id="chat-history" class="chat-history">
+                    <!-- Welcome Message -->
+                    <div class="chat-welcome">
+                        <h2 class="chat-welcome-title">RAG Query Chat</h2>
+                        <p class="chat-welcome-description">업로드된 문서를 기반으로 질문하고 답변을 받아보세요</p>
                     </div>
-
-                    <div class="form-group">
-                        <label class="form-label">
-                            메타데이터 필터
-                            <span class="form-label-optional">(선택사항)</span>
-                        </label>
-                        <input type="text" id="metadata-filter" placeholder="예: doc_type='manual'" class="input" />
-                    </div>
-
-                    <button onclick="executeQuery()" class="btn btn-primary btn-lg btn-full">
-                        <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <path d="m21 21-4.35-4.35"></path>
-                        </svg>
-                        <span>Execute Query</span>
-                    </button>
                 </div>
             </div>
 
-            <!-- Results Card -->
-            <div id="query-result"></div>
+            <!-- Chat Input Area (fixed at bottom) -->
+            <div class="chat-input-container">
+                <div class="chat-input-wrapper">
+                    <div class="chat-input-main">
+                        <textarea
+                            id="query-input"
+                            placeholder="질문을 입력하세요..."
+                            class="chat-textarea"
+                            rows="1"></textarea>
+
+                        <div class="chat-input-actions">
+                            <button onclick="toggleMetadataPanel()" class="chat-action-btn" title="메타데이터 필터">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="4" y1="21" x2="4" y2="14"></line>
+                                    <line x1="4" y1="10" x2="4" y2="3"></line>
+                                    <line x1="12" y1="21" x2="12" y2="12"></line>
+                                    <line x1="12" y1="8" x2="12" y2="3"></line>
+                                    <line x1="20" y1="21" x2="20" y2="16"></line>
+                                    <line x1="20" y1="12" x2="20" y2="3"></line>
+                                    <line x1="1" y1="14" x2="7" y2="14"></line>
+                                    <line x1="9" y1="8" x2="15" y2="8"></line>
+                                    <line x1="17" y1="16" x2="23" y2="16"></line>
+                                </svg>
+                            </button>
+                            <button onclick="clearChatHistory()" class="chat-action-btn" title="대화 기록 삭제">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                            </button>
+                            <button onclick="executeQuery()" class="chat-send-btn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Metadata Panel (collapsible) -->
+                    <div id="metadata-panel" class="metadata-panel hidden">
+                        <div class="metadata-panel-content">
+                            <label class="form-label">
+                                메타데이터 필터
+                                <span class="form-label-optional">(선택사항)</span>
+                            </label>
+                            <input type="text" id="metadata-filter" placeholder="예: doc_type='manual'" class="input" />
+                        </div>
+                    </div>
+                </div>
+            </div>
 
         </main>
 
