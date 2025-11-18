@@ -426,6 +426,16 @@ async function loadDocuments() {
                     </div>
                 </div>
                 <div class="document-list-actions">
+                    <button class="btn btn-secondary btn-sm" onclick="openUpdateModal('${escapeHtml(
+                      doc.displayName
+                    )}')">
+                        <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <span>Update</span>
+                    </button>
                     <button class="btn btn-danger btn-sm" onclick="deleteDocument('${escapeHtml(
                       getStoreName()
                     )}', '${escapeHtml(doc.displayName)}')">
@@ -776,6 +786,12 @@ window.addEventListener("DOMContentLoaded", () => {
   if (fileInput) {
     fileInput.addEventListener("change", updateSelectedFilesPreview);
   }
+
+  // 문서 업데이트 모달의 파일 입력
+  const updateFileInput = document.getElementById("update-file-input");
+  if (updateFileInput) {
+    updateFileInput.addEventListener("change", updateSelectedFilePreview);
+  }
 });
 
 /**
@@ -973,6 +989,151 @@ async function createStore() {
     loadStores();
   } catch (error) {
     alert(`오류: ${error.message}`);
+  } finally {
+    hideLoading();
+  }
+}
+
+// ============================================
+// DOCUMENT UPDATE FUNCTIONS
+// ============================================
+
+/**
+ * 문서 업데이트 모달 열기
+ */
+function openUpdateModal(docDisplayName) {
+  const modal = document.getElementById("update-modal");
+  const docNameEl = document.getElementById("update-doc-name");
+  const fileInput = document.getElementById("update-file-input");
+  const statusElement = document.getElementById("update-status");
+  const selectedFileEl = document.getElementById("update-selected-file");
+
+  if (!modal) return;
+
+  // 문서 이름 저장 (전역 변수로)
+  window.UPDATING_DOCUMENT_NAME = docDisplayName;
+
+  // UI 초기화
+  if (docNameEl) {
+    docNameEl.textContent = docDisplayName;
+  }
+  if (fileInput) {
+    fileInput.value = "";
+  }
+  if (statusElement) {
+    statusElement.textContent = "";
+    statusElement.className = "status-message";
+  }
+  if (selectedFileEl) {
+    selectedFileEl.innerHTML = "";
+    selectedFileEl.style.display = "none";
+  }
+
+  modal.classList.remove("hidden");
+}
+
+/**
+ * 문서 업데이트 모달 닫기
+ */
+function closeUpdateModal() {
+  const modal = document.getElementById("update-modal");
+  if (!modal) return;
+  modal.classList.add("hidden");
+  window.UPDATING_DOCUMENT_NAME = null;
+}
+
+/**
+ * 업데이트 파일 미리보기
+ */
+function updateSelectedFilePreview() {
+  const fileInput = document.getElementById("update-file-input");
+  const container = document.getElementById("update-selected-file");
+
+  if (!fileInput || !container) return;
+
+  const file = fileInput.files[0];
+
+  if (!file) {
+    container.innerHTML = "";
+    container.style.display = "none";
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="selected-files-header">
+      <span class="selected-files-title">선택된 파일</span>
+    </div>
+    <ul class="selected-files-list">
+      <li>${escapeHtml(file.name)} (${formatFileSize(file.size)})</li>
+    </ul>
+  `;
+
+  container.style.display = "block";
+}
+
+/**
+ * 문서 업데이트 실행
+ */
+async function updateDocument() {
+  const fileInput = document.getElementById("update-file-input");
+  const docDisplayName = window.UPDATING_DOCUMENT_NAME;
+  const statusElement = document.getElementById("update-status");
+
+  if (!docDisplayName) {
+    alert("업데이트할 문서가 선택되지 않았습니다");
+    return;
+  }
+
+  if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+    alert("업데이트할 파일을 선택하세요");
+    return;
+  }
+
+  const file = fileInput.files[0];
+  const storeName = getStoreName();
+
+  showLoading();
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch(
+      `${API_BASE_URL}/api/stores/${encodeURIComponent(
+        storeName
+      )}/documents/${encodeURIComponent(docDisplayName)}`,
+      {
+        method: "PUT",
+        body: formData,
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "문서 업데이트 실패");
+    }
+
+    if (statusElement) {
+      statusElement.innerHTML = `
+        <span class="status-icon">✓</span>
+        <span>문서가 성공적으로 업데이트되었습니다</span>
+      `;
+      statusElement.className = "status-message success";
+    }
+
+    // 잠시 후 모달 닫고 문서 목록 새로고침
+    setTimeout(() => {
+      closeUpdateModal();
+      loadDocuments();
+    }, 1500);
+  } catch (error) {
+    if (statusElement) {
+      statusElement.innerHTML = `
+        <span class="status-icon">✕</span>
+        <span>오류: ${error.message}</span>
+      `;
+      statusElement.className = "status-message error";
+    }
   } finally {
     hideLoading();
   }
