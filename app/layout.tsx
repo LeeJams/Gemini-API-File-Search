@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
+import { LoadingOverlay } from "@/components/loading-overlay";
+import { AppHeader } from "@/components/app-header";
 import { cn } from "@/lib/utils";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -30,7 +32,13 @@ export default function RootLayout({
           inter.variable
         )}
       >
-        <Providers>{children}</Providers>
+        <Providers>
+          <div className="relative flex min-h-screen flex-col">
+            <AppHeader />
+            <main className="flex-1">{children}</main>
+          </div>
+          <LoadingOverlay />
+        </Providers>
       </body>
     </html>
   );
