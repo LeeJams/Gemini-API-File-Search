@@ -57,18 +57,57 @@ router.post("/:displayName/query", async (req, res) => {
   } catch (error) {
     console.error("쿼리 실행 오류:", error);
 
-    // Gemini 모델 과부하(503)인 경우, 보다 친절한 메시지와 함께 그대로 503으로 전달
-    if (error.status === 503 || error.statusCode === 503) {
-      return res.status(503).json({
-        success: false,
-        error:
-          "현재 Gemini 모델이 과부하 상태입니다. 잠시 후 다시 시도해주세요. (503 UNAVAILABLE)",
-      });
+    // API 에러 코드별 처리
+    const status = error.status || error.statusCode || 500;
+    let errorMessage = error.message || "쿼리 실행 중 알 수 없는 오류가 발생했습니다";
+    let statusCode = 500;
+
+    switch (status) {
+      case 400:
+        // Bad Request - 잘못된 요청
+        statusCode = 400;
+        errorMessage = `잘못된 요청입니다: ${error.message}`;
+        break;
+
+      case 403:
+        // Forbidden - API 키 권한 문제
+        statusCode = 403;
+        errorMessage = "API 키 권한이 없거나 File Search가 활성화되지 않았습니다.";
+        break;
+
+      case 404:
+        // Not Found - 스토어나 모델을 찾을 수 없음
+        statusCode = 404;
+        errorMessage = `리소스를 찾을 수 없습니다: ${error.message}`;
+        break;
+
+      case 429:
+        // Rate Limit - API 호출 한도 초과
+        statusCode = 429;
+        errorMessage = "API 호출 한도를 초과했습니다. 잠시 후 다시 시도해주세요.";
+        break;
+
+      case 500:
+        // Internal Server Error - 서버 내부 오류
+        statusCode = 500;
+        errorMessage = `서버 오류가 발생했습니다: ${error.message}`;
+        break;
+
+      case 503:
+        // Service Unavailable - 모델 과부하
+        statusCode = 503;
+        errorMessage = "현재 Gemini 모델이 과부하 상태입니다. 잠시 후 다시 시도해주세요.";
+        break;
+
+      default:
+        statusCode = 500;
+        errorMessage = error.message || "알 수 없는 오류가 발생했습니다";
     }
 
-    res.status(500).json({
+    res.status(statusCode).json({
       success: false,
-      error: error.message || "쿼리 실행 중 알 수 없는 오류가 발생했습니다",
+      error: errorMessage,
+      code: status,
     });
   }
 });

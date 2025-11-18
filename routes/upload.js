@@ -1,5 +1,6 @@
 import express from "express";
 import fs from "fs";
+import multer from "multer";
 import { findStoreByDisplayName } from "../index.js";
 import { uploadWithCustomChunking } from "../index.js";
 import upload from "../middleware/upload.js";
@@ -37,7 +38,39 @@ const router = express.Router();
  */
 router.post(
   "/:displayName/upload",
-  upload.array("files", 10),
+  (req, res, next) => {
+    upload.array("files", 10)(req, res, (err) => {
+      if (err) {
+        // Multer 에러 처리
+        if (err instanceof multer.MulterError) {
+          if (err.code === "LIMIT_FILE_SIZE") {
+            return res.status(400).json({
+              success: false,
+              error: "파일 크기가 20MB를 초과합니다",
+            });
+          }
+          if (err.code === "LIMIT_FILE_COUNT") {
+            return res.status(400).json({
+              success: false,
+              error: "최대 10개의 파일만 업로드할 수 있습니다",
+            });
+          }
+          if (err.code === "LIMIT_UNEXPECTED_FILE") {
+            return res.status(400).json({
+              success: false,
+              error: "예상치 못한 필드명입니다. 'files' 필드를 사용하세요",
+            });
+          }
+        }
+        // 파일 필터 에러 (MIME 타입)
+        return res.status(400).json({
+          success: false,
+          error: err.message || "파일 업로드 중 오류가 발생했습니다",
+        });
+      }
+      next();
+    });
+  },
   async (req, res) => {
     try {
       const { displayName } = req.params;
@@ -55,17 +88,30 @@ router.post(
       // 업로드된 파일들 처리
       const uploadResults = [];
       for (const file of files) {
+        let filePath = file.path;
         try {
-          // 커스텀 청킹 옵션 설정
+          // 커스텀 청킹 옵션 설정 및 검증
           const options = {};
           if (req.body.customMetadata) {
-            options.customMetadata = JSON.parse(req.body.customMetadata);
+            try {
+              options.customMetadata = JSON.parse(req.body.customMetadata);
+            } catch (e) {
+              throw new Error("customMetadata는 유효한 JSON이어야 합니다");
+            }
           }
           if (req.body.maxTokensPerChunk) {
-            options.maxTokensPerChunk = parseInt(req.body.maxTokensPerChunk);
+            const value = parseInt(req.body.maxTokensPerChunk);
+            if (value < 100 || value > 2000) {
+              throw new Error("maxTokensPerChunk는 100~2000 사이여야 합니다");
+            }
+            options.maxTokensPerChunk = value;
           }
           if (req.body.maxOverlapTokens) {
-            options.maxOverlapTokens = parseInt(req.body.maxOverlapTokens);
+            const value = parseInt(req.body.maxOverlapTokens);
+            if (value < 0 || value > 500) {
+              throw new Error("maxOverlapTokens는 0~500 사이여야 합니다");
+            }
+            options.maxOverlapTokens = value;
           }
 
           // 커스텀 옵션이 있으면 커스텀 청킹으로 업로드, 없으면 기본 업로드
@@ -76,14 +122,29 @@ router.post(
             status: "success",
           });
 
-          // 업로드 후 임시 파일 삭제
-          fs.unlinkSync(file.path);
+          // 업로드 후 임시 파일 삭제 (안전하게)
+          try {
+            if (fs.existsSync(filePath)) {
+              await fs.promises.unlink(filePath);
+            }
+          } catch (unlinkError) {
+            console.warn(`임시 파일 삭제 실패: ${filePath}`, unlinkError.message);
+          }
         } catch (error) {
           uploadResults.push({
             filename: file.originalname,
             status: "error",
             error: error.message,
           });
+
+          // 에러 발생 시에도 임시 파일 정리
+          try {
+            if (fs.existsSync(filePath)) {
+              await fs.promises.unlink(filePath);
+            }
+          } catch (unlinkError) {
+            console.warn(`임시 파일 삭제 실패: ${filePath}`, unlinkError.message);
+          }
         }
       }
 

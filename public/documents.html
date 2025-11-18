@@ -135,6 +135,52 @@
             loadDocuments();
         });
     </script>
+
+    <!-- Update Document Modal -->
+    <div id="update-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="closeUpdateModal()"></div>
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2 class="modal-title">문서 업데이트</h2>
+                <button class="modal-close-btn" onclick="closeUpdateModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <p class="text-sm" style="margin-bottom: 16px; color: var(--color-gray-600);">
+                    <strong id="update-doc-name"></strong> 문서를 새 버전으로 업데이트합니다.
+                </p>
+
+                <div class="form-group" style="margin-bottom: 24px;">
+                    <label class="form-label">새 파일 선택</label>
+                    <div class="file-upload-area">
+                        <input type="file" id="update-file-input" class="file-input">
+                        <div class="file-upload-label">
+                            <svg class="upload-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <span class="upload-text">파일을 선택하세요</span>
+                            <span class="upload-hint">기존 문서가 삭제되고 새 파일로 대체됩니다</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="update-selected-file" class="selected-files"></div>
+
+                <button onclick="updateDocument()" class="btn btn-primary btn-lg btn-full">
+                    <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <span>문서 업데이트</span>
+                </button>
+
+                <div id="update-status" class="status-message" style="margin-top: 12px;"></div>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
