@@ -28,6 +28,39 @@ const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY || "",
 });
 
+// ============================================
+// 유틸리티 함수
+// ============================================
+
+/**
+ * 재시도 로직을 포함한 비동기 함수 실행
+ *
+ * 일시적인 오류(503, 429 등)가 발생하면 지수 백오프를 사용하여 재시도합니다.
+ *
+ * @param {Function} fn - 실행할 비동기 함수
+ * @param {number} maxRetries - 최대 재시도 횟수 (기본값: 3)
+ * @param {number} baseDelay - 기본 대기 시간(ms) (기본값: 1000)
+ * @returns {Promise<any>} 함수 실행 결과
+ */
+async function retryWithBackoff(fn, maxRetries = 3, baseDelay = 1000) {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      const status = error.status || error.statusCode;
+      const isRetriableError = status === 429 || status === 503 || status === 500;
+
+      if (attempt < maxRetries && isRetriableError) {
+        const delay = baseDelay * Math.pow(2, attempt); // 지수 백오프
+        console.log(`재시도 ${attempt + 1}/${maxRetries} - ${delay}ms 후 재시도...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      } else {
+        throw error;
+      }
+    }
+  }
+}
+
 /**
  * 스토어 캐시 (서버 메모리)
  *
@@ -234,31 +267,46 @@ async function uploadWithCustomChunking(fileStore, filePath, options = {}) {
       ".json": "application/json",
       ".html": "text/html",
       ".htm": "text/html",
+      ".doc": "application/msword",
+      ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      ".xls": "application/vnd.ms-excel",
+      ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     };
 
     resolvedMimeType = mimeMap[ext] || "application/octet-stream";
   }
 
-  let advancedUploadOp = await ai.fileSearchStores.uploadToFileSearchStore({
-    file: filePath,
-    fileSearchStoreName: fileStore.name,
-    config: {
-      displayName,
-      customMetadata,
-      mimeType: resolvedMimeType,
-      chunkingConfig: {
-        whiteSpaceConfig: {
-          maxTokensPerChunk,
-          maxOverlapTokens,
+  // 재시도 로직 적용하여 업로드
+  let advancedUploadOp = await retryWithBackoff(async () => {
+    return await ai.fileSearchStores.uploadToFileSearchStore({
+      file: filePath,
+      fileSearchStoreName: fileStore.name,
+      config: {
+        displayName,
+        customMetadata,
+        mimeType: resolvedMimeType,
+        chunkingConfig: {
+          whiteSpaceConfig: {
+            maxTokensPerChunk,
+            maxOverlapTokens,
+          },
         },
       },
-    },
+    });
   });
 
-  // 파일 처리 완료까지 폴링 (1초마다 상태 확인)
-  while (!advancedUploadOp.done) {
+  // 파일 처리 완료까지 폴링 (1초마다 상태 확인, 최대 5분)
+  const maxPollAttempts = 300; // 5분
+  let pollAttempts = 0;
+
+  while (!advancedUploadOp.done && pollAttempts < maxPollAttempts) {
     await new Promise((resolve) => setTimeout(resolve, 1000));
     advancedUploadOp = await ai.operations.get({ operation: advancedUploadOp });
+    pollAttempts++;
+  }
+
+  if (!advancedUploadOp.done) {
+    throw new Error(`파일 처리 시간 초과: ${displayName}`);
   }
 
   console.log(`✅ 고급 파일 처리 완료: ${displayName}`);
@@ -297,14 +345,17 @@ async function generateContentWithFileSearch(
     toolsConfig.fileSearch.metadataFilter = metadataFilter;
   }
 
-  const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: query,
-    config: {
-      tools: [toolsConfig],
-      systemInstruction:
-        "답변은 다음 형식으로 작성해주세요: 답변을 md형식으로 작성해주세요. 답변은 짧고 요점을 명확하게 작성해주세요. 순서대로 정리되게 작성해주세요.",
-    },
+  // 재시도 로직 적용하여 쿼리 실행
+  const response = await retryWithBackoff(async () => {
+    return await ai.models.generateContent({
+      model: "gemini-2.0-flash-exp",
+      contents: query,
+      config: {
+        tools: [toolsConfig],
+        systemInstruction:
+          "답변은 다음 형식으로 작성해주세요: 답변을 md형식으로 작성해주세요. 답변은 짧고 요점을 명확하게 작성해주세요. 순서대로 정리되게 작성해주세요.",
+      },
+    });
   });
 
   console.log(`\n📝 모델 응답:\n${response.text}\n`);

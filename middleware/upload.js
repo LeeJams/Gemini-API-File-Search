@@ -39,12 +39,46 @@ const storage = multer.diskStorage({
 });
 
 /**
+ * 지원되는 MIME 타입 목록
+ * Gemini File Search API가 지원하는 파일 타입
+ */
+const SUPPORTED_MIME_TYPES = [
+  'text/plain',
+  'text/markdown',
+  'text/csv',
+  'text/html',
+  'application/pdf',
+  'application/json',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+];
+
+/**
+ * 파일 필터 - MIME 타입 검증
+ */
+const fileFilter = (req, file, cb) => {
+  // MIME 타입 확인
+  if (SUPPORTED_MIME_TYPES.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error(`지원되지 않는 파일 형식입니다: ${file.mimetype}`), false);
+  }
+};
+
+/**
  * Multer 인스턴스 생성
- * - 파일 크기 제한: 50MB
+ * - 파일 크기 제한: 20MB (Gemini API 제한)
+ * - MIME 타입 검증
  */
 const upload = multer({
   storage,
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB 제한
+  limits: {
+    fileSize: 20 * 1024 * 1024, // 20MB 제한 (Gemini API 제한)
+    files: 10, // 최대 10개 파일
+  },
+  fileFilter,
 });
 
 export default upload;
