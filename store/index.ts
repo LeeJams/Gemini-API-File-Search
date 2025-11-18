@@ -67,47 +67,88 @@ export const useAppStore = create<AppStore>()(
  * Selectors for better performance
  * Use these in components to prevent unnecessary re-renders
  */
-export const useUIState = () =>
-  useAppStore((state) => ({
-    isLoading: state.isLoading,
-    loadingMessage: state.loadingMessage,
-    error: state.error,
-    setLoading: state.setLoading,
-    setError: state.setError,
-    clearError: state.clearError,
-  }));
+export const useUIState = () => {
+  const isLoading = useAppStore((state) => state.isLoading);
+  const loadingMessage = useAppStore((state) => state.loadingMessage);
+  const error = useAppStore((state) => state.error);
+  const setLoading = useAppStore((state) => state.setLoading);
+  const setError = useAppStore((state) => state.setError);
+  const clearError = useAppStore((state) => state.clearError);
 
-export const useStoresState = () =>
-  useAppStore((state) => ({
-    stores: state.stores,
-    currentStore: state.currentStore,
-    lastUpdated: state.lastUpdated,
-    setStores: state.setStores,
-    setCurrentStore: state.setCurrentStore,
-    addStore: state.addStore,
-    removeStore: state.removeStore,
-    clearStores: state.clearStores,
-    isCacheValid: state.isCacheValid,
-  }));
+  return {
+    isLoading,
+    loadingMessage,
+    error,
+    setLoading,
+    setError,
+    clearError,
+  };
+};
 
-export const useDocumentsState = () =>
-  useAppStore((state) => ({
-    documents: state.documents,
-    selectedDocuments: state.selectedDocuments,
-    setDocuments: state.setDocuments,
-    addDocument: state.addDocument,
-    removeDocument: state.removeDocument,
-    toggleSelectDocument: state.toggleSelectDocument,
-    clearSelectedDocuments: state.clearSelectedDocuments,
-    clearDocuments: state.clearDocuments,
-  }));
+export const useStoresState = () => {
+  const stores = useAppStore((state) => state.stores);
+  const currentStore = useAppStore((state) => state.currentStore);
+  const lastUpdated = useAppStore((state) => state.lastUpdated);
+  const setStores = useAppStore((state) => state.setStores);
+  const setCurrentStore = useAppStore((state) => state.setCurrentStore);
+  const addStore = useAppStore((state) => state.addStore);
+  const removeStore = useAppStore((state) => state.removeStore);
+  const clearStores = useAppStore((state) => state.clearStores);
+  const isCacheValid = useAppStore((state) => state.isCacheValid);
 
-export const useQueryState = () =>
-  useAppStore((state) => ({
-    history: state.history,
-    currentResult: state.currentResult,
-    addToHistory: state.addToHistory,
-    setCurrentResult: state.setCurrentResult,
-    clearHistory: state.clearHistory,
-    clearCurrentResult: state.clearCurrentResult,
-  }));
+  return {
+    stores,
+    currentStore,
+    lastUpdated,
+    setStores,
+    setCurrentStore,
+    addStore,
+    removeStore,
+    clearStores,
+    isCacheValid,
+  };
+};
+
+export const useDocumentsState = () => {
+  const documents = useAppStore((state) => state.documents);
+  const selectedDocuments = useAppStore((state) => state.selectedDocuments);
+  const setDocuments = useAppStore((state) => state.setDocuments);
+  const addDocument = useAppStore((state) => state.addDocument);
+  const removeDocument = useAppStore((state) => state.removeDocument);
+  const toggleSelectDocument = useAppStore(
+    (state) => state.toggleSelectDocument
+  );
+  const clearSelectedDocuments = useAppStore(
+    (state) => state.clearSelectedDocuments
+  );
+  const clearDocuments = useAppStore((state) => state.clearDocuments);
+
+  return {
+    documents,
+    selectedDocuments,
+    setDocuments,
+    addDocument,
+    removeDocument,
+    toggleSelectDocument,
+    clearSelectedDocuments,
+    clearDocuments,
+  };
+};
+
+export const useQueryState = () => {
+  const history = useAppStore((state) => state.history);
+  const currentResult = useAppStore((state) => state.currentResult);
+  const addToHistory = useAppStore((state) => state.addToHistory);
+  const setCurrentResult = useAppStore((state) => state.setCurrentResult);
+  const clearHistory = useAppStore((state) => state.clearHistory);
+  const clearCurrentResult = useAppStore((state) => state.clearCurrentResult);
+
+  return {
+    history,
+    currentResult,
+    addToHistory,
+    setCurrentResult,
+    clearHistory,
+    clearCurrentResult,
+  };
+};
