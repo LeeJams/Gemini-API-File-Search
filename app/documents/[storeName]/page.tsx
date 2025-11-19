@@ -15,6 +15,7 @@ import {
   Eye,
 } from "lucide-react";
 import { formatDate, formatFileSize } from "@/lib/utils";
+import { DocumentDetailModal } from "@/components/DocumentDetailModal";
 import type { FileSearchDocument } from "@/types";
 
 /**
@@ -36,6 +37,10 @@ export default function DocumentsPage() {
   const [deleteConfirm, setDeleteConfirm] = useState<FileSearchDocument | null>(
     null
   );
+  const [selectedDocument, setSelectedDocument] = useState<FileSearchDocument | null>(
+    null
+  );
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
 
   useEffect(() => {
     loadStore();
@@ -153,6 +158,11 @@ export default function DocumentsPage() {
     }
   }
 
+  function handleDocumentClick(doc: FileSearchDocument) {
+    setSelectedDocument(doc);
+    setDetailModalOpen(true);
+  }
+
   if (!currentStore) {
     return null;
   }
@@ -259,11 +269,7 @@ export default function DocumentsPage() {
                   >
                     <div
                       className="flex items-center gap-3 flex-1 cursor-pointer"
-                      onClick={() =>
-                        router.push(
-                          `/documents/${storeName}/${encodeURIComponent(doc.displayName)}`
-                        )
-                      }
+                      onClick={() => handleDocumentClick(doc)}
                     >
                       <File className="h-5 w-5 text-primary" />
                       <div>
@@ -287,11 +293,7 @@ export default function DocumentsPage() {
                         variant="ghost"
                         size="icon"
                         className="opacity-0 transition-opacity group-hover:opacity-100"
-                        onClick={() =>
-                          router.push(
-                            `/documents/${storeName}/${encodeURIComponent(doc.displayName)}`
-                          )
-                        }
+                        onClick={() => handleDocumentClick(doc)}
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
@@ -314,6 +316,13 @@ export default function DocumentsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Document Detail Modal */}
+      <DocumentDetailModal
+        document={selectedDocument}
+        open={detailModalOpen}
+        onOpenChange={setDetailModalOpen}
+      />
     </div>
   );
 }
