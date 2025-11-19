@@ -327,14 +327,4 @@ npm run dev
 
 MIT
 
-## 🙏 감사의 글
-
-- Google Gemini API 팀
-- Next.js 팀
-- shadcn (UI 컴포넌트)
-- Zustand 팀
-- Tailwind CSS 팀
-
 ---
-
-**Next.js 16, TypeScript, Zustand, Tailwind CSS로 제작되었습니다** ❤️
