@@ -12,6 +12,7 @@ import {
   Calendar,
   HardDrive,
   Trash2,
+  Eye,
 } from "lucide-react";
 import { formatDate, formatFileSize } from "@/lib/utils";
 import type { FileSearchDocument } from "@/types";
@@ -256,7 +257,14 @@ export default function DocumentsPage() {
                     key={doc.name}
                     className="group flex items-center justify-between rounded-lg border p-4 transition-colors hover:bg-accent"
                   >
-                    <div className="flex items-center gap-3">
+                    <div
+                      className="flex items-center gap-3 flex-1 cursor-pointer"
+                      onClick={() =>
+                        router.push(
+                          `/documents/${storeName}/${encodeURIComponent(doc.displayName)}`
+                        )
+                      }
+                    >
                       <File className="h-5 w-5 text-primary" />
                       <div>
                         <p className="font-medium">{doc.displayName}</p>
@@ -274,14 +282,31 @@ export default function DocumentsPage() {
                         </div>
                       </div>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="opacity-0 transition-opacity group-hover:opacity-100"
-                      onClick={() => setDeleteConfirm(doc)}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="opacity-0 transition-opacity group-hover:opacity-100"
+                        onClick={() =>
+                          router.push(
+                            `/documents/${storeName}/${encodeURIComponent(doc.displayName)}`
+                          )
+                        }
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="opacity-0 transition-opacity group-hover:opacity-100"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteConfirm(doc);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
