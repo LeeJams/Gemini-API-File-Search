@@ -195,36 +195,40 @@ export default function DocumentsPage() {
   }
 
   return (
-    <div className="container py-8">
+    <div className="container px-4 py-6 md:py-8">
       {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="mb-6 space-y-4">
+        <div className="flex items-center gap-3 md:gap-4">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => router.push("/stores")}
+            className="flex-shrink-0"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold">{currentStore.displayName}</h1>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-2xl md:text-3xl font-bold truncate">{currentStore.displayName}</h1>
             <p className="text-sm text-muted-foreground">문서 관리</p>
           </div>
         </div>
-        <Button onClick={() => router.push(`/workspace/${storeName}`)}>
+        <Button
+          onClick={() => router.push(`/workspace/${storeName}`)}
+          className="w-full md:w-auto"
+        >
           쿼리 워크스페이스로 이동
         </Button>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[400px_1fr]">
+      <div className="grid gap-4 md:gap-6 lg:grid-cols-[minmax(300px,400px)_1fr]">
         {/* Upload Section */}
         <Card>
           <CardHeader>
-            <CardTitle>파일 업로드</CardTitle>
+            <CardTitle className="text-lg md:text-xl">파일 업로드</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="rounded-lg border-2 border-dashed p-6 text-center">
-              <Upload className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+            <div className="rounded-lg border-2 border-dashed p-4 md:p-6 text-center">
+              <Upload className="mx-auto mb-3 md:mb-4 h-10 md:h-12 w-10 md:w-12 text-muted-foreground" />
               <input
                 ref={fileInputRef}
                 type="file"
@@ -236,7 +240,7 @@ export default function DocumentsPage() {
               />
               <label
                 htmlFor="file-upload"
-                className="cursor-pointer text-sm text-muted-foreground hover:text-foreground"
+                className="cursor-pointer text-sm text-muted-foreground hover:text-foreground block"
               >
                 클릭하여 파일 추가
                 <br />
@@ -268,7 +272,7 @@ export default function DocumentsPage() {
                       className="group flex items-center justify-between gap-2 rounded-md border p-2 text-sm transition-colors hover:bg-accent"
                     >
                       <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
-                        <span className="truncate">{file.name}</span>
+                        <span className="truncate text-xs md:text-sm">{file.name}</span>
                         <span className="text-xs text-muted-foreground whitespace-nowrap">
                           {formatFileSize(file.size)}
                         </span>
@@ -276,7 +280,7 @@ export default function DocumentsPage() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
+                        className="h-6 w-6 shrink-0 opacity-100 md:opacity-0 md:group-hover:opacity-100"
                         onClick={() => handleRemoveFile(idx)}
                       >
                         <Trash2 className="h-3 w-3 text-destructive" />
@@ -296,13 +300,13 @@ export default function DocumentsPage() {
         {/* Documents List */}
         <Card>
           <CardHeader>
-            <CardTitle>문서 목록 ({documents.length}개)</CardTitle>
+            <CardTitle className="text-lg md:text-xl">문서 목록 ({documents.length}개)</CardTitle>
           </CardHeader>
           <CardContent>
             {documents.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <File className="mb-4 h-12 w-12 text-muted-foreground" />
-                <h3 className="mb-2 text-lg font-semibold">문서가 없습니다</h3>
+              <div className="flex flex-col items-center justify-center py-8 md:py-12 text-center">
+                <File className="mb-3 md:mb-4 h-10 md:h-12 w-10 md:w-12 text-muted-foreground" />
+                <h3 className="mb-2 text-base md:text-lg font-semibold">문서가 없습니다</h3>
                 <p className="text-sm text-muted-foreground">
                   파일을 업로드하여 시작하세요
                 </p>
@@ -312,19 +316,20 @@ export default function DocumentsPage() {
                 {documents.map((doc) => (
                   <div
                     key={doc.name}
-                    className="group flex items-center justify-between rounded-lg border p-4 transition-colors hover:bg-accent"
+                    className="group flex items-center justify-between rounded-lg border p-3 md:p-4 transition-colors hover:bg-accent"
                   >
                     <div
-                      className="flex items-center gap-3 flex-1 cursor-pointer"
+                      className="flex items-center gap-2 md:gap-3 flex-1 min-w-0 cursor-pointer"
                       onClick={() => handleDocumentClick(doc)}
                     >
-                      <File className="h-5 w-5 text-primary" />
-                      <div>
-                        <p className="font-medium">{doc.displayName}</p>
-                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <File className="h-4 md:h-5 w-4 md:w-5 text-primary flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-sm md:text-base truncate">{doc.displayName}</p>
+                        <div className="flex items-center gap-2 md:gap-3 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
-                            {formatDate(doc.createTime)}
+                            <span className="hidden sm:inline">{formatDate(doc.createTime)}</span>
+                            <span className="sm:hidden">{formatDate(doc.createTime).split(' ')[0]}</span>
                           </span>
                           {doc.sizeBytes && (
                             <span className="flex items-center gap-1">
@@ -335,11 +340,11 @@ export default function DocumentsPage() {
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="opacity-0 transition-opacity group-hover:opacity-100"
+                        className="h-8 w-8 md:h-10 md:w-10 opacity-100 md:opacity-0 md:group-hover:opacity-100"
                         onClick={() => handleDocumentClick(doc)}
                       >
                         <Eye className="h-4 w-4" />
@@ -347,7 +352,7 @@ export default function DocumentsPage() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="opacity-0 transition-opacity group-hover:opacity-100"
+                        className="h-8 w-8 md:h-10 md:w-10 opacity-100 md:opacity-0 md:group-hover:opacity-100"
                         onClick={(e) => {
                           e.stopPropagation();
                           setDeleteConfirm(doc);

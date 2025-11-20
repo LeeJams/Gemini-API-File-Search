@@ -133,43 +133,44 @@ export default function WorkspacePage() {
   }
 
   return (
-    <div className="container py-8">
+    <div className="container px-4 py-6 md:py-8">
       {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="mb-6 space-y-4">
+        <div className="flex items-center gap-3 md:gap-4">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => router.push("/stores")}
+            className="flex-shrink-0"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold">{currentStore.displayName}</h1>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-2xl md:text-3xl font-bold truncate">{currentStore.displayName}</h1>
             <p className="text-sm text-muted-foreground">쿼리 워크스페이스</p>
           </div>
         </div>
         <Button
           variant="outline"
           onClick={() => setShowHistory(!showHistory)}
-          className="gap-2"
+          className="gap-2 w-full md:w-auto"
         >
           <History className="h-4 w-4" />
           히스토리 {showHistory ? "숨기기" : "보기"}
         </Button>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
+      <div className="grid gap-4 md:gap-6 lg:grid-cols-[1fr_minmax(250px,300px)]">
         {/* Main Content */}
-        <div className="space-y-6">
+        <div className="space-y-4 md:space-y-6">
           {/* Query Input */}
           <Card>
             <CardHeader>
-              <CardTitle>쿼리 입력</CardTitle>
+              <CardTitle className="text-lg md:text-xl">쿼리 입력</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="query">질문을 입력하세요</Label>
+                <Label htmlFor="query" className="text-sm">질문을 입력하세요</Label>
                 <div className="flex gap-2">
                   <Input
                     id="query"
@@ -182,21 +183,22 @@ export default function WorkspacePage() {
                         handleExecuteQuery();
                       }
                     }}
-                    className="flex-1"
+                    className="flex-1 text-sm md:text-base"
                   />
-                  <Button onClick={handleExecuteQuery} size="icon">
+                  <Button onClick={handleExecuteQuery} size="icon" className="flex-shrink-0">
                     <Send className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="filter">메타데이터 필터 (선택사항)</Label>
+                <Label htmlFor="filter" className="text-sm">메타데이터 필터 (선택사항)</Label>
                 <Input
                   id="filter"
                   placeholder='예: doc_type="manual"'
                   value={metadataFilter}
                   onChange={(e) => setMetadataFilter(e.target.value)}
+                  className="text-sm md:text-base"
                 />
               </div>
             </CardContent>
@@ -206,13 +208,13 @@ export default function WorkspacePage() {
           {currentResult && (
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
                   <FileText className="h-5 w-5" />
                   AI 응답
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="prose prose-slate dark:prose-invert max-w-none">
+                <div className="prose prose-sm md:prose prose-slate dark:prose-invert max-w-none">
                   <ReactMarkdown>{currentResult.text}</ReactMarkdown>
                 </div>
 
@@ -237,12 +239,12 @@ export default function WorkspacePage() {
           {/* Empty State */}
           {!currentResult && (
             <Card className="border-dashed">
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <Send className="mb-4 h-12 w-12 text-muted-foreground" />
-                <h3 className="mb-2 text-lg font-semibold">
+              <CardContent className="flex flex-col items-center justify-center py-8 md:py-12">
+                <Send className="mb-3 md:mb-4 h-10 md:h-12 w-10 md:w-12 text-muted-foreground" />
+                <h3 className="mb-2 text-base md:text-lg font-semibold">
                   쿼리를 실행해보세요
                 </h3>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground text-center">
                   업로드된 문서에 대해 질문하세요
                 </p>
               </CardContent>
@@ -252,9 +254,9 @@ export default function WorkspacePage() {
 
         {/* History Sidebar */}
         {showHistory && (
-          <Card className="h-fit">
+          <Card className="h-fit lg:sticky lg:top-4">
             <CardHeader>
-              <CardTitle className="text-lg">쿼리 히스토리</CardTitle>
+              <CardTitle className="text-base md:text-lg">쿼리 히스토리</CardTitle>
             </CardHeader>
             <CardContent>
               {history.filter((h) => h.storeName === storeName).length === 0 ? (
@@ -270,11 +272,11 @@ export default function WorkspacePage() {
                       <button
                         key={item.id}
                         onClick={() => loadHistoryItem(item)}
-                        className="flex w-full items-start gap-2 rounded-lg border p-3 text-left transition-colors hover:bg-accent"
+                        className="flex w-full items-start gap-2 rounded-lg border p-2 md:p-3 text-left transition-colors hover:bg-accent active:bg-accent"
                       >
                         <ChevronRight className="mt-0.5 h-4 w-4 flex-shrink-0 text-muted-foreground" />
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium">
+                          <p className="truncate text-xs md:text-sm font-medium">
                             {item.query}
                           </p>
                           <p className="text-xs text-muted-foreground">
