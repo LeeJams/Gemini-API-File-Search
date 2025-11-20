@@ -70,12 +70,20 @@ export default function StoresPage() {
     }
   }
 
+  const [isCreating, setIsCreating] = useState(false);
+
   async function handleCreateStore() {
     if (!newStoreName.trim()) {
       setError("스토어 이름을 입력해주세요");
       return;
     }
 
+    // Prevent duplicate calls
+    if (isCreating) {
+      return;
+    }
+
+    setIsCreating(true);
     setLoading(true, "스토어 생성 중...");
     clearError();
 
@@ -99,6 +107,7 @@ export default function StoresPage() {
       setError(error.message || "네트워크 오류가 발생했습니다");
     } finally {
       setLoading(false);
+      setIsCreating(false);
     }
   }
 
@@ -243,6 +252,7 @@ export default function StoresPage() {
                 onChange={(e) => setNewStoreName(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
+                    e.preventDefault();
                     handleCreateStore();
                   }
                 }}
@@ -251,7 +261,12 @@ export default function StoresPage() {
                 영문, 숫자, 하이픈(-), 언더스코어(_)만 사용 가능
               </p>
             </div>
-            <Button onClick={handleCreateStore} className="w-full" size="lg">
+            <Button
+              onClick={handleCreateStore}
+              className="w-full"
+              size="lg"
+              disabled={isCreating}
+            >
               생성
             </Button>
           </div>
