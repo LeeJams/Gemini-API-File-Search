@@ -45,9 +45,9 @@ export default function StoresPage() {
     loadStores();
   }, []);
 
-  async function loadStores() {
-    // Check cache first
-    if (stores.length > 0 && isCacheValid()) {
+  async function loadStores(force = false) {
+    // Check cache first (skip if force refresh)
+    if (!force && stores.length > 0 && isCacheValid()) {
       return;
     }
 
@@ -97,7 +97,7 @@ export default function StoresPage() {
       const data = await response.json();
 
       if (data.success) {
-        await loadStores(); // Refresh list
+        await loadStores(true); // Force refresh list
         setIsCreateModalOpen(false);
         setNewStoreName("");
       } else {
