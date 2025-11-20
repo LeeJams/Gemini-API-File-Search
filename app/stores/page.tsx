@@ -45,9 +45,9 @@ export default function StoresPage() {
     loadStores();
   }, []);
 
-  async function loadStores() {
-    // Check cache first
-    if (stores.length > 0 && isCacheValid()) {
+  async function loadStores(force = false) {
+    // Check cache first (skip if force refresh)
+    if (!force && stores.length > 0 && isCacheValid()) {
       return;
     }
 
@@ -70,12 +70,20 @@ export default function StoresPage() {
     }
   }
 
+  const [isCreating, setIsCreating] = useState(false);
+
   async function handleCreateStore() {
     if (!newStoreName.trim()) {
       setError("스토어 이름을 입력해주세요");
       return;
     }
 
+    // Prevent duplicate calls
+    if (isCreating) {
+      return;
+    }
+
+    setIsCreating(true);
     setLoading(true, "스토어 생성 중...");
     clearError();
 
@@ -89,7 +97,7 @@ export default function StoresPage() {
       const data = await response.json();
 
       if (data.success) {
-        await loadStores(); // Refresh list
+        await loadStores(true); // Force refresh list
         setIsCreateModalOpen(false);
         setNewStoreName("");
       } else {
@@ -99,6 +107,7 @@ export default function StoresPage() {
       setError(error.message || "네트워크 오류가 발생했습니다");
     } finally {
       setLoading(false);
+      setIsCreating(false);
     }
   }
 
@@ -137,16 +146,16 @@ export default function StoresPage() {
   }
 
   return (
-    <div className="container py-8">
+    <div className="container px-4 py-6 md:py-8">
       {/* Header */}
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-6 md:mb-8 space-y-4 md:flex md:items-center md:justify-between md:space-y-0">
         <div>
-          <h1 className="text-4xl font-bold tracking-tight">Stores</h1>
-          <p className="mt-2 text-muted-foreground">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Stores</h1>
+          <p className="mt-2 text-sm md:text-base text-muted-foreground">
             File Search Store를 선택하거나 새로운 스토어를 추가하세요
           </p>
         </div>
-        <Button onClick={() => setIsCreateModalOpen(true)} size="lg">
+        <Button onClick={() => setIsCreateModalOpen(true)} size="lg" className="w-full md:w-auto">
           <Plus className="mr-2 h-4 w-4" />
           새 스토어 추가
         </Button>
@@ -171,24 +180,24 @@ export default function StoresPage() {
 
       {/* Store Grid */}
       {stores.length > 0 && (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 md:gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {stores.map((store) => (
             <Card
               key={store.name}
               className="group relative overflow-hidden transition-shadow hover:shadow-lg"
             >
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-2">
-                    <Database className="h-5 w-5 text-primary" />
-                    <CardTitle className="text-xl">
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <Database className="h-5 w-5 text-primary flex-shrink-0" />
+                    <CardTitle className="text-lg md:text-xl truncate">
                       {store.displayName}
                     </CardTitle>
                   </div>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="opacity-0 transition-opacity group-hover:opacity-100"
+                    className="opacity-100 md:opacity-0 md:group-hover:opacity-100 flex-shrink-0"
                     onClick={(e) => {
                       e.stopPropagation();
                       setDeleteConfirm(store);
@@ -208,7 +217,7 @@ export default function StoresPage() {
                   onClick={() => navigateToWorkspace(store)}
                 >
                   <FileText className="mr-2 h-4 w-4" />
-                  쿼리 워크스페이스
+                  <span className="truncate">쿼리 워크스페이스</span>
                 </Button>
                 <Button
                   variant="outline"
@@ -216,7 +225,7 @@ export default function StoresPage() {
                   onClick={() => navigateToDocuments(store)}
                 >
                   <Database className="mr-2 h-4 w-4" />
-                  문서 관리
+                  <span className="truncate">문서 관리</span>
                 </Button>
               </CardContent>
             </Card>
@@ -226,10 +235,10 @@ export default function StoresPage() {
 
       {/* Create Store Modal */}
       <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-        <DialogContent>
+        <DialogContent className="w-[calc(100%-2rem)] max-w-md">
           <DialogHeader>
             <DialogTitle>새 스토어 추가</DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-sm">
               새로운 File Search Store를 생성합니다
             </DialogDescription>
           </DialogHeader>
@@ -243,6 +252,7 @@ export default function StoresPage() {
                 onChange={(e) => setNewStoreName(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
+                    e.preventDefault();
                     handleCreateStore();
                   }
                 }}
@@ -251,7 +261,12 @@ export default function StoresPage() {
                 영문, 숫자, 하이픈(-), 언더스코어(_)만 사용 가능
               </p>
             </div>
-            <Button onClick={handleCreateStore} className="w-full" size="lg">
+            <Button
+              onClick={handleCreateStore}
+              className="w-full"
+              size="lg"
+              disabled={isCreating}
+            >
               생성
             </Button>
           </div>
@@ -263,10 +278,10 @@ export default function StoresPage() {
         open={deleteConfirm !== null}
         onOpenChange={() => setDeleteConfirm(null)}
       >
-        <DialogContent>
+        <DialogContent className="w-[calc(100%-2rem)] max-w-md">
           <DialogHeader>
             <DialogTitle>스토어 삭제 확인</DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-sm">
               정말로 &quot;{deleteConfirm?.displayName}&quot; 스토어를
               삭제하시겠습니까?
               <br />
@@ -275,13 +290,14 @@ export default function StoresPage() {
               </span>
             </DialogDescription>
           </DialogHeader>
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setDeleteConfirm(null)}>
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
+            <Button variant="outline" onClick={() => setDeleteConfirm(null)} className="w-full sm:w-auto">
               취소
             </Button>
             <Button
               variant="destructive"
               onClick={() => deleteConfirm && handleDeleteStore(deleteConfirm)}
+              className="w-full sm:w-auto"
             >
               삭제
             </Button>
