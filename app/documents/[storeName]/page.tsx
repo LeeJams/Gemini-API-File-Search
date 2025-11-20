@@ -101,9 +101,9 @@ export default function DocumentsPage() {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
-    // Check max files
-    if (files.length > 10) {
-      setError("최대 10개의 파일만 업로드 가능합니다");
+    // Check max files (기존 파일 + 새 파일)
+    if (uploadFiles.length + files.length > 10) {
+      setError(`최대 10개의 파일만 업로드 가능합니다 (현재 ${uploadFiles.length}개 선택됨)`);
       return;
     }
 
@@ -117,7 +117,34 @@ export default function DocumentsPage() {
       return;
     }
 
-    setUploadFiles(files);
+    // 중복 파일 체크 (같은 이름의 파일)
+    const existingNames = uploadFiles.map((f) => f.name);
+    const duplicates = files.filter((f) => existingNames.includes(f.name));
+    if (duplicates.length > 0) {
+      setError(
+        `이미 선택된 파일입니다: ${duplicates.map((f) => f.name).join(", ")}`
+      );
+      return;
+    }
+
+    // 기존 파일에 추가
+    setUploadFiles([...uploadFiles, ...files]);
+
+    // Reset input so same file can be selected again after removal
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  }
+
+  function handleRemoveFile(index: number) {
+    setUploadFiles(uploadFiles.filter((_, idx) => idx !== index));
+  }
+
+  function handleClearAllFiles() {
+    setUploadFiles([]);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   }
 
   async function handleUpload() {
@@ -211,35 +238,55 @@ export default function DocumentsPage() {
                 htmlFor="file-upload"
                 className="cursor-pointer text-sm text-muted-foreground hover:text-foreground"
               >
-                클릭하여 파일 선택
+                클릭하여 파일 추가
                 <br />
                 <span className="text-xs">
-                  최대 10개, 파일당 50MB 이하
+                  여러 번 선택 가능 · 최대 10개 · 파일당 50MB 이하
                 </span>
               </label>
             </div>
 
             {uploadFiles.length > 0 && (
               <div className="space-y-2">
-                <p className="text-sm font-medium">
-                  선택된 파일 ({uploadFiles.length}개)
-                </p>
-                <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium">
+                    선택된 파일 ({uploadFiles.length}개)
+                  </p>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleClearAllFiles}
+                    className="h-auto py-1 text-xs text-destructive hover:text-destructive"
+                  >
+                    전체 삭제
+                  </Button>
+                </div>
+                <div className="max-h-[200px] space-y-1 overflow-y-auto">
                   {uploadFiles.map((file, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center justify-between rounded-md border p-2 text-sm"
+                      className="group flex items-center justify-between gap-2 rounded-md border p-2 text-sm transition-colors hover:bg-accent"
                     >
-                      <span className="truncate">{file.name}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {formatFileSize(file.size)}
-                      </span>
+                      <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
+                        <span className="truncate">{file.name}</span>
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">
+                          {formatFileSize(file.size)}
+                        </span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
+                        onClick={() => handleRemoveFile(idx)}
+                      >
+                        <Trash2 className="h-3 w-3 text-destructive" />
+                      </Button>
                     </div>
                   ))}
                 </div>
                 <Button onClick={handleUpload} className="w-full">
                   <Upload className="mr-2 h-4 w-4" />
-                  업로드
+                  {uploadFiles.length}개 파일 업로드
                 </Button>
               </div>
             )}
