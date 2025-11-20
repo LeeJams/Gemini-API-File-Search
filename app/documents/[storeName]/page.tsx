@@ -254,80 +254,9 @@ export default function DocumentsPage() {
         </Button>
       </div>
 
-      <div className="grid gap-4 md:gap-6 md:grid-cols-[1fr_350px]">
-        {/* Documents List */}
-        <Card className="md:order-1">
-          <CardHeader>
-            <CardTitle className="text-lg md:text-xl">문서 목록 ({documents.length}개)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {documents.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8 md:py-12 text-center">
-                <File className="mb-3 md:mb-4 h-10 md:h-12 w-10 md:w-12 text-muted-foreground" />
-                <h3 className="mb-2 text-base md:text-lg font-semibold">문서가 없습니다</h3>
-                <p className="text-sm text-muted-foreground">
-                  파일을 업로드하여 시작하세요
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {documents.map((doc) => (
-                  <div
-                    key={doc.name}
-                    className="group flex items-center justify-between rounded-lg border p-3 md:p-4 transition-colors hover:bg-accent"
-                  >
-                    <div
-                      className="flex items-center gap-2 md:gap-3 flex-1 min-w-0 cursor-pointer"
-                      onClick={() => handleDocumentClick(doc)}
-                    >
-                      <File className="h-4 md:h-5 w-4 md:w-5 text-primary flex-shrink-0" />
-                      <div className="min-w-0 flex-1">
-                        <p className="font-medium text-sm md:text-base truncate">{doc.displayName}</p>
-                        <div className="flex items-center gap-2 md:gap-3 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            <span className="hidden sm:inline">{formatDate(doc.createTime)}</span>
-                            <span className="sm:hidden">{formatDate(doc.createTime).split(' ')[0]}</span>
-                          </span>
-                          {doc.sizeBytes && (
-                            <span className="flex items-center gap-1">
-                              <HardDrive className="h-3 w-3" />
-                              {formatFileSize(doc.sizeBytes)}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 md:h-10 md:w-10 opacity-100 md:opacity-0 md:group-hover:opacity-100"
-                        onClick={() => handleDocumentClick(doc)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 md:h-10 md:w-10 opacity-100 md:opacity-0 md:group-hover:opacity-100"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDeleteConfirm(doc);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
+      <div className="grid gap-4 md:gap-6 lg:grid-cols-[minmax(300px,400px)_1fr]">
         {/* Upload Section */}
-        <Card className="md:order-2">
+        <Card>
           <CardHeader>
             <CardTitle className="text-lg md:text-xl">파일 업로드</CardTitle>
           </CardHeader>
@@ -397,6 +326,77 @@ export default function DocumentsPage() {
                   <Upload className="mr-2 h-4 w-4" />
                   {uploadFiles.length}개 파일 업로드
                 </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Documents List */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg md:text-xl">문서 목록 ({documents.length}개)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {documents.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 md:py-12 text-center">
+                <File className="mb-3 md:mb-4 h-10 md:h-12 w-10 md:w-12 text-muted-foreground" />
+                <h3 className="mb-2 text-base md:text-lg font-semibold">문서가 없습니다</h3>
+                <p className="text-sm text-muted-foreground">
+                  파일을 업로드하여 시작하세요
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {documents.map((doc) => (
+                  <div
+                    key={doc.name}
+                    className="group flex items-center justify-between rounded-lg border p-3 md:p-4 transition-colors hover:bg-accent"
+                  >
+                    <div
+                      className="flex items-center gap-2 md:gap-3 flex-1 min-w-0 cursor-pointer"
+                      onClick={() => handleDocumentClick(doc)}
+                    >
+                      <File className="h-4 md:h-5 w-4 md:w-5 text-primary flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-sm md:text-base truncate">{doc.displayName}</p>
+                        <div className="flex items-center gap-2 md:gap-3 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            <span className="hidden sm:inline">{formatDate(doc.createTime)}</span>
+                            <span className="sm:hidden">{formatDate(doc.createTime).split(' ')[0]}</span>
+                          </span>
+                          {doc.sizeBytes && (
+                            <span className="flex items-center gap-1">
+                              <HardDrive className="h-3 w-3" />
+                              {formatFileSize(doc.sizeBytes)}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 md:h-10 md:w-10 opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                        onClick={() => handleDocumentClick(doc)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 md:h-10 md:w-10 opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteConfirm(doc);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </CardContent>
