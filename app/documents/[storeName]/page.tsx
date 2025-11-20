@@ -37,9 +37,8 @@ export default function DocumentsPage() {
   const [deleteConfirm, setDeleteConfirm] = useState<FileSearchDocument | null>(
     null
   );
-  const [selectedDocument, setSelectedDocument] = useState<FileSearchDocument | null>(
-    null
-  );
+  const [selectedDocument, setSelectedDocument] =
+    useState<FileSearchDocument | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
 
   useEffect(() => {
@@ -103,7 +102,9 @@ export default function DocumentsPage() {
 
     // Check max files (기존 파일 + 새 파일)
     if (uploadFiles.length + files.length > 10) {
-      setError(`최대 10개의 파일만 업로드 가능합니다 (현재 ${uploadFiles.length}개 선택됨)`);
+      setError(
+        `최대 10개의 파일만 업로드 가능합니다 (현재 ${uploadFiles.length}개 선택됨)`
+      );
       return;
     }
 
@@ -197,8 +198,8 @@ export default function DocumentsPage() {
   return (
     <div className="container px-4 py-6 md:py-8">
       {/* Header */}
-      <div className="mb-6 space-y-4">
-        <div className="flex items-center gap-3 md:gap-4">
+      <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1">
           <Button
             variant="ghost"
             size="icon"
@@ -208,13 +209,15 @@ export default function DocumentsPage() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="min-w-0 flex-1">
-            <h1 className="text-2xl md:text-3xl font-bold truncate">{currentStore.displayName}</h1>
+            <h1 className="text-2xl md:text-3xl font-bold truncate">
+              {currentStore.displayName}
+            </h1>
             <p className="text-sm text-muted-foreground">문서 관리</p>
           </div>
         </div>
         <Button
           onClick={() => router.push(`/workspace/${storeName}`)}
-          className="w-full md:w-auto"
+          className="w-full md:w-auto flex-shrink-0"
         >
           쿼리 워크스페이스로 이동
         </Button>
@@ -222,7 +225,7 @@ export default function DocumentsPage() {
 
       <div className="grid gap-4 md:gap-6 lg:grid-cols-[minmax(300px,400px)_1fr]">
         {/* Upload Section */}
-        <Card>
+        <Card className="min-w-0">
           <CardHeader>
             <CardTitle className="text-lg md:text-xl">파일 업로드</CardTitle>
           </CardHeader>
@@ -272,7 +275,9 @@ export default function DocumentsPage() {
                       className="group flex items-center justify-between gap-2 rounded-md border p-2 text-sm transition-colors hover:bg-accent"
                     >
                       <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
-                        <span className="truncate text-xs md:text-sm">{file.name}</span>
+                        <span className="truncate text-xs md:text-sm">
+                          {file.name}
+                        </span>
                         <span className="text-xs text-muted-foreground whitespace-nowrap">
                           {formatFileSize(file.size)}
                         </span>
@@ -298,15 +303,19 @@ export default function DocumentsPage() {
         </Card>
 
         {/* Documents List */}
-        <Card>
+        <Card className="min-w-0">
           <CardHeader>
-            <CardTitle className="text-lg md:text-xl">문서 목록 ({documents.length}개)</CardTitle>
+            <CardTitle className="text-lg md:text-xl">
+              문서 목록 ({documents.length}개)
+            </CardTitle>
           </CardHeader>
           <CardContent>
             {documents.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 md:py-12 text-center">
                 <File className="mb-3 md:mb-4 h-10 md:h-12 w-10 md:w-12 text-muted-foreground" />
-                <h3 className="mb-2 text-base md:text-lg font-semibold">문서가 없습니다</h3>
+                <h3 className="mb-2 text-base md:text-lg font-semibold">
+                  문서가 없습니다
+                </h3>
                 <p className="text-sm text-muted-foreground">
                   파일을 업로드하여 시작하세요
                 </p>
@@ -324,12 +333,18 @@ export default function DocumentsPage() {
                     >
                       <File className="h-4 md:h-5 w-4 md:w-5 text-primary flex-shrink-0" />
                       <div className="min-w-0 flex-1">
-                        <p className="font-medium text-sm md:text-base truncate">{doc.displayName}</p>
+                        <p className="font-medium text-sm md:text-base truncate">
+                          {doc.displayName}
+                        </p>
                         <div className="flex items-center gap-2 md:gap-3 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
-                            <span className="hidden sm:inline">{formatDate(doc.createTime)}</span>
-                            <span className="sm:hidden">{formatDate(doc.createTime).split(' ')[0]}</span>
+                            <span className="hidden sm:inline">
+                              {formatDate(doc.createTime)}
+                            </span>
+                            <span className="sm:hidden">
+                              {formatDate(doc.createTime).split(" ")[0]}
+                            </span>
                           </span>
                           {doc.sizeBytes && (
                             <span className="flex items-center gap-1">
