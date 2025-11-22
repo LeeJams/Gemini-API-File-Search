@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { findStoreByDisplayName, deleteDocument } from "@/lib/gemini";
+import { findStoreByDisplayName, findDocumentByDisplayName, deleteDocument } from "@/lib/gemini";
 
 /**
  * DELETE /api/stores/:displayName/documents/:docName
@@ -30,13 +30,14 @@ export async function DELETE(
       );
     }
 
+    // 문서 검색
+    const document = await findDocumentByDisplayName(
+      fileStore,
+      decodeURIComponent(docName)
+    );
+
     // 문서 삭제
-    await deleteDocument({
-      name: `${fileStore.name}/documents/${decodeURIComponent(docName)}`,
-      displayName: decodeURIComponent(docName),
-      createTime: "",
-      updateTime: "",
-    });
+    await deleteDocument(document);
 
     console.log(`✅ 문서 삭제 완료`);
 
