@@ -44,6 +44,11 @@ export default function WorkspacePage() {
 
     try {
       const response = await fetch(`/api/stores/${storeName}`);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
       const data = await response.json();
 
       if (data.success) {
@@ -77,6 +82,10 @@ export default function WorkspacePage() {
           metadataFilter: metadataFilter.trim() || null,
         }),
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
 
       const data = await response.json();
 

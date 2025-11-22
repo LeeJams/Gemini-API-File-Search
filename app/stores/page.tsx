@@ -56,6 +56,11 @@ export default function StoresPage() {
 
     try {
       const response = await fetch("/api/stores");
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
       const data = await response.json();
 
       if (data.success) {
@@ -94,6 +99,10 @@ export default function StoresPage() {
         body: JSON.stringify({ displayName: newStoreName.trim() }),
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
       const data = await response.json();
 
       if (data.success) {
@@ -119,6 +128,10 @@ export default function StoresPage() {
       const response = await fetch(`/api/stores/${store.displayName}`, {
         method: "DELETE",
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
 
       const data = await response.json();
 

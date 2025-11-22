@@ -6,6 +6,13 @@ import { useStoresState, useDocumentsState, useUIState } from "@/store";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   ArrowLeft,
   Upload,
   File,
@@ -61,6 +68,11 @@ export default function DocumentsPage() {
 
     try {
       const response = await fetch(`/api/stores/${storeName}`);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
       const data = await response.json();
 
       if (data.success) {
@@ -82,6 +94,11 @@ export default function DocumentsPage() {
 
     try {
       const response = await fetch(`/api/stores/${storeName}/documents`);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
       const data = await response.json();
 
       if (data.success) {
@@ -168,6 +185,10 @@ export default function DocumentsPage() {
         body: formData,
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
       const data = await response.json();
 
       if (data.success) {
@@ -178,6 +199,38 @@ export default function DocumentsPage() {
         await loadDocuments(); // Refresh list
       } else {
         setError(data.error || "파일 업로드에 실패했습니다");
+      }
+    } catch (error: any) {
+      setError(error.message || "네트워크 오류가 발생했습니다");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleDeleteDocument(doc: FileSearchDocument) {
+    setLoading(true, "문서 삭제 중...");
+    clearError();
+
+    try {
+      const response = await fetch(
+        `/api/stores/${storeName}/documents/${encodeURIComponent(doc.displayName)}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        removeDocument(doc.displayName);
+        setDeleteConfirm(null);
+        await loadDocuments(); // Refresh list
+      } else {
+        setError(data.error || "문서 삭제에 실패했습니다");
       }
     } catch (error: any) {
       setError(error.message || "네트워크 오류가 발생했습니다");
@@ -390,6 +443,42 @@ export default function DocumentsPage() {
         open={detailModalOpen}
         onOpenChange={setDetailModalOpen}
       />
+
+      {/* Delete Confirmation Modal */}
+      <Dialog
+        open={deleteConfirm !== null}
+        onOpenChange={() => setDeleteConfirm(null)}
+      >
+        <DialogContent className="w-[calc(100%-2rem)] max-w-md">
+          <DialogHeader>
+            <DialogTitle>문서 삭제 확인</DialogTitle>
+            <DialogDescription className="text-sm">
+              정말로 &quot;{deleteConfirm?.displayName}&quot; 문서를
+              삭제하시겠습니까?
+              <br />
+              <span className="font-semibold text-destructive">
+                이 작업은 되돌릴 수 없습니다.
+              </span>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteConfirm(null)}
+              className="w-full sm:w-auto"
+            >
+              취소
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => deleteConfirm && handleDeleteDocument(deleteConfirm)}
+              className="w-full sm:w-auto"
+            >
+              삭제
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
