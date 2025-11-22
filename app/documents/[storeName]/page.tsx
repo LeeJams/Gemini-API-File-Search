@@ -196,7 +196,7 @@ export default function DocumentsPage() {
   }
 
   return (
-    <div className="container px-4 py-6 md:py-8">
+    <div className="container py-6 md:py-8">
       {/* Header */}
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1">

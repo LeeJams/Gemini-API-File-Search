@@ -146,18 +146,23 @@ export default function StoresPage() {
   }
 
   return (
-    <div className="container px-4 py-6 md:py-8">
+    <div className="container py-6 md:py-8">
       {/* Header */}
       <div className="mb-6 md:mb-8 space-y-4 md:flex md:items-center md:justify-between md:space-y-0">
         <div>
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Stores</h1>
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+            Stores
+          </h1>
           <p className="mt-2 text-sm md:text-base text-muted-foreground">
             File Search Store를 선택하거나 새로운 스토어를 추가하세요
           </p>
         </div>
-        <Button onClick={() => setIsCreateModalOpen(true)} size="lg" className="w-full md:w-auto">
-          <Plus className="mr-2 h-4 w-4" />
-          새 스토어 추가
+        <Button
+          onClick={() => setIsCreateModalOpen(true)}
+          size="lg"
+          className="w-full md:w-auto"
+        >
+          <Plus className="mr-2 h-4 w-4" />새 스토어 추가
         </Button>
       </div>
 
@@ -291,7 +296,11 @@ export default function StoresPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
-            <Button variant="outline" onClick={() => setDeleteConfirm(null)} className="w-full sm:w-auto">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteConfirm(null)}
+              className="w-full sm:w-auto"
+            >
               취소
             </Button>
             <Button

@@ -8,13 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import ReactMarkdown from "react-markdown";
-import {
-  ArrowLeft,
-  Send,
-  History,
-  FileText,
-  ChevronRight,
-} from "lucide-react";
+import { ArrowLeft, Send, History, FileText, ChevronRight } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import type { QueryHistoryItem } from "@/types";
 
@@ -133,7 +127,7 @@ export default function WorkspacePage() {
   }
 
   return (
-    <div className="container px-4 py-6 md:py-8">
+    <div className="container py-6 md:py-8">
       {/* Header */}
       <div className="mb-6 space-y-4">
         <div className="flex items-center gap-3 md:gap-4">
@@ -146,7 +140,9 @@ export default function WorkspacePage() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="min-w-0 flex-1">
-            <h1 className="text-2xl md:text-3xl font-bold truncate">{currentStore.displayName}</h1>
+            <h1 className="text-2xl md:text-3xl font-bold truncate">
+              {currentStore.displayName}
+            </h1>
             <p className="text-sm text-muted-foreground">쿼리 워크스페이스</p>
           </div>
         </div>
@@ -170,7 +166,9 @@ export default function WorkspacePage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="query" className="text-sm">질문을 입력하세요</Label>
+                <Label htmlFor="query" className="text-sm">
+                  질문을 입력하세요
+                </Label>
                 <div className="flex gap-2">
                   <Input
                     id="query"
@@ -185,14 +183,20 @@ export default function WorkspacePage() {
                     }}
                     className="flex-1 text-sm md:text-base"
                   />
-                  <Button onClick={handleExecuteQuery} size="icon" className="flex-shrink-0">
+                  <Button
+                    onClick={handleExecuteQuery}
+                    size="icon"
+                    className="flex-shrink-0"
+                  >
                     <Send className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="filter" className="text-sm">메타데이터 필터 (선택사항)</Label>
+                <Label htmlFor="filter" className="text-sm">
+                  메타데이터 필터 (선택사항)
+                </Label>
                 <Input
                   id="filter"
                   placeholder='예: doc_type="manual"'
@@ -256,7 +260,9 @@ export default function WorkspacePage() {
         {showHistory && (
           <Card className="h-fit lg:sticky lg:top-4">
             <CardHeader>
-              <CardTitle className="text-base md:text-lg">쿼리 히스토리</CardTitle>
+              <CardTitle className="text-base md:text-lg">
+                쿼리 히스토리
+              </CardTitle>
             </CardHeader>
             <CardContent>
               {history.filter((h) => h.storeName === storeName).length === 0 ? (
