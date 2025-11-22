@@ -11,24 +11,12 @@ const nextConfig: NextConfig = {
       allowedOrigins: ["localhost:3000"],
       bodySizeLimit: "50mb", // Match Multer limit
     },
-    // Turbopack for faster development
-    turbo: {
-      resolveAlias: {
-        "@": ".",
-      },
-    },
   },
 
   /* TypeScript */
   typescript: {
     // Enforces type checking during builds
     ignoreBuildErrors: false,
-  },
-
-  /* ESLint */
-  eslint: {
-    // Run ESLint on these directories during production builds
-    dirs: ["app", "components", "lib", "store", "hooks", "utils"],
   },
 
   /* Headers for API Security */
