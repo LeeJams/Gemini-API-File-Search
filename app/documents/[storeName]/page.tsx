@@ -68,19 +68,15 @@ export default function DocumentsPage() {
 
     try {
       const response = await fetch(`/api/stores/${storeName}`);
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
       const data = await response.json();
 
-      if (data.success) {
-        setCurrentStore(data.data);
-      } else {
-        setError(data.error || "스토어를 찾을 수 없습니다");
+      if (!response.ok || !data.success) {
+        setError(data.error || `HTTP ${response.status}: ${response.statusText}`);
         setTimeout(() => router.push("/stores"), 2000);
+        return;
       }
+
+      setCurrentStore(data.data);
     } catch (error: any) {
       setError(error.message || "네트워크 오류가 발생했습니다");
     } finally {
@@ -94,18 +90,13 @@ export default function DocumentsPage() {
 
     try {
       const response = await fetch(`/api/stores/${storeName}/documents`);
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
       const data = await response.json();
 
-      if (data.success) {
-        setDocuments(data.data.data);
-      } else {
-        setError(data.error || "문서 목록을 불러오는데 실패했습니다");
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || `HTTP ${response.status}: ${response.statusText}`);
       }
+
+      setDocuments(data.data.data);
     } catch (error: any) {
       setError(error.message || "네트워크 오류가 발생했습니다");
     } finally {
@@ -184,11 +175,6 @@ export default function DocumentsPage() {
         method: "POST",
         body: formData,
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
       const data = await response.json();
 
       // 성공한 파일이 있으면 목록 새로고침
@@ -237,20 +223,15 @@ export default function DocumentsPage() {
           method: "DELETE",
         }
       );
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
       const data = await response.json();
 
-      if (data.success) {
-        removeDocument(doc.displayName);
-        setDeleteConfirm(null);
-        await loadDocuments(); // Refresh list
-      } else {
-        setError(data.error || "문서 삭제에 실패했습니다");
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || `HTTP ${response.status}: ${response.statusText}`);
       }
+
+      removeDocument(doc.displayName);
+      setDeleteConfirm(null);
+      await loadDocuments(); // Refresh list
     } catch (error: any) {
       setError(error.message || "네트워크 오류가 발생했습니다");
     } finally {

@@ -44,19 +44,15 @@ export default function WorkspacePage() {
 
     try {
       const response = await fetch(`/api/stores/${storeName}`);
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
       const data = await response.json();
 
-      if (data.success) {
-        setCurrentStore(data.data);
-      } else {
-        setError(data.error || "스토어를 찾을 수 없습니다");
+      if (!response.ok || !data.success) {
+        setError(data.error || `HTTP ${response.status}: ${response.statusText}`);
         setTimeout(() => router.push("/stores"), 2000);
+        return;
       }
+
+      setCurrentStore(data.data);
     } catch (error: any) {
       setError(error.message || "네트워크 오류가 발생했습니다");
     } finally {
@@ -82,37 +78,32 @@ export default function WorkspacePage() {
           metadataFilter: metadataFilter.trim() || null,
         }),
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
       const data = await response.json();
 
-      if (data.success) {
-        const result = {
-          text: data.data.text,
-          groundingMetadata: data.data.groundingMetadata,
-          timestamp: Date.now(),
-        };
-
-        setCurrentResult(result);
-
-        // Add to history
-        const historyItem: QueryHistoryItem = {
-          id: Date.now().toString(),
-          query: query.trim(),
-          response: data.data.text,
-          timestamp: Date.now(),
-          storeName,
-        };
-        addToHistory(historyItem);
-
-        // Clear query input
-        setQuery("");
-      } else {
-        setError(data.error || "쿼리 실행에 실패했습니다");
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || `HTTP ${response.status}: ${response.statusText}`);
       }
+
+      const result = {
+        text: data.data.text,
+        groundingMetadata: data.data.groundingMetadata,
+        timestamp: Date.now(),
+      };
+
+      setCurrentResult(result);
+
+      // Add to history
+      const historyItem: QueryHistoryItem = {
+        id: Date.now().toString(),
+        query: query.trim(),
+        response: data.data.text,
+        timestamp: Date.now(),
+        storeName,
+      };
+      addToHistory(historyItem);
+
+      // Clear query input
+      setQuery("");
     } catch (error: any) {
       setError(error.message || "네트워크 오류가 발생했습니다");
     } finally {
