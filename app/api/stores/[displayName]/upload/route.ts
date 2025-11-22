@@ -117,9 +117,30 @@ export async function POST(
       }
     }
 
+    // 실패한 파일이 있으면 에러로 처리
+    if (failCount > 0) {
+      const failedFiles = results
+        .filter(r => !r.success)
+        .map(r => `• ${r.fileName}: ${r.error}`)
+        .join('\n');
+
+      return NextResponse.json<ApiResponse>(
+        {
+          success: false,
+          error: `${failCount}개 파일 업로드 실패:\n\n${failedFiles}`,
+          data: {
+            results,
+            successCount,
+            failCount,
+          },
+        },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json<ApiResponse>({
       success: true,
-      message: `${successCount}개 성공, ${failCount}개 실패`,
+      message: `${successCount}개 파일이 성공적으로 업로드되었습니다`,
       data: {
         results,
         successCount,

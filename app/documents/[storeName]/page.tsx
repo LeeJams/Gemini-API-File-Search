@@ -191,14 +191,33 @@ export default function DocumentsPage() {
 
       const data = await response.json();
 
+      // 성공한 파일이 있으면 목록 새로고침
+      if (data.data?.successCount > 0) {
+        await loadDocuments();
+      }
+
       if (data.success) {
+        // 모든 파일 업로드 성공
         setUploadFiles([]);
         if (fileInputRef.current) {
           fileInputRef.current.value = "";
         }
-        await loadDocuments(); // Refresh list
       } else {
+        // 일부 또는 모든 파일 업로드 실패
         setError(data.error || "파일 업로드에 실패했습니다");
+
+        // 성공한 파일이 있으면 실패한 파일만 남기기
+        if (data.data?.successCount > 0 && data.data?.results) {
+          const failedFileNames = data.data.results
+            .filter((r: any) => !r.success)
+            .map((r: any) => r.fileName);
+
+          const remainingFiles = uploadFiles.filter(f =>
+            failedFileNames.includes(f.name)
+          );
+
+          setUploadFiles(remainingFiles);
+        }
       }
     } catch (error: any) {
       setError(error.message || "네트워크 오류가 발생했습니다");
