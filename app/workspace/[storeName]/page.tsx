@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import ReactMarkdown from "react-markdown";
-import { ArrowLeft, Send, History, FileText, ChevronRight } from "lucide-react";
+import { ArrowLeft, Send, FileText, ChevronRight } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import type { QueryHistoryItem } from "@/types";
 
@@ -29,7 +29,6 @@ export default function WorkspacePage() {
 
   const [query, setQuery] = useState("");
   const [metadataFilter, setMetadataFilter] = useState("");
-  const [showHistory, setShowHistory] = useState(false);
 
   useEffect(() => {
     loadStore();
@@ -119,7 +118,6 @@ export default function WorkspacePage() {
       groundingMetadata: null,
       timestamp: item.timestamp,
     });
-    setShowHistory(false);
   }
 
   if (!currentStore) {
@@ -146,14 +144,6 @@ export default function WorkspacePage() {
             <p className="text-sm text-muted-foreground">쿼리 워크스페이스</p>
           </div>
         </div>
-        <Button
-          variant="outline"
-          onClick={() => setShowHistory(!showHistory)}
-          className="gap-2 w-full md:w-auto"
-        >
-          <History className="h-4 w-4" />
-          히스토리 {showHistory ? "숨기기" : "보기"}
-        </Button>
       </div>
 
       <div className="grid gap-4 md:gap-6 lg:grid-cols-[1fr_minmax(250px,300px)]">
@@ -257,45 +247,43 @@ export default function WorkspacePage() {
         </div>
 
         {/* History Sidebar */}
-        {showHistory && (
-          <Card className="h-fit lg:sticky lg:top-4">
-            <CardHeader>
-              <CardTitle className="text-base md:text-lg">
-                쿼리 히스토리
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {history.filter((h) => h.storeName === storeName).length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  히스토리가 없습니다
-                </p>
-              ) : (
-                <div className="space-y-2">
-                  {history
-                    .filter((h) => h.storeName === storeName)
-                    .slice(0, 10)
-                    .map((item) => (
-                      <button
-                        key={item.id}
-                        onClick={() => loadHistoryItem(item)}
-                        className="flex w-full items-start gap-2 rounded-lg border p-2 md:p-3 text-left transition-colors hover:bg-accent active:bg-accent"
-                      >
-                        <ChevronRight className="mt-0.5 h-4 w-4 flex-shrink-0 text-muted-foreground" />
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-xs md:text-sm font-medium">
-                            {item.query}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {formatDate(new Date(item.timestamp))}
-                          </p>
-                        </div>
-                      </button>
-                    ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
+        <Card className="h-fit lg:sticky lg:top-4">
+          <CardHeader>
+            <CardTitle className="text-base md:text-lg">
+              쿼리 히스토리
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {history.filter((h) => h.storeName === storeName).length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                히스토리가 없습니다
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {history
+                  .filter((h) => h.storeName === storeName)
+                  .slice(0, 10)
+                  .map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => loadHistoryItem(item)}
+                      className="flex w-full items-start gap-2 rounded-lg border p-2 md:p-3 text-left transition-colors hover:bg-accent active:bg-accent"
+                    >
+                      <ChevronRight className="mt-0.5 h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-xs md:text-sm font-medium">
+                          {item.query}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatDate(new Date(item.timestamp))}
+                        </p>
+                      </div>
+                    </button>
+                  ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
