@@ -83,22 +83,20 @@ export function ApiKeyModal({ open, onOpenChange }: ApiKeyModalProps) {
             <Key className="h-5 w-5" />
             Gemini API 키 입력
           </DialogTitle>
-          <DialogDescription className="text-sm space-y-2">
-            <p>
-              Gemini File Search를 사용하려면 API 키가 필요합니다.
-              <br />
-              API 키는 브라우저에 안전하게 저장됩니다.
-            </p>
-            <a
-              href="https://aistudio.google.com/apikey"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-primary hover:underline"
-            >
-              API 키 발급받기
-              <ExternalLink className="h-3 w-3" />
-            </a>
+          <DialogDescription className="text-sm">
+            Gemini File Search를 사용하려면 API 키가 필요합니다.
+            <br />
+            API 키는 브라우저에 안전하게 저장됩니다.
           </DialogDescription>
+          <a
+            href="https://aistudio.google.com/apikey"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+          >
+            API 키 발급받기
+            <ExternalLink className="h-3 w-3" />
+          </a>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
