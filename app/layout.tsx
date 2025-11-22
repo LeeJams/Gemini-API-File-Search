@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { LoadingOverlay } from "@/components/loading-overlay";
+import { Toaster } from "@/components/ui/toaster";
 import { AppHeader } from "@/components/app-header";
 import { cn } from "@/lib/utils";
 
@@ -38,6 +39,7 @@ export default function RootLayout({
             <main className="flex-1">{children}</main>
           </div>
           <LoadingOverlay />
+          <Toaster />
         </Providers>
       </body>
     </html>

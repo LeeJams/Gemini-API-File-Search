@@ -117,9 +117,30 @@ export async function POST(
       }
     }
 
+    // 실패한 파일이 있으면 에러로 처리
+    if (failCount > 0) {
+      const failedFiles = results
+        .filter(r => !r.success)
+        .map(r => `• ${r.fileName}: ${r.error}`)
+        .join('\n');
+
+      return NextResponse.json<ApiResponse>(
+        {
+          success: false,
+          error: `${failCount}개 파일 업로드 실패:\n\n${failedFiles}`,
+          data: {
+            results,
+            successCount,
+            failCount,
+          },
+        },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json<ApiResponse>({
       success: true,
-      message: `${successCount}개 성공, ${failCount}개 실패`,
+      message: `${successCount}개 파일이 성공적으로 업로드되었습니다`,
       data: {
         results,
         successCount,
@@ -129,12 +150,40 @@ export async function POST(
   } catch (error: any) {
     console.error("파일 업로드 오류:", error);
 
+    // HTTP 상태 코드별 에러 처리
+    const status = error.status || error.statusCode || (error.message?.includes("찾을 수 없습니다") ? 404 : 500);
+    let errorMessage = error.message || "파일 업로드 중 오류가 발생했습니다";
+
+    switch (status) {
+      case 400:
+        errorMessage = `잘못된 요청입니다: ${error.message}`;
+        break;
+      case 401:
+        errorMessage = "API 키가 유효하지 않습니다. 환경 변수를 확인해주세요.";
+        break;
+      case 403:
+        errorMessage = "API 키 권한이 없거나 File Search가 활성화되지 않았습니다.";
+        break;
+      case 404:
+        // Keep the original error message for 404
+        break;
+      case 413:
+        errorMessage = "파일 크기가 너무 큽니다. 50MB 이하의 파일만 업로드 가능합니다.";
+        break;
+      case 429:
+        errorMessage = "API 호출 한도를 초과했습니다. 잠시 후 다시 시도해주세요.";
+        break;
+      case 503:
+        errorMessage = "Google AI 서비스가 일시적으로 사용 불가합니다. 잠시 후 다시 시도해주세요.";
+        break;
+    }
+
     return NextResponse.json<ApiResponse>(
       {
         success: false,
-        error: error.message || "파일 업로드 중 오류가 발생했습니다",
+        error: errorMessage,
       },
-      { status: 500 }
+      { status }
     );
   }
 }

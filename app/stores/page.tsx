@@ -58,11 +58,11 @@ export default function StoresPage() {
       const response = await fetch("/api/stores");
       const data = await response.json();
 
-      if (data.success) {
-        setStores(data.data.data);
-      } else {
-        setError(data.error || "스토어 목록을 불러오는데 실패했습니다");
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || `HTTP ${response.status}: ${response.statusText}`);
       }
+
+      setStores(data.data.data);
     } catch (error: any) {
       setError(error.message || "네트워크 오류가 발생했습니다");
     } finally {
@@ -93,16 +93,15 @@ export default function StoresPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ displayName: newStoreName.trim() }),
       });
-
       const data = await response.json();
 
-      if (data.success) {
-        await loadStores(true); // Force refresh list
-        setIsCreateModalOpen(false);
-        setNewStoreName("");
-      } else {
-        setError(data.error || "스토어 생성에 실패했습니다");
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || `HTTP ${response.status}: ${response.statusText}`);
       }
+
+      await loadStores(true); // Force refresh list
+      setIsCreateModalOpen(false);
+      setNewStoreName("");
     } catch (error: any) {
       setError(error.message || "네트워크 오류가 발생했습니다");
     } finally {
@@ -119,15 +118,14 @@ export default function StoresPage() {
       const response = await fetch(`/api/stores/${store.displayName}`, {
         method: "DELETE",
       });
-
       const data = await response.json();
 
-      if (data.success) {
-        removeStore(store.displayName);
-        setDeleteConfirm(null);
-      } else {
-        setError(data.error || "스토어 삭제에 실패했습니다");
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || `HTTP ${response.status}: ${response.statusText}`);
       }
+
+      removeStore(store.displayName);
+      setDeleteConfirm(null);
     } catch (error: any) {
       setError(error.message || "네트워크 오류가 발생했습니다");
     } finally {
