@@ -146,6 +146,10 @@ export default function WorkspacePage() {
     });
   }
 
+  if (!currentStore) {
+    return null;
+  }
+
   return (
     <div className="container py-6 md:py-8">
       {/* API Key Modal */}
@@ -160,17 +164,7 @@ export default function WorkspacePage() {
         }}
       />
 
-      {/* Show loading state if no current store */}
-      {!currentStore && (
-        <div className="flex flex-col items-center justify-center py-12">
-          <p className="text-muted-foreground">
-            {hasApiKey() ? "스토어 로딩 중..." : "API 키를 입력해주세요"}
-          </p>
-        </div>
-      )}
-
       {/* Header */}
-      {currentStore && (
       <div className="mb-6 space-y-4">
         <div className="flex items-center gap-3 md:gap-4">
           <Button
@@ -329,7 +323,6 @@ export default function WorkspacePage() {
           </CardContent>
         </Card>
       </div>
-      )}
     </div>
   );
 }
