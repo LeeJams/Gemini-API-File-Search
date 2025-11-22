@@ -11,13 +11,15 @@ export async function DELETE(
   { params }: { params: { displayName: string; docName: string } }
 ) {
   try {
+    const apiKey = request.headers.get("x-api-key") || undefined;
     const { displayName, docName } = params;
 
     console.log(`\n🗑️  문서 삭제 요청: ${decodeURIComponent(docName)}`);
 
     // 스토어 검색
     const fileStore = await findStoreByDisplayName(
-      decodeURIComponent(displayName)
+      decodeURIComponent(displayName),
+      apiKey
     );
 
     if (!fileStore) {
@@ -36,7 +38,7 @@ export async function DELETE(
       displayName: decodeURIComponent(docName),
       createTime: "",
       updateTime: "",
-    });
+    }, apiKey);
 
     console.log(`✅ 문서 삭제 완료`);
 

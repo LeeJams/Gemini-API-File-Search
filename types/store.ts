@@ -116,7 +116,25 @@ export interface QueryResult {
 }
 
 /**
+ * API Key State Slice
+ * API 키 상태 관리
+ */
+export interface ApiKeyState {
+  /** API 키 */
+  apiKey: string | null;
+
+  /** Actions */
+  setApiKey: (key: string) => void;
+  clearApiKey: () => void;
+  hasApiKey: () => boolean;
+}
+
+/**
  * Combined App Store
  * 전체 애플리케이션 상태
  */
-export type AppStore = UIState & StoresState & DocumentsState & QueryState;
+export type AppStore = UIState &
+  StoresState &
+  DocumentsState &
+  QueryState &
+  ApiKeyState;

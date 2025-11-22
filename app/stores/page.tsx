@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useStoresState, useUIState } from "@/store";
+import { useStoresState, useUIState, useAppStore } from "@/store";
+import { ApiKeyModal } from "@/components/ApiKeyModal";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -34,7 +35,9 @@ export default function StoresPage() {
   const { stores, setStores, setCurrentStore, isCacheValid, removeStore } =
     useStoresState();
   const { setLoading, setError, clearError } = useUIState();
+  const { apiKey, hasApiKey } = useAppStore();
 
+  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newStoreName, setNewStoreName] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState<FileSearchStore | null>(
@@ -42,8 +45,13 @@ export default function StoresPage() {
   );
 
   useEffect(() => {
-    loadStores();
-  }, []);
+    // Check if API key exists
+    if (!hasApiKey()) {
+      setIsApiKeyModalOpen(true);
+    } else {
+      loadStores();
+    }
+  }, [apiKey]);
 
   async function loadStores(force = false) {
     // Check cache first (skip if force refresh)
@@ -51,11 +59,20 @@ export default function StoresPage() {
       return;
     }
 
+    if (!hasApiKey()) {
+      setIsApiKeyModalOpen(true);
+      return;
+    }
+
     setLoading(true, "스토어 목록 로딩 중...");
     clearError();
 
     try {
-      const response = await fetch("/api/stores");
+      const headers: HeadersInit = {
+        "x-api-key": apiKey || "",
+      };
+
+      const response = await fetch("/api/stores", { headers });
       const data = await response.json();
 
       if (!response.ok || !data.success) {
@@ -78,6 +95,11 @@ export default function StoresPage() {
       return;
     }
 
+    if (!hasApiKey()) {
+      setIsApiKeyModalOpen(true);
+      return;
+    }
+
     // Prevent duplicate calls
     if (isCreating) {
       return;
@@ -88,9 +110,14 @@ export default function StoresPage() {
     clearError();
 
     try {
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey || "",
+      };
+
       const response = await fetch("/api/stores", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ displayName: newStoreName.trim() }),
       });
       const data = await response.json();
@@ -111,12 +138,22 @@ export default function StoresPage() {
   }
 
   async function handleDeleteStore(store: FileSearchStore) {
+    if (!hasApiKey()) {
+      setIsApiKeyModalOpen(true);
+      return;
+    }
+
     setLoading(true, "스토어 삭제 중...");
     clearError();
 
     try {
+      const headers: HeadersInit = {
+        "x-api-key": apiKey || "",
+      };
+
       const response = await fetch(`/api/stores/${store.displayName}`, {
         method: "DELETE",
+        headers,
       });
       const data = await response.json();
 
@@ -145,6 +182,18 @@ export default function StoresPage() {
 
   return (
     <div className="container py-6 md:py-8">
+      {/* API Key Modal */}
+      <ApiKeyModal
+        open={isApiKeyModalOpen}
+        onOpenChange={(open) => {
+          setIsApiKeyModalOpen(open);
+          // Reload stores after API key is set
+          if (!open && hasApiKey()) {
+            loadStores(true);
+          }
+        }}
+      />
+
       {/* Header */}
       <div className="mb-6 md:mb-8 space-y-4 md:flex md:items-center md:justify-between md:space-y-0">
         <div>
