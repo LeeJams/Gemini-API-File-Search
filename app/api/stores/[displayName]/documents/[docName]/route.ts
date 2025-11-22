@@ -8,10 +8,10 @@ import { findStoreByDisplayName, deleteDocument } from "@/lib/gemini";
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { displayName: string; docName: string } }
+  { params }: { params: Promise<{ displayName: string; docName: string }> }
 ) {
   try {
-    const { displayName, docName } = params;
+    const { displayName, docName } = await params;
 
     console.log(`\n🗑️  문서 삭제 요청: ${decodeURIComponent(docName)}`);
 
