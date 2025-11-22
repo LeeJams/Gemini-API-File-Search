@@ -15,12 +15,10 @@ export interface ApiKeySlice {
   hasApiKey: () => boolean;
 }
 
-export const createApiKeySlice: StateCreator<
-  AppStore,
-  [],
-  [],
-  ApiKeySlice
-> = (set, get) => ({
+export const createApiKeySlice: StateCreator<AppStore, [], [], ApiKeySlice> = (
+  set,
+  get
+) => ({
   apiKey: null,
 
   setApiKey: (key: string) => {
@@ -28,7 +26,28 @@ export const createApiKeySlice: StateCreator<
   },
 
   clearApiKey: () => {
-    set({ apiKey: null });
+    set(() => ({
+      // API Key
+      apiKey: null,
+
+      // UI 상태 초기화
+      isLoading: false,
+      loadingMessage: undefined,
+      error: null,
+
+      // Stores 상태 초기화
+      stores: [],
+      currentStore: null,
+      lastUpdated: null,
+
+      // Documents 상태 초기화
+      documents: [],
+      selectedDocuments: [],
+
+      // Query 상태 초기화
+      history: [],
+      currentResult: null,
+    }));
   },
 
   hasApiKey: () => {

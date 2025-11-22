@@ -2,7 +2,12 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useStoresState, useDocumentsState, useUIState, useAppStore } from "@/store";
+import {
+  useStoresState,
+  useDocumentsState,
+  useUIState,
+  useAppStore,
+} from "@/store";
 import { ApiKeyModal } from "@/components/ApiKeyModal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,11 +58,12 @@ export default function DocumentsPage() {
 
   useEffect(() => {
     if (!hasApiKey()) {
-      setIsApiKeyModalOpen(true);
-    } else {
-      loadStore();
+      router.push("/stores");
+      return;
     }
-  }, [storeName, apiKey]);
+
+    loadStore();
+  }, [storeName, apiKey, router]);
 
   useEffect(() => {
     if (currentStore && hasApiKey()) {
@@ -71,7 +77,7 @@ export default function DocumentsPage() {
     }
 
     if (!hasApiKey()) {
-      setIsApiKeyModalOpen(true);
+      router.push("/stores");
       return;
     }
 
@@ -87,7 +93,9 @@ export default function DocumentsPage() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        setError(data.error || `HTTP ${response.status}: ${response.statusText}`);
+        setError(
+          data.error || `HTTP ${response.status}: ${response.statusText}`
+        );
         setTimeout(() => router.push("/stores"), 2000);
         return;
       }
@@ -113,11 +121,15 @@ export default function DocumentsPage() {
         "x-api-key": apiKey || "",
       };
 
-      const response = await fetch(`/api/stores/${storeName}/documents`, { headers });
+      const response = await fetch(`/api/stores/${storeName}/documents`, {
+        headers,
+      });
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || `HTTP ${response.status}: ${response.statusText}`);
+        throw new Error(
+          data.error || `HTTP ${response.status}: ${response.statusText}`
+        );
       }
 
       setDocuments(data.data.data);
@@ -187,7 +199,7 @@ export default function DocumentsPage() {
     }
 
     if (!hasApiKey()) {
-      setIsApiKeyModalOpen(true);
+      router.push("/stores");
       return;
     }
 
@@ -232,7 +244,7 @@ export default function DocumentsPage() {
             .filter((r: any) => !r.success)
             .map((r: any) => r.fileName);
 
-          const remainingFiles = uploadFiles.filter(f =>
+          const remainingFiles = uploadFiles.filter((f) =>
             failedFileNames.includes(f.name)
           );
 
@@ -248,7 +260,7 @@ export default function DocumentsPage() {
 
   async function handleDeleteDocument(doc: FileSearchDocument) {
     if (!hasApiKey()) {
-      setIsApiKeyModalOpen(true);
+      router.push("/stores");
       return;
     }
 
@@ -270,7 +282,9 @@ export default function DocumentsPage() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || `HTTP ${response.status}: ${response.statusText}`);
+        throw new Error(
+          data.error || `HTTP ${response.status}: ${response.statusText}`
+        );
       }
 
       removeDocument(doc.displayName);
@@ -527,7 +541,9 @@ export default function DocumentsPage() {
             </Button>
             <Button
               variant="destructive"
-              onClick={() => deleteConfirm && handleDeleteDocument(deleteConfirm)}
+              onClick={() =>
+                deleteConfirm && handleDeleteDocument(deleteConfirm)
+              }
               className="w-full sm:w-auto"
             >
               삭제

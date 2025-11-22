@@ -11,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Key, ExternalLink } from "lucide-react";
+import { Key, ExternalLink, Eye, EyeOff } from "lucide-react";
 import { useAppStore } from "@/store";
 
 interface ApiKeyModalProps {
@@ -28,11 +28,15 @@ export function ApiKeyModal({ open, onOpenChange }: ApiKeyModalProps) {
   const { apiKey, setApiKey } = useAppStore();
   const [inputValue, setInputValue] = useState("");
   const [error, setError] = useState("");
+  const [isApiKeyVisible, setIsApiKeyVisible] = useState(false);
 
   useEffect(() => {
     if (apiKey) {
       setInputValue(apiKey);
+    } else {
+      setInputValue("");
     }
+    setError("");
   }, [apiKey]);
 
   const handleSave = () => {
@@ -102,18 +106,33 @@ export function ApiKeyModal({ open, onOpenChange }: ApiKeyModalProps) {
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="apiKey">API 키</Label>
-            <Input
-              id="apiKey"
-              type="password"
-              placeholder="AIza..."
-              value={inputValue}
-              onChange={(e) => {
-                setInputValue(e.target.value);
-                setError("");
-              }}
-              onKeyDown={handleKeyDown}
-              className={error ? "border-destructive" : ""}
-            />
+            <div className="flex gap-2">
+              <Input
+                id="apiKey"
+                type={isApiKeyVisible ? "text" : "password"}
+                placeholder="AIza..."
+                value={inputValue}
+                onChange={(e) => {
+                  setInputValue(e.target.value);
+                  setError("");
+                }}
+                onKeyDown={handleKeyDown}
+                className={`flex-1 ${error ? "border-destructive" : ""}`}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={() => setIsApiKeyVisible((prev) => !prev)}
+                aria-label={isApiKeyVisible ? "API 키 숨기기" : "API 키 보이기"}
+              >
+                {isApiKeyVisible ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
             {error && (
               <p className="text-xs text-destructive font-medium">{error}</p>
             )}

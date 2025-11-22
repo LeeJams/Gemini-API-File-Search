@@ -2,7 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useStoresState, useQueryState, useUIState, useAppStore } from "@/store";
+import {
+  useStoresState,
+  useQueryState,
+  useUIState,
+  useAppStore,
+} from "@/store";
 import { ApiKeyModal } from "@/components/ApiKeyModal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,11 +40,12 @@ export default function WorkspacePage() {
 
   useEffect(() => {
     if (!hasApiKey()) {
-      setIsApiKeyModalOpen(true);
-    } else {
-      loadStore();
+      router.push("/stores");
+      return;
     }
-  }, [storeName, apiKey]);
+
+    loadStore();
+  }, [storeName, apiKey, router]);
 
   async function loadStore() {
     if (currentStore?.displayName === storeName) {
@@ -47,7 +53,7 @@ export default function WorkspacePage() {
     }
 
     if (!hasApiKey()) {
-      setIsApiKeyModalOpen(true);
+      router.push("/stores");
       return;
     }
 
@@ -63,7 +69,9 @@ export default function WorkspacePage() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        setError(data.error || `HTTP ${response.status}: ${response.statusText}`);
+        setError(
+          data.error || `HTTP ${response.status}: ${response.statusText}`
+        );
         setTimeout(() => router.push("/stores"), 2000);
         return;
       }
@@ -83,7 +91,7 @@ export default function WorkspacePage() {
     }
 
     if (!hasApiKey()) {
-      setIsApiKeyModalOpen(true);
+      router.push("/stores");
       return;
     }
 
@@ -107,7 +115,9 @@ export default function WorkspacePage() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || `HTTP ${response.status}: ${response.statusText}`);
+        throw new Error(
+          data.error || `HTTP ${response.status}: ${response.statusText}`
+        );
       }
 
       const result = {

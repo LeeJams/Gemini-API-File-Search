@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { ApiKeyModal } from "@/components/ApiKeyModal";
 import { Button } from "@/components/ui/button";
@@ -24,9 +24,10 @@ import {
  */
 export function AppHeader() {
   const pathname = usePathname();
-  const { apiKey, hasApiKey, clearApiKey } = useAppStore();
+  const { hasApiKey, clearApiKey } = useAppStore();
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   const navItems = [
     {
@@ -36,9 +37,21 @@ export function AppHeader() {
     },
   ];
 
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
   const handleClearApiKey = () => {
     clearApiKey();
     setIsConfirmDeleteOpen(false);
+  };
+
+  const handleApiKeyButtonClick = () => {
+    if (hasApiKey()) {
+      setIsConfirmDeleteOpen(true);
+    } else {
+      setIsApiKeyModalOpen(true);
+    }
   };
 
   return (
@@ -69,27 +82,17 @@ export function AppHeader() {
         </div>
 
         <div className="flex items-center gap-2">
-          {hasApiKey() ? (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsConfirmDeleteOpen(true)}
-              className="gap-2"
-            >
-              <Key className="h-4 w-4" />
-              <span className="hidden sm:inline">API 키 초기화</span>
-            </Button>
-          ) : (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsApiKeyModalOpen(true)}
-              className="gap-2"
-            >
-              <Key className="h-4 w-4" />
-              <span className="hidden sm:inline">API 키 입력</span>
-            </Button>
-          )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleApiKeyButtonClick}
+            className="gap-2"
+          >
+            <Key className="h-4 w-4" />
+            <span className="hidden sm:inline">
+              {isHydrated && hasApiKey() ? "API 키 초기화" : "API 키 입력"}
+            </span>
+          </Button>
           <ThemeToggle />
         </div>
       </div>
