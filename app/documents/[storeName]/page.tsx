@@ -288,10 +288,6 @@ export default function DocumentsPage() {
     setDetailModalOpen(true);
   }
 
-  if (!currentStore) {
-    return null;
-  }
-
   return (
     <div className="container py-6 md:py-8">
       {/* API Key Modal */}
@@ -306,7 +302,17 @@ export default function DocumentsPage() {
         }}
       />
 
+      {/* Show loading state if no current store */}
+      {!currentStore && (
+        <div className="flex flex-col items-center justify-center py-12">
+          <p className="text-muted-foreground">
+            {hasApiKey() ? "스토어 로딩 중..." : "API 키를 입력해주세요"}
+          </p>
+        </div>
+      )}
+
       {/* Header */}
+      {currentStore && (
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1">
           <Button
@@ -535,6 +541,7 @@ export default function DocumentsPage() {
           </div>
         </DialogContent>
       </Dialog>
+      )}
     </div>
   );
 }
