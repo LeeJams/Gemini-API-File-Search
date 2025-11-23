@@ -24,7 +24,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import ReactMarkdown from "react-markdown";
-import { ArrowLeft, Send, FileText, ChevronRight, ChevronDown, Settings } from "lucide-react";
+import {
+  ArrowLeft,
+  Send,
+  FileText,
+  ChevronRight,
+  ChevronDown,
+  Settings,
+} from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import type { QueryHistoryItem, GenerationConfig } from "@/types";
 
@@ -242,7 +249,9 @@ export default function WorkspacePage() {
           {/* Query Input */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg md:text-xl">{t("queryInput")}</CardTitle>
+              <CardTitle className="text-lg md:text-xl">
+                {t("queryInput")}
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -259,7 +268,10 @@ export default function WorkspacePage() {
                       <ChevronDown className="ml-2 h-4 w-4 flex-shrink-0" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="min-w-[300px] md:min-w-[400px]">
+                  <DropdownMenuContent
+                    align="start"
+                    className="min-w-[300px] md:min-w-[400px]"
+                  >
                     {SUPPORTED_MODELS.map((model) => (
                       <DropdownMenuItem
                         key={model}
@@ -354,7 +366,8 @@ export default function WorkspacePage() {
                     {/* Temperature */}
                     <div className="space-y-2">
                       <Label htmlFor="temperature" className="text-sm">
-                        {t("temperature")} ({temperature ?? t("temperatureDefault")})
+                        {t("temperature")} (
+                        {temperature ?? t("temperatureDefault")})
                       </Label>
                       <div className="flex gap-2 items-center">
                         <Input
@@ -367,7 +380,9 @@ export default function WorkspacePage() {
                           value={temperature ?? ""}
                           onChange={(e) =>
                             setTemperature(
-                              e.target.value ? parseFloat(e.target.value) : undefined
+                              e.target.value
+                                ? parseFloat(e.target.value)
+                                : undefined
                             )
                           }
                           className="text-sm"
@@ -401,7 +416,9 @@ export default function WorkspacePage() {
                           value={maxOutputTokens ?? ""}
                           onChange={(e) =>
                             setMaxOutputTokens(
-                              e.target.value ? parseInt(e.target.value) : undefined
+                              e.target.value
+                                ? parseInt(e.target.value)
+                                : undefined
                             )
                           }
                           className="text-sm"
@@ -424,7 +441,7 @@ export default function WorkspacePage() {
                     {/* Top P */}
                     <div className="space-y-2">
                       <Label htmlFor="topP" className="text-sm">
-                        {t("topP")} ({topP ?? t("temperatureDefault")})
+                        {t("topP")}
                       </Label>
                       <div className="flex gap-2 items-center">
                         <Input
@@ -437,7 +454,9 @@ export default function WorkspacePage() {
                           value={topP ?? ""}
                           onChange={(e) =>
                             setTopP(
-                              e.target.value ? parseFloat(e.target.value) : undefined
+                              e.target.value
+                                ? parseFloat(e.target.value)
+                                : undefined
                             )
                           }
                           className="text-sm"
@@ -471,7 +490,9 @@ export default function WorkspacePage() {
                           value={topK ?? ""}
                           onChange={(e) =>
                             setTopK(
-                              e.target.value ? parseInt(e.target.value) : undefined
+                              e.target.value
+                                ? parseInt(e.target.value)
+                                : undefined
                             )
                           }
                           className="text-sm"

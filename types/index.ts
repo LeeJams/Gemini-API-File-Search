@@ -14,6 +14,7 @@ export type {
   QueryResponse,
   UploadOptions,
   Operation,
+  GenerationConfig,
 } from "./gemini";
 
 // API types
