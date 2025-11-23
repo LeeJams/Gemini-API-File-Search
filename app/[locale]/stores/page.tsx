@@ -38,7 +38,7 @@ export default function StoresPage() {
   const { stores, setStores, setCurrentStore, isCacheValid, removeStore } =
     useStoresState();
   const { setLoading, setError, clearError } = useUIState();
-  const { apiKey, hasApiKey } = useAppStore();
+  const { apiKey, hasApiKey, _hasHydrated } = useAppStore();
 
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -48,13 +48,18 @@ export default function StoresPage() {
   );
 
   useEffect(() => {
+    // Wait for hydration to complete before checking API key
+    if (!_hasHydrated) {
+      return;
+    }
+
     // Check if API key exists
     if (!hasApiKey()) {
       setIsApiKeyModalOpen(true);
     } else {
       loadStores();
     }
-  }, [apiKey]);
+  }, [_hasHydrated, apiKey]);
 
   async function loadStores(force = false) {
     // Check cache first (skip if force refresh)
