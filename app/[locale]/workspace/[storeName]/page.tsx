@@ -24,9 +24,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import ReactMarkdown from "react-markdown";
-import { ArrowLeft, Send, FileText, ChevronRight, ChevronDown } from "lucide-react";
+import {
+  ArrowLeft,
+  Send,
+  FileText,
+  ChevronRight,
+  ChevronDown,
+  Settings,
+} from "lucide-react";
 import { formatDate } from "@/lib/utils";
-import type { QueryHistoryItem } from "@/types";
+import type { QueryHistoryItem, GenerationConfig } from "@/types";
 
 /**
  * Workspace Page
@@ -50,6 +57,16 @@ export default function WorkspacePage() {
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [metadataFilter, setMetadataFilter] = useState("");
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+
+  // Advanced options state
+  const [systemInstruction, setSystemInstruction] = useState("");
+  const [temperature, setTemperature] = useState<number | undefined>(undefined);
+  const [maxOutputTokens, setMaxOutputTokens] = useState<number | undefined>(
+    undefined
+  );
+  const [topP, setTopP] = useState<number | undefined>(undefined);
+  const [topK, setTopK] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     if (!hasApiKey()) {
@@ -117,14 +134,32 @@ export default function WorkspacePage() {
         "x-api-key": apiKey || "",
       };
 
+      // Build generationConfig if any advanced options are set
+      const generationConfig: GenerationConfig = {};
+      if (temperature !== undefined) generationConfig.temperature = temperature;
+      if (maxOutputTokens !== undefined)
+        generationConfig.maxOutputTokens = maxOutputTokens;
+      if (topP !== undefined) generationConfig.topP = topP;
+      if (topK !== undefined) generationConfig.topK = topK;
+
+      const requestBody: any = {
+        query: query.trim(),
+        metadataFilter: metadataFilter.trim() || null,
+        model: selectedModel,
+      };
+
+      // Add optional fields only if they have values
+      if (systemInstruction.trim()) {
+        requestBody.systemInstruction = systemInstruction.trim();
+      }
+      if (Object.keys(generationConfig).length > 0) {
+        requestBody.generationConfig = generationConfig;
+      }
+
       const response = await fetch(`/api/stores/${storeName}/query`, {
         method: "POST",
         headers,
-        body: JSON.stringify({
-          query: query.trim(),
-          metadataFilter: metadataFilter.trim() || null,
-          model: selectedModel,
-        }),
+        body: JSON.stringify(requestBody),
       });
       const data = await response.json();
 
@@ -214,7 +249,9 @@ export default function WorkspacePage() {
           {/* Query Input */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg md:text-xl">{t("queryInput")}</CardTitle>
+              <CardTitle className="text-lg md:text-xl">
+                {t("queryInput")}
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -231,7 +268,10 @@ export default function WorkspacePage() {
                       <ChevronDown className="ml-2 h-4 w-4 flex-shrink-0" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="min-w-[300px] md:min-w-[400px]">
+                  <DropdownMenuContent
+                    align="start"
+                    className="min-w-[300px] md:min-w-[400px]"
+                  >
                     {SUPPORTED_MODELS.map((model) => (
                       <DropdownMenuItem
                         key={model}
@@ -243,6 +283,19 @@ export default function WorkspacePage() {
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="filter" className="text-sm">
+                  {t("metadataFilter")}
+                </Label>
+                <Input
+                  id="filter"
+                  placeholder={t("metadataFilterPlaceholder")}
+                  value={metadataFilter}
+                  onChange={(e) => setMetadataFilter(e.target.value)}
+                  className="text-sm md:text-base"
+                />
               </div>
 
               <div className="space-y-2">
@@ -273,17 +326,192 @@ export default function WorkspacePage() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="filter" className="text-sm">
-                  {t("metadataFilter")}
-                </Label>
-                <Input
-                  id="filter"
-                  placeholder={t("metadataFilterPlaceholder")}
-                  value={metadataFilter}
-                  onChange={(e) => setMetadataFilter(e.target.value)}
-                  className="text-sm md:text-base"
-                />
+              {/* Advanced Options */}
+              <div className="border-t pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+                  className="flex w-full items-center justify-between text-sm font-medium hover:opacity-70 transition-opacity"
+                >
+                  <span className="flex items-center gap-2">
+                    <Settings className="h-4 w-4" />
+                    {t("advancedOptions")}
+                  </span>
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform ${
+                      showAdvancedOptions ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                {showAdvancedOptions && (
+                  <div className="mt-4 space-y-4">
+                    {/* System Instruction */}
+                    <div className="space-y-2">
+                      <Label htmlFor="systemInstruction" className="text-sm">
+                        {t("systemInstruction")}
+                      </Label>
+                      <Input
+                        id="systemInstruction"
+                        placeholder={t("systemInstructionPlaceholder")}
+                        value={systemInstruction}
+                        onChange={(e) => setSystemInstruction(e.target.value)}
+                        className="text-sm"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        {t("systemInstructionHint")}
+                      </p>
+                    </div>
+
+                    {/* Temperature */}
+                    <div className="space-y-2">
+                      <Label htmlFor="temperature" className="text-sm">
+                        {t("temperature")}
+                      </Label>
+                      <div className="flex gap-2 items-center">
+                        <Input
+                          id="temperature"
+                          type="number"
+                          min="0"
+                          max="2"
+                          step="0.1"
+                          placeholder={t("temperaturePlaceholder")}
+                          value={temperature ?? ""}
+                          onChange={(e) =>
+                            setTemperature(
+                              e.target.value
+                                ? parseFloat(e.target.value)
+                                : undefined
+                            )
+                          }
+                          className="text-sm"
+                        />
+                        {temperature !== undefined && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setTemperature(undefined)}
+                          >
+                            {t("reset")}
+                          </Button>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {t("temperatureHint")}
+                      </p>
+                    </div>
+
+                    {/* Max Output Tokens */}
+                    <div className="space-y-2">
+                      <Label htmlFor="maxOutputTokens" className="text-sm">
+                        {t("maxOutputTokens")}
+                      </Label>
+                      <div className="flex gap-2 items-center">
+                        <Input
+                          id="maxOutputTokens"
+                          type="number"
+                          min="1"
+                          placeholder={t("maxOutputTokensPlaceholder")}
+                          value={maxOutputTokens ?? ""}
+                          onChange={(e) =>
+                            setMaxOutputTokens(
+                              e.target.value
+                                ? parseInt(e.target.value)
+                                : undefined
+                            )
+                          }
+                          className="text-sm"
+                        />
+                        {maxOutputTokens !== undefined && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setMaxOutputTokens(undefined)}
+                          >
+                            {t("reset")}
+                          </Button>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {t("maxOutputTokensHint")}
+                      </p>
+                    </div>
+
+                    {/* Top P */}
+                    <div className="space-y-2">
+                      <Label htmlFor="topP" className="text-sm">
+                        {t("topP")}
+                      </Label>
+                      <div className="flex gap-2 items-center">
+                        <Input
+                          id="topP"
+                          type="number"
+                          min="0"
+                          max="1"
+                          step="0.01"
+                          placeholder={t("topPPlaceholder")}
+                          value={topP ?? ""}
+                          onChange={(e) =>
+                            setTopP(
+                              e.target.value
+                                ? parseFloat(e.target.value)
+                                : undefined
+                            )
+                          }
+                          className="text-sm"
+                        />
+                        {topP !== undefined && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setTopP(undefined)}
+                          >
+                            {t("reset")}
+                          </Button>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {t("topPHint")}
+                      </p>
+                    </div>
+
+                    {/* Top K */}
+                    <div className="space-y-2">
+                      <Label htmlFor="topK" className="text-sm">
+                        {t("topK")}
+                      </Label>
+                      <div className="flex gap-2 items-center">
+                        <Input
+                          id="topK"
+                          type="number"
+                          min="1"
+                          placeholder={t("topKPlaceholder")}
+                          value={topK ?? ""}
+                          onChange={(e) =>
+                            setTopK(
+                              e.target.value
+                                ? parseInt(e.target.value)
+                                : undefined
+                            )
+                          }
+                          className="text-sm"
+                        />
+                        {topK !== undefined && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setTopK(undefined)}
+                          >
+                            {t("reset")}
+                          </Button>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {t("topKHint")}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
