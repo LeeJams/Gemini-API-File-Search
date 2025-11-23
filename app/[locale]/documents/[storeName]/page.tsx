@@ -474,86 +474,101 @@ export default function DocumentsPage() {
                 </div>
 
                 {/* Custom Metadata Section */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="text-sm font-medium">
+                <div className="space-y-4 pt-2">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <Label className="text-base font-semibold">
                         {t("customMetadata")}
                       </Label>
-                      <p className="text-xs text-muted-foreground mt-0.5">
+                      <p className="text-sm text-muted-foreground mt-1">
                         {t("customMetadataHint")}
                       </p>
                     </div>
                     <Button
                       type="button"
                       variant="outline"
-                      size="sm"
                       onClick={handleAddMetadata}
                       disabled={customMetadata.length >= 20}
+                      className="shrink-0"
                     >
-                      <Plus className="h-4 w-4 mr-1" />
+                      <Plus className="h-4 w-4 mr-2" />
                       {t("addMetadata")}
                     </Button>
                   </div>
 
                   {customMetadata.length > 0 && (
-                    <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                    <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
                       {customMetadata.map((meta, idx) => (
                         <div
                           key={idx}
-                          className="flex gap-2 p-2 rounded-md border bg-background"
+                          className="flex gap-3 p-4 rounded-lg border bg-card"
                         >
-                          <div className="flex-1 space-y-2">
-                            <Input
-                              placeholder={t("metadataKeyPlaceholder")}
-                              value={meta.key}
-                              onChange={(e) =>
-                                handleMetadataChange(idx, "key", e.target.value)
-                              }
-                              className="h-8 text-sm"
-                            />
-                            {meta.type === "stringList" ? (
+                          <div className="flex-1 space-y-3">
+                            <div>
+                              <Label className="text-xs text-muted-foreground mb-1.5 block">
+                                {t("metadataKey")}
+                              </Label>
                               <Input
-                                placeholder={t("metadataValueListPlaceholder")}
-                                value={meta.value}
+                                placeholder={t("metadataKeyPlaceholder")}
+                                value={meta.key}
                                 onChange={(e) =>
-                                  handleMetadataChange(idx, "value", e.target.value)
+                                  handleMetadataChange(idx, "key", e.target.value)
                                 }
-                                className="h-8 text-sm"
+                                className="h-10"
                               />
-                            ) : (
-                              <Input
-                                type={meta.type === "number" ? "number" : "text"}
-                                placeholder={t("metadataValuePlaceholder")}
-                                value={meta.value}
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground mb-1.5 block">
+                                {t("metadataValue")}
+                              </Label>
+                              {meta.type === "stringList" ? (
+                                <Input
+                                  placeholder={t("metadataValueListPlaceholder")}
+                                  value={meta.value}
+                                  onChange={(e) =>
+                                    handleMetadataChange(idx, "value", e.target.value)
+                                  }
+                                  className="h-10"
+                                />
+                              ) : (
+                                <Input
+                                  type={meta.type === "number" ? "number" : "text"}
+                                  placeholder={t("metadataValuePlaceholder")}
+                                  value={meta.value}
+                                  onChange={(e) =>
+                                    handleMetadataChange(idx, "value", e.target.value)
+                                  }
+                                  className="h-10"
+                                />
+                              )}
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground mb-1.5 block">
+                                {t("metadataType")}
+                              </Label>
+                              <select
+                                value={meta.type}
                                 onChange={(e) =>
-                                  handleMetadataChange(idx, "value", e.target.value)
+                                  handleMetadataChange(idx, "type", e.target.value)
                                 }
-                                className="h-8 text-sm"
-                              />
-                            )}
-                            <select
-                              value={meta.type}
-                              onChange={(e) =>
-                                handleMetadataChange(idx, "type", e.target.value)
-                              }
-                              className="w-full h-8 text-sm rounded-md border border-input bg-background px-3 py-1"
-                            >
-                              <option value="string">{t("metadataTypeString")}</option>
-                              <option value="number">{t("metadataTypeNumber")}</option>
-                              <option value="stringList">
-                                {t("metadataTypeStringList")}
-                              </option>
-                            </select>
+                                className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                              >
+                                <option value="string">{t("metadataTypeString")}</option>
+                                <option value="number">{t("metadataTypeNumber")}</option>
+                                <option value="stringList">
+                                  {t("metadataTypeStringList")}
+                                </option>
+                              </select>
+                            </div>
                           </div>
                           <Button
                             type="button"
                             variant="ghost"
                             size="icon"
                             onClick={() => handleRemoveMetadata(idx)}
-                            className="h-8 w-8 shrink-0"
+                            className="h-10 w-10 shrink-0 mt-6"
                           >
-                            <X className="h-4 w-4 text-destructive" />
+                            <X className="h-5 w-5 text-destructive" />
                           </Button>
                         </div>
                       ))}
