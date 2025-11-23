@@ -142,6 +142,18 @@ export interface ModelState {
 }
 
 /**
+ * Hydration State
+ * Zustand persist 미들웨어의 hydration 상태 추적
+ */
+export interface HydrationState {
+  /** Hydration 완료 여부 */
+  _hasHydrated: boolean;
+
+  /** Actions */
+  setHasHydrated: (state: boolean) => void;
+}
+
+/**
  * Combined App Store
  * 전체 애플리케이션 상태
  */
@@ -150,4 +162,5 @@ export type AppStore = UIState &
   DocumentsState &
   QueryState &
   ApiKeyState &
-  ModelState;
+  ModelState &
+  HydrationState;

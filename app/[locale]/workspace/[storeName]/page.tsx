@@ -51,7 +51,7 @@ export default function WorkspacePage() {
   const { history, addToHistory, currentResult, setCurrentResult } =
     useQueryState();
   const { setLoading, setError, clearError } = useUIState();
-  const { apiKey, hasApiKey } = useAppStore();
+  const { apiKey, hasApiKey, _hasHydrated } = useAppStore();
   const { selectedModel, setSelectedModel } = useModelState();
 
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
@@ -69,13 +69,18 @@ export default function WorkspacePage() {
   const [topK, setTopK] = useState<number | undefined>(undefined);
 
   useEffect(() => {
+    // Wait for hydration to complete before checking API key
+    if (!_hasHydrated) {
+      return;
+    }
+
     if (!hasApiKey()) {
       router.push("/stores");
       return;
     }
 
     loadStore();
-  }, [storeName, apiKey, router]);
+  }, [_hasHydrated, storeName, apiKey, router]);
 
   async function loadStore() {
     if (currentStore?.displayName === storeName) {

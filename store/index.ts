@@ -35,6 +35,12 @@ export const useAppStore = create<AppStore>()(
 
       // Model slice (with persistence)
       ...createModelSlice(...args),
+
+      // Hydration state (not persisted)
+      _hasHydrated: false,
+      setHasHydrated: (state: boolean) => {
+        args[0]({ _hasHydrated: state });
+      },
     }),
     {
       name: "gemini-file-search-storage",
@@ -72,7 +78,11 @@ export const useAppStore = create<AppStore>()(
         // - UI state (isLoading, error, etc.)
         // - Documents state (should be fetched fresh)
         // - currentResult (temporary)
+        // - _hasHydrated (hydration state)
       }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     }
   )
 );

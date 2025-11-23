@@ -53,7 +53,7 @@ export default function DocumentsPage() {
   const { currentStore, setCurrentStore } = useStoresState();
   const { documents, setDocuments, removeDocument } = useDocumentsState();
   const { setLoading, setError, clearError } = useUIState();
-  const { apiKey, hasApiKey } = useAppStore();
+  const { apiKey, hasApiKey, _hasHydrated } = useAppStore();
 
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
   const [uploadFiles, setUploadFiles] = useState<File[]>([]);
@@ -72,13 +72,18 @@ export default function DocumentsPage() {
   >([]);
 
   useEffect(() => {
+    // Wait for hydration to complete before checking API key
+    if (!_hasHydrated) {
+      return;
+    }
+
     if (!hasApiKey()) {
       router.push("/stores");
       return;
     }
 
     loadStore();
-  }, [storeName, apiKey, router]);
+  }, [_hasHydrated, storeName, apiKey, router]);
 
   useEffect(() => {
     if (currentStore && hasApiKey()) {
