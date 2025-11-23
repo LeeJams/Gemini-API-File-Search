@@ -4,6 +4,7 @@ import { createUISlice } from "./slices/uiSlice";
 import { createStoresSlice } from "./slices/storesSlice";
 import { createDocumentsSlice } from "./slices/documentsSlice";
 import { createQuerySlice } from "./slices/querySlice";
+import { createApiKeySlice } from "./slices/apiKeySlice";
 import type { AppStore } from "@/types/store";
 
 /**
@@ -27,6 +28,9 @@ export const useAppStore = create<AppStore>()(
 
       // Query slice (with persistence)
       ...createQuerySlice(...args),
+
+      // API Key slice (with persistence)
+      ...createApiKeySlice(...args),
     }),
     {
       name: "gemini-file-search-storage",
@@ -53,6 +57,9 @@ export const useAppStore = create<AppStore>()(
         // Query slice
         history: state.history,
         maxHistorySize: state.maxHistorySize,
+
+        // API Key slice
+        apiKey: state.apiKey,
 
         // Do NOT persist:
         // - UI state (isLoading, error, etc.)

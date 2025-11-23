@@ -15,9 +15,10 @@ import type { ApiResponse, CreateStoreRequest } from "@/types";
  * GET /api/stores
  * List all File Search Stores
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const stores = await listAllStores();
+    const apiKey = request.headers.get("x-api-key") || undefined;
+    const stores = await listAllStores(apiKey);
 
     return NextResponse.json<ApiResponse>({
       success: true,
@@ -64,6 +65,7 @@ export async function GET() {
  */
 export async function POST(request: NextRequest) {
   try {
+    const apiKey = request.headers.get("x-api-key") || undefined;
     const body: CreateStoreRequest = await request.json();
     const { displayName } = body;
 
@@ -77,7 +79,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const store = await createFileSearchStore(displayName.trim());
+    const store = await createFileSearchStore(displayName.trim(), apiKey);
 
     return NextResponse.json<ApiResponse>({
       success: true,

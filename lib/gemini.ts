@@ -22,28 +22,26 @@ import type {
 
 /**
  * GoogleGenAI 클라이언트 초기화
- * 환경 변수에서 API 키를 가져옵니다
+ * API 키를 파라미터로 받거나 환경 변수에서 가져옵니다
  */
-const getGeminiClient = () => {
-  const apiKey = process.env.GEMINI_API_KEY;
+const getGeminiClient = (apiKey?: string) => {
+  const key = apiKey || process.env.GEMINI_API_KEY;
 
-  if (!apiKey) {
+  if (!key) {
     throw new Error(
-      "GEMINI_API_KEY 환경 변수가 설정되지 않았습니다. .env.local 파일을 확인하세요."
+      "API 키가 필요합니다. API 키를 입력하거나 GEMINI_API_KEY 환경 변수를 설정하세요."
     );
   }
 
-  return new GoogleGenAI({ apiKey });
+  return new GoogleGenAI({ apiKey: key });
 };
 
-// Singleton instance
-let aiClient: GoogleGenAI | null = null;
-
-export const getAI = (): GoogleGenAI => {
-  if (!aiClient) {
-    aiClient = getGeminiClient();
-  }
-  return aiClient;
+/**
+ * API 키를 받아서 GoogleGenAI 클라이언트 반환
+ * 매번 새로운 인스턴스 생성 (사용자별 API 키 지원)
+ */
+export const getAI = (apiKey?: string): GoogleGenAI => {
+  return getGeminiClient(apiKey);
 };
 
 // ============================================
@@ -132,14 +130,16 @@ export function clearStoreCache(): void {
  * File Search Store 생성
  *
  * @param displayName - 스토어의 표시 이름
+ * @param apiKey - Gemini API 키
  * @returns 생성된 스토어 정보
  */
 export async function createFileSearchStore(
-  displayName: string
+  displayName: string,
+  apiKey?: string
 ): Promise<FileSearchStore> {
   console.log(`\n📦 파일 검색 스토어 생성 중: ${displayName}`);
 
-  const ai = getAI();
+  const ai = getAI(apiKey);
   const createStoreOp = await ai.fileSearchStores.create({
     config: { displayName },
   });
@@ -163,11 +163,13 @@ export async function createFileSearchStore(
  * Display Name으로 Store 찾기
  *
  * @param displayName - 찾을 스토어의 표시 이름
+ * @param apiKey - Gemini API 키
  * @returns 찾은 스토어 정보
  * @throws 스토어를 찾을 수 없을 경우
  */
 export async function findStoreByDisplayName(
-  displayName: string
+  displayName: string,
+  apiKey?: string
 ): Promise<FileSearchStore> {
   // 1. 캐시 먼저 조회
   const cached = getCachedStore(displayName);
@@ -178,7 +180,7 @@ export async function findStoreByDisplayName(
 
   console.log(`\n🔍 스토어 검색 중(원격): ${displayName}`);
 
-  const ai = getAI();
+  const ai = getAI(apiKey);
   let fileStore: FileSearchStore | null = null;
   const pager = await ai.fileSearchStores.list({ config: { pageSize: 10 } });
   let page = pager.page;
@@ -214,12 +216,13 @@ export async function findStoreByDisplayName(
 /**
  * 모든 File Search Store 목록 조회
  *
+ * @param apiKey - Gemini API 키
  * @returns 스토어 목록
  */
-export async function listAllStores(): Promise<FileSearchStore[]> {
+export async function listAllStores(apiKey?: string): Promise<FileSearchStore[]> {
   console.log("\n📋 스토어 목록 조회 중...");
 
-  const ai = getAI();
+  const ai = getAI(apiKey);
   const stores: FileSearchStore[] = [];
   const pager = await ai.fileSearchStores.list({ config: { pageSize: 20 } });
   let page = pager.page;
@@ -246,13 +249,15 @@ export async function listAllStores(): Promise<FileSearchStore[]> {
  * File Search Store 삭제
  *
  * @param fileStore - 삭제할 스토어 객체
+ * @param apiKey - Gemini API 키
  */
 export async function deleteFileSearchStore(
-  fileStore: FileSearchStore
+  fileStore: FileSearchStore,
+  apiKey?: string
 ): Promise<void> {
   console.log(`\n🗑️  파일 검색 스토어 삭제 중: ${fileStore.displayName}`);
 
-  const ai = getAI();
+  const ai = getAI(apiKey);
   await ai.fileSearchStores.delete({
     name: fileStore.name,
     config: { force: true },
@@ -301,12 +306,14 @@ function getMimeType(filePath: string): string {
  * @param fileStore - 업로드할 대상 스토어 객체
  * @param filePath - 업로드할 파일의 경로
  * @param options - 업로드 옵션
+ * @param apiKey - Gemini API 키
  * @returns 업로드 완료된 operation 결과
  */
 export async function uploadWithCustomChunking(
   fileStore: FileSearchStore,
   filePath: string,
-  options: UploadOptions = {}
+  options: UploadOptions = {},
+  apiKey?: string
 ): Promise<Operation> {
   console.log(`\n📄 커스텀 청킹으로 업로드 중: ${filePath}`);
 
@@ -320,7 +327,7 @@ export async function uploadWithCustomChunking(
 
   const resolvedMimeType = mimeType || getMimeType(filePath);
 
-  const ai = getAI();
+  const ai = getAI(apiKey);
 
   // 재시도 로직 적용하여 업로드
   let advancedUploadOp = await retryWithBackoff(async () => {
@@ -370,16 +377,18 @@ export async function uploadWithCustomChunking(
  * @param fileStore - 검색할 스토어 객체
  * @param query - 사용자의 질문 또는 쿼리
  * @param metadataFilter - 메타데이터 필터 (선택사항)
+ * @param apiKey - Gemini API 키
  * @returns AI 생성 응답 객체
  */
 export async function generateContentWithFileSearch(
   fileStore: FileSearchStore,
   query: string,
-  metadataFilter: string | null = null
+  metadataFilter: string | null = null,
+  apiKey?: string
 ): Promise<QueryResponse> {
   console.log(`\n💬 쿼리로 콘텐츠 생성 중: "${query}"`);
 
-  const ai = getAI();
+  const ai = getAI(apiKey);
 
   const toolsConfig: any = {
     fileSearch: {
@@ -427,16 +436,18 @@ export async function generateContentWithFileSearch(
  *
  * @param fileStore - 검색할 스토어 객체
  * @param displayName - 찾을 문서의 표시 이름
+ * @param apiKey - Gemini API 키
  * @returns 찾은 문서 정보
  * @throws 문서를 찾을 수 없을 경우
  */
 export async function findDocumentByDisplayName(
   fileStore: FileSearchStore,
-  displayName: string
+  displayName: string,
+  apiKey?: string
 ): Promise<FileSearchDocument> {
   console.log(`\n🔍 문서 검색 중: ${displayName}`);
 
-  const ai = getAI();
+  const ai = getAI(apiKey);
   let targetDoc: FileSearchDocument | null = null;
   let documentPager = await ai.fileSearchStores.documents.list({
     parent: fileStore.name,
@@ -474,14 +485,16 @@ export async function findDocumentByDisplayName(
  * Store 내 모든 문서 목록 조회
  *
  * @param fileStore - 스토어 객체
+ * @param apiKey - Gemini API 키
  * @returns 문서 목록
  */
 export async function listDocuments(
-  fileStore: FileSearchStore
+  fileStore: FileSearchStore,
+  apiKey?: string
 ): Promise<FileSearchDocument[]> {
   console.log(`\n📋 문서 목록 조회 중: ${fileStore.displayName}`);
 
-  const ai = getAI();
+  const ai = getAI(apiKey);
   const documents: FileSearchDocument[] = [];
   let documentPager = await ai.fileSearchStores.documents.list({
     parent: fileStore.name,
@@ -512,13 +525,15 @@ export async function listDocuments(
  * 문서 삭제
  *
  * @param document - 삭제할 문서 객체
+ * @param apiKey - Gemini API 키
  */
 export async function deleteDocument(
-  document: FileSearchDocument
+  document: FileSearchDocument,
+  apiKey?: string
 ): Promise<void> {
   console.log(`\n🗑️  문서 삭제 중: ${document.displayName}`);
 
-  const ai = getAI();
+  const ai = getAI(apiKey);
   await ai.fileSearchStores.documents.delete({
     name: document.name,
     config: { force: true },
@@ -533,16 +548,18 @@ export async function deleteDocument(
  * @param fileStore - 문서가 속한 스토어 객체
  * @param docDisplayName - 업데이트할 문서의 표시 이름
  * @param localDocPath - 새 버전 파일의 로컬 경로
+ * @param apiKey - Gemini API 키
  * @returns 업로드 완료된 operation 결과
  */
 export async function updateDocument(
   fileStore: FileSearchStore,
   docDisplayName: string,
-  localDocPath: string
+  localDocPath: string,
+  apiKey?: string
 ): Promise<Operation> {
   console.log(`\n🔄 문서 업데이트 중: ${docDisplayName}`);
 
-  const ai = getAI();
+  const ai = getAI(apiKey);
 
   // 1. 기존 문서 찾기
   let documentPager = await ai.fileSearchStores.documents.list({
