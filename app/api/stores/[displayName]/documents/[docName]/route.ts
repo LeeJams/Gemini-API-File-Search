@@ -19,6 +19,8 @@ export async function DELETE(
 
     console.log(`\n🗑️  문서 삭제 요청: ${decodeURIComponent(docName)}`);
 
+    const apiKey = request.headers.get("x-api-key") || undefined;
+
     // 스토어 검색
     const fileStore = await findStoreByDisplayName(
       decodeURIComponent(displayName),
