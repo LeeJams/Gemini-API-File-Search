@@ -16,10 +16,11 @@ export async function GET(
   { params }: { params: Promise<{ displayName: string }> }
 ) {
   try {
+    const apiKey = request.headers.get("x-api-key") || undefined;
     const { displayName } = await params;
 
-    const store = await findStoreByDisplayName(displayName);
-    const documents = await listDocuments(store);
+    const store = await findStoreByDisplayName(displayName, apiKey);
+    const documents = await listDocuments(store, apiKey);
 
     return NextResponse.json<ApiResponse>({
       success: true,

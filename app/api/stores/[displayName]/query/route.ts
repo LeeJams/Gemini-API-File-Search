@@ -19,6 +19,7 @@ export async function POST(
   { params }: { params: Promise<{ displayName: string }> }
 ) {
   try {
+    const apiKey = request.headers.get("x-api-key") || undefined;
     const { displayName } = await params;
     const body: QueryRequest = await request.json();
     const { query, metadataFilter } = body;
@@ -33,11 +34,12 @@ export async function POST(
       );
     }
 
-    const store = await findStoreByDisplayName(displayName);
+    const store = await findStoreByDisplayName(displayName, apiKey);
     const response = await generateContentWithFileSearch(
       store,
       query.trim(),
-      metadataFilter || null
+      metadataFilter || null,
+      apiKey
     );
 
     return NextResponse.json<ApiResponse>({

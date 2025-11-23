@@ -21,7 +21,8 @@ export async function DELETE(
 
     // 스토어 검색
     const fileStore = await findStoreByDisplayName(
-      decodeURIComponent(displayName)
+      decodeURIComponent(displayName),
+      apiKey
     );
 
     if (!fileStore) {

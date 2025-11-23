@@ -26,6 +26,7 @@ export async function POST(
   { params }: { params: Promise<{ displayName: string }> }
 ) {
   try {
+    const apiKey = request.headers.get("x-api-key") || undefined;
     const { displayName } = await params;
 
     // Ensure uploads directory exists
@@ -58,7 +59,7 @@ export async function POST(
     }
 
     // Find store
-    const store = await findStoreByDisplayName(displayName);
+    const store = await findStoreByDisplayName(displayName, apiKey);
 
     // Process files
     const results: UploadFileResult[] = [];
@@ -92,7 +93,7 @@ export async function POST(
           // Upload to Gemini
           await uploadWithCustomChunking(store, tempFilePath, {
             displayName: file.name,
-          });
+          }, apiKey);
 
           results.push({
             fileName: file.name,

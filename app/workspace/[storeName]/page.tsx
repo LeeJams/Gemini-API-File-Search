@@ -2,7 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useStoresState, useQueryState, useUIState } from "@/store";
+import {
+  useStoresState,
+  useQueryState,
+  useUIState,
+  useAppStore,
+} from "@/store";
+import { ApiKeyModal } from "@/components/ApiKeyModal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -26,16 +32,28 @@ export default function WorkspacePage() {
   const { history, addToHistory, currentResult, setCurrentResult } =
     useQueryState();
   const { setLoading, setError, clearError } = useUIState();
+  const { apiKey, hasApiKey } = useAppStore();
 
+  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [metadataFilter, setMetadataFilter] = useState("");
 
   useEffect(() => {
+    if (!hasApiKey()) {
+      router.push("/stores");
+      return;
+    }
+
     loadStore();
-  }, [storeName]);
+  }, [storeName, apiKey, router]);
 
   async function loadStore() {
     if (currentStore?.displayName === storeName) {
+      return;
+    }
+
+    if (!hasApiKey()) {
+      router.push("/stores");
       return;
     }
 
@@ -43,11 +61,17 @@ export default function WorkspacePage() {
     clearError();
 
     try {
-      const response = await fetch(`/api/stores/${storeName}`);
+      const headers: HeadersInit = {
+        "x-api-key": apiKey || "",
+      };
+
+      const response = await fetch(`/api/stores/${storeName}`, { headers });
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        setError(data.error || `HTTP ${response.status}: ${response.statusText}`);
+        setError(
+          data.error || `HTTP ${response.status}: ${response.statusText}`
+        );
         setTimeout(() => router.push("/stores"), 2000);
         return;
       }
@@ -66,13 +90,23 @@ export default function WorkspacePage() {
       return;
     }
 
+    if (!hasApiKey()) {
+      router.push("/stores");
+      return;
+    }
+
     setLoading(true, "쿼리 실행 중...");
     clearError();
 
     try {
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey || "",
+      };
+
       const response = await fetch(`/api/stores/${storeName}/query`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           query: query.trim(),
           metadataFilter: metadataFilter.trim() || null,
@@ -81,7 +115,9 @@ export default function WorkspacePage() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || `HTTP ${response.status}: ${response.statusText}`);
+        throw new Error(
+          data.error || `HTTP ${response.status}: ${response.statusText}`
+        );
       }
 
       const result = {
@@ -126,6 +162,18 @@ export default function WorkspacePage() {
 
   return (
     <div className="container py-6 md:py-8">
+      {/* API Key Modal */}
+      <ApiKeyModal
+        open={isApiKeyModalOpen}
+        onOpenChange={(open) => {
+          setIsApiKeyModalOpen(open);
+          // Reload store after API key is set
+          if (!open && hasApiKey()) {
+            loadStore();
+          }
+        }}
+      />
+
       {/* Header */}
       <div className="mb-6 space-y-4">
         <div className="flex items-center gap-3 md:gap-4">

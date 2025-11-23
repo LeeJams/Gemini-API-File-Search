@@ -2,7 +2,13 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useStoresState, useDocumentsState, useUIState } from "@/store";
+import {
+  useStoresState,
+  useDocumentsState,
+  useUIState,
+  useAppStore,
+} from "@/store";
+import { ApiKeyModal } from "@/components/ApiKeyModal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -39,7 +45,9 @@ export default function DocumentsPage() {
   const { currentStore, setCurrentStore } = useStoresState();
   const { documents, setDocuments, removeDocument } = useDocumentsState();
   const { setLoading, setError, clearError } = useUIState();
+  const { apiKey, hasApiKey } = useAppStore();
 
+  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
   const [uploadFiles, setUploadFiles] = useState<File[]>([]);
   const [deleteConfirm, setDeleteConfirm] = useState<FileSearchDocument | null>(
     null
@@ -49,11 +57,16 @@ export default function DocumentsPage() {
   const [detailModalOpen, setDetailModalOpen] = useState(false);
 
   useEffect(() => {
+    if (!hasApiKey()) {
+      router.push("/stores");
+      return;
+    }
+
     loadStore();
-  }, [storeName]);
+  }, [storeName, apiKey, router]);
 
   useEffect(() => {
-    if (currentStore) {
+    if (currentStore && hasApiKey()) {
       loadDocuments();
     }
   }, [currentStore]);
@@ -63,15 +76,26 @@ export default function DocumentsPage() {
       return;
     }
 
+    if (!hasApiKey()) {
+      router.push("/stores");
+      return;
+    }
+
     setLoading(true, "스토어 로딩 중...");
     clearError();
 
     try {
-      const response = await fetch(`/api/stores/${storeName}`);
+      const headers: HeadersInit = {
+        "x-api-key": apiKey || "",
+      };
+
+      const response = await fetch(`/api/stores/${storeName}`, { headers });
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        setError(data.error || `HTTP ${response.status}: ${response.statusText}`);
+        setError(
+          data.error || `HTTP ${response.status}: ${response.statusText}`
+        );
         setTimeout(() => router.push("/stores"), 2000);
         return;
       }
@@ -85,15 +109,27 @@ export default function DocumentsPage() {
   }
 
   async function loadDocuments() {
+    if (!hasApiKey()) {
+      return;
+    }
+
     setLoading(true, "문서 목록 로딩 중...");
     clearError();
 
     try {
-      const response = await fetch(`/api/stores/${storeName}/documents`);
+      const headers: HeadersInit = {
+        "x-api-key": apiKey || "",
+      };
+
+      const response = await fetch(`/api/stores/${storeName}/documents`, {
+        headers,
+      });
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || `HTTP ${response.status}: ${response.statusText}`);
+        throw new Error(
+          data.error || `HTTP ${response.status}: ${response.statusText}`
+        );
       }
 
       setDocuments(data.data.data);
@@ -162,6 +198,11 @@ export default function DocumentsPage() {
       return;
     }
 
+    if (!hasApiKey()) {
+      router.push("/stores");
+      return;
+    }
+
     setLoading(true, `${uploadFiles.length}개 파일 업로드 중...`);
     clearError();
 
@@ -171,8 +212,13 @@ export default function DocumentsPage() {
         formData.append("files", file);
       });
 
+      const headers: HeadersInit = {
+        "x-api-key": apiKey || "",
+      };
+
       const response = await fetch(`/api/stores/${storeName}/upload`, {
         method: "POST",
+        headers,
         body: formData,
       });
       const data = await response.json();
@@ -198,7 +244,7 @@ export default function DocumentsPage() {
             .filter((r: any) => !r.success)
             .map((r: any) => r.fileName);
 
-          const remainingFiles = uploadFiles.filter(f =>
+          const remainingFiles = uploadFiles.filter((f) =>
             failedFileNames.includes(f.name)
           );
 
@@ -213,20 +259,32 @@ export default function DocumentsPage() {
   }
 
   async function handleDeleteDocument(doc: FileSearchDocument) {
+    if (!hasApiKey()) {
+      router.push("/stores");
+      return;
+    }
+
     setLoading(true, "문서 삭제 중...");
     clearError();
 
     try {
+      const headers: HeadersInit = {
+        "x-api-key": apiKey || "",
+      };
+
       const response = await fetch(
         `/api/stores/${storeName}/documents/${encodeURIComponent(doc.displayName)}`,
         {
           method: "DELETE",
+          headers,
         }
       );
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || `HTTP ${response.status}: ${response.statusText}`);
+        throw new Error(
+          data.error || `HTTP ${response.status}: ${response.statusText}`
+        );
       }
 
       removeDocument(doc.displayName);
@@ -250,6 +308,18 @@ export default function DocumentsPage() {
 
   return (
     <div className="container py-6 md:py-8">
+      {/* API Key Modal */}
+      <ApiKeyModal
+        open={isApiKeyModalOpen}
+        onOpenChange={(open) => {
+          setIsApiKeyModalOpen(open);
+          // Reload data after API key is set
+          if (!open && hasApiKey()) {
+            loadStore();
+          }
+        }}
+      />
+
       {/* Header */}
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1">
@@ -471,7 +541,9 @@ export default function DocumentsPage() {
             </Button>
             <Button
               variant="destructive"
-              onClick={() => deleteConfirm && handleDeleteDocument(deleteConfirm)}
+              onClick={() =>
+                deleteConfirm && handleDeleteDocument(deleteConfirm)
+              }
               className="w-full sm:w-auto"
             >
               삭제
