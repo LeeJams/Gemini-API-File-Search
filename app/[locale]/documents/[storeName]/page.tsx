@@ -20,6 +20,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   ArrowLeft,
   Upload,
@@ -28,6 +30,8 @@ import {
   HardDrive,
   Trash2,
   Eye,
+  Plus,
+  X,
 } from "lucide-react";
 import { formatDate, formatFileSize } from "@/lib/utils";
 import { DocumentDetailModal } from "@/components/DocumentDetailModal";
@@ -59,6 +63,13 @@ export default function DocumentsPage() {
   const [selectedDocument, setSelectedDocument] =
     useState<FileSearchDocument | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [customMetadata, setCustomMetadata] = useState<
+    Array<{
+      key: string;
+      value: string;
+      type: "string" | "number" | "stringList";
+    }>
+  >([]);
 
   useEffect(() => {
     if (!hasApiKey()) {
@@ -150,9 +161,7 @@ export default function DocumentsPage() {
 
     // Check max files (기존 파일 + 새 파일)
     if (uploadFiles.length + files.length > 10) {
-      setError(
-        t("errorMaxFiles", { count: uploadFiles.length })
-      );
+      setError(t("errorMaxFiles", { count: uploadFiles.length }));
       return;
     }
 
@@ -191,15 +200,60 @@ export default function DocumentsPage() {
 
   function handleClearAllFiles() {
     setUploadFiles([]);
+    setCustomMetadata([]);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+  }
+
+  function handleAddMetadata() {
+    if (customMetadata.length >= 20) {
+      setError(t("errorMetadataMax"));
+      return;
+    }
+    setCustomMetadata([
+      ...customMetadata,
+      { key: "", value: "", type: "string" },
+    ]);
+  }
+
+  function handleRemoveMetadata(index: number) {
+    setCustomMetadata(customMetadata.filter((_, idx) => idx !== index));
+  }
+
+  function handleMetadataChange(
+    index: number,
+    field: "key" | "value" | "type",
+    value: string
+  ) {
+    setCustomMetadata((prev) =>
+      prev.map((item, i) => {
+        if (i !== index) return item;
+
+        if (field === "type") {
+          return { ...item, type: value as "string" | "number" | "stringList" };
+        }
+        return { ...item, [field]: value };
+      })
+    );
   }
 
   async function handleUpload() {
     if (uploadFiles.length === 0) {
       setError(t("errorSelectFile"));
       return;
+    }
+
+    // Validate metadata
+    for (const meta of customMetadata) {
+      if (!meta.key.trim()) {
+        setError(t("errorMetadataKeyEmpty"));
+        return;
+      }
+      if (!meta.value.trim()) {
+        setError(t("errorMetadataValueEmpty"));
+        return;
+      }
     }
 
     if (!hasApiKey()) {
@@ -215,6 +269,11 @@ export default function DocumentsPage() {
       uploadFiles.forEach((file) => {
         formData.append("files", file);
       });
+
+      // Add metadata if any
+      if (customMetadata.length > 0) {
+        formData.append("customMetadata", JSON.stringify(customMetadata));
+      }
 
       const headers: HeadersInit = {
         "x-api-key": apiKey || "",
@@ -235,6 +294,7 @@ export default function DocumentsPage() {
       if (data.success) {
         // 모든 파일 업로드 성공
         setUploadFiles([]);
+        setCustomMetadata([]);
         if (fileInputRef.current) {
           fileInputRef.current.value = "";
         }
@@ -342,19 +402,15 @@ export default function DocumentsPage() {
             <p className="text-sm text-muted-foreground">{t("title")}</p>
           </div>
         </div>
-        <Button
-          onClick={() => router.push(`/workspace/${storeName}`)}
-          className="w-full md:w-auto flex-shrink-0"
-        >
-          {t("goToWorkspace")}
-        </Button>
       </div>
 
       <div className="grid gap-4 md:gap-6 lg:grid-cols-[minmax(300px,400px)_1fr]">
         {/* Upload Section */}
         <Card className="min-w-0">
           <CardHeader>
-            <CardTitle className="text-lg md:text-xl">{t("fileUpload")}</CardTitle>
+            <CardTitle className="text-lg md:text-xl">
+              {t("fileUpload")}
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="rounded-lg border-2 border-dashed p-4 md:p-6 text-center">
@@ -374,9 +430,7 @@ export default function DocumentsPage() {
               >
                 {t("clickToAdd")}
                 <br />
-                <span className="text-xs">
-                  {t("uploadHint")}
-                </span>
+                <span className="text-xs">{t("uploadHint")}</span>
               </label>
             </div>
 
@@ -420,6 +474,134 @@ export default function DocumentsPage() {
                     </div>
                   ))}
                 </div>
+
+                {/* Custom Metadata Section */}
+                <div className="space-y-4 pt-2">
+                  <div className="space-y-3">
+                    <div>
+                      <Label className="text-base font-semibold">
+                        {t("customMetadata")}
+                      </Label>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {t("customMetadataHint")}
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleAddMetadata}
+                      disabled={customMetadata.length >= 20}
+                      className="w-full"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      {t("addMetadata")}
+                    </Button>
+                  </div>
+
+                  {customMetadata.length > 0 && (
+                    <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                      {customMetadata.map((meta, idx) => (
+                        <div
+                          key={idx}
+                          className="flex gap-3 p-4 rounded-lg border bg-card"
+                        >
+                          <div className="flex-1 space-y-3">
+                            <div>
+                              <Label className="text-xs text-muted-foreground mb-1.5 block">
+                                {t("metadataKey")}
+                              </Label>
+                              <Input
+                                placeholder={t("metadataKeyPlaceholder")}
+                                value={meta.key}
+                                onChange={(e) =>
+                                  handleMetadataChange(
+                                    idx,
+                                    "key",
+                                    e.target.value
+                                  )
+                                }
+                                className="h-10"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground mb-1.5 block">
+                                {t("metadataValue")}
+                              </Label>
+                              {meta.type === "stringList" ? (
+                                <Input
+                                  placeholder={t(
+                                    "metadataValueListPlaceholder"
+                                  )}
+                                  value={meta.value}
+                                  onChange={(e) =>
+                                    handleMetadataChange(
+                                      idx,
+                                      "value",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="h-10"
+                                />
+                              ) : (
+                                <Input
+                                  type={
+                                    meta.type === "number" ? "number" : "text"
+                                  }
+                                  placeholder={t("metadataValuePlaceholder")}
+                                  value={meta.value}
+                                  onChange={(e) =>
+                                    handleMetadataChange(
+                                      idx,
+                                      "value",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="h-10"
+                                />
+                              )}
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground mb-1.5 block">
+                                {t("metadataType")}
+                              </Label>
+                              <select
+                                value={meta.type}
+                                onChange={(e) =>
+                                  handleMetadataChange(
+                                    idx,
+                                    "type",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                              >
+                                <option value="string">
+                                  {t("metadataTypeString")}
+                                </option>
+                                <option value="number">
+                                  {t("metadataTypeNumber")}
+                                </option>
+                                <option value="stringList">
+                                  {t("metadataTypeStringList")}
+                                </option>
+                              </select>
+                            </div>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleRemoveMetadata(idx)}
+                            className="h-10 w-10 shrink-0 mt-6"
+                          >
+                            <X className="h-5 w-5 text-destructive" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 <Button onClick={handleUpload} className="w-full">
                   <Upload className="mr-2 h-4 w-4" />
                   {t("uploadButton", { count: uploadFiles.length })}
@@ -527,7 +709,9 @@ export default function DocumentsPage() {
           <DialogHeader>
             <DialogTitle>{t("deleteConfirmTitle")}</DialogTitle>
             <DialogDescription className="text-sm">
-              {t("deleteConfirmMessage", { name: deleteConfirm?.displayName })}
+              {t("deleteConfirmMessage", {
+                name: deleteConfirm?.displayName || "",
+              })}
               <br />
               <span className="font-semibold text-destructive">
                 {t("deleteConfirmWarning")}
