@@ -9,14 +9,22 @@ import {
   useQueryState,
   useUIState,
   useAppStore,
+  useModelState,
 } from "@/store";
+import { SUPPORTED_MODELS } from "@/store/slices/modelSlice";
 import { ApiKeyModal } from "@/components/ApiKeyModal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import ReactMarkdown from "react-markdown";
-import { ArrowLeft, Send, FileText, ChevronRight } from "lucide-react";
+import { ArrowLeft, Send, FileText, ChevronRight, ChevronDown } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import type { QueryHistoryItem } from "@/types";
 
@@ -37,6 +45,7 @@ export default function WorkspacePage() {
     useQueryState();
   const { setLoading, setError, clearError } = useUIState();
   const { apiKey, hasApiKey } = useAppStore();
+  const { selectedModel, setSelectedModel } = useModelState();
 
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -114,6 +123,7 @@ export default function WorkspacePage() {
         body: JSON.stringify({
           query: query.trim(),
           metadataFilter: metadataFilter.trim() || null,
+          model: selectedModel,
         }),
       });
       const data = await response.json();
@@ -207,6 +217,34 @@ export default function WorkspacePage() {
               <CardTitle className="text-lg md:text-xl">{t("queryInput")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="model" className="text-sm">
+                  {t("modelLabel")}
+                </Label>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-between text-sm md:text-base"
+                    >
+                      <span className="truncate">{selectedModel}</span>
+                      <ChevronDown className="ml-2 h-4 w-4 flex-shrink-0" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="min-w-[300px] md:min-w-[400px]">
+                    {SUPPORTED_MODELS.map((model) => (
+                      <DropdownMenuItem
+                        key={model}
+                        onClick={() => setSelectedModel(model)}
+                        className={selectedModel === model ? "bg-accent" : ""}
+                      >
+                        {model}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="query" className="text-sm">
                   {t("questionLabel")}

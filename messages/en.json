@@ -65,6 +65,7 @@
   "workspace": {
     "title": "Query Workspace",
     "queryInput": "Query Input",
+    "modelLabel": "Select Model",
     "questionLabel": "Enter your question",
     "questionPlaceholder": "Ask questions about your documents...",
     "metadataFilter": "Metadata Filter (Optional)",

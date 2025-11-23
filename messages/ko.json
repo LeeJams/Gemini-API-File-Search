@@ -65,6 +65,7 @@
   "workspace": {
     "title": "쿼리 워크스페이스",
     "queryInput": "쿼리 입력",
+    "modelLabel": "모델 선택",
     "questionLabel": "질문을 입력하세요",
     "questionPlaceholder": "문서에 대해 질문하세요...",
     "metadataFilter": "메타데이터 필터 (선택사항)",
