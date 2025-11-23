@@ -378,15 +378,17 @@ export async function uploadWithCustomChunking(
  * @param query - 사용자의 질문 또는 쿼리
  * @param metadataFilter - 메타데이터 필터 (선택사항)
  * @param apiKey - Gemini API 키
+ * @param model - 사용할 Gemini 모델 (기본값: gemini-2.5-flash)
  * @returns AI 생성 응답 객체
  */
 export async function generateContentWithFileSearch(
   fileStore: FileSearchStore,
   query: string,
   metadataFilter: string | null = null,
-  apiKey?: string
+  apiKey?: string,
+  model: string = "gemini-2.5-flash"
 ): Promise<QueryResponse> {
-  console.log(`\n💬 쿼리로 콘텐츠 생성 중: "${query}"`);
+  console.log(`\n💬 쿼리로 콘텐츠 생성 중: "${query}" (모델: ${model})`);
 
   const ai = getAI(apiKey);
 
@@ -403,7 +405,7 @@ export async function generateContentWithFileSearch(
   // 재시도 로직 적용하여 쿼리 실행
   const response = await retryWithBackoff(async () => {
     return await ai.models.generateContent({
-      model: "gemini-2.0-flash-exp",
+      model,
       contents: query,
       config: {
         tools: [toolsConfig],

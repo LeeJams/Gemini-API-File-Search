@@ -56,6 +56,7 @@ export interface ListStoresResponse {
 export interface QueryRequest {
   query: string;
   metadataFilter?: string | null;
+  model?: string;
 }
 
 /**

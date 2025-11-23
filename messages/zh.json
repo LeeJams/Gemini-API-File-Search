@@ -65,6 +65,7 @@
   "workspace": {
     "title": "查询工作区",
     "queryInput": "查询输入",
+    "modelLabel": "选择模型",
     "questionLabel": "输入您的问题",
     "questionPlaceholder": "向您的文档提问...",
     "metadataFilter": "元数据筛选器（可选）",

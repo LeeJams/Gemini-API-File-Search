@@ -65,6 +65,7 @@
   "workspace": {
     "title": "クエリワークスペース",
     "queryInput": "クエリ入力",
+    "modelLabel": "モデル選択",
     "questionLabel": "質問を入力してください",
     "questionPlaceholder": "ドキュメントについて質問してください...",
     "metadataFilter": "メタデータフィルター（オプション）",

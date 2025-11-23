@@ -22,7 +22,7 @@ export async function POST(
     const apiKey = request.headers.get("x-api-key") || undefined;
     const { displayName } = await params;
     const body: QueryRequest = await request.json();
-    const { query, metadataFilter } = body;
+    const { query, metadataFilter, model } = body;
 
     if (!query || !query.trim()) {
       return NextResponse.json<ApiResponse>(
@@ -39,7 +39,8 @@ export async function POST(
       store,
       query.trim(),
       metadataFilter || null,
-      apiKey
+      apiKey,
+      model || "gemini-2.5-flash"
     );
 
     return NextResponse.json<ApiResponse>({

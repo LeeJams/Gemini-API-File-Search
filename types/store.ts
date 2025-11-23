@@ -130,6 +130,18 @@ export interface ApiKeyState {
 }
 
 /**
+ * Model State Slice
+ * Gemini 모델 선택 상태 관리
+ */
+export interface ModelState {
+  /** 선택된 모델 */
+  selectedModel: string;
+
+  /** Actions */
+  setSelectedModel: (model: string) => void;
+}
+
+/**
  * Combined App Store
  * 전체 애플리케이션 상태
  */
@@ -137,4 +149,5 @@ export type AppStore = UIState &
   StoresState &
   DocumentsState &
   QueryState &
-  ApiKeyState;
+  ApiKeyState &
+  ModelState;
