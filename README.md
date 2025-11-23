@@ -17,11 +17,13 @@ An intuitive interface to manage File Search Stores, upload documents, and query
 ## <a name="english"></a>🌟 Features
 
 ### 🔐 Privacy & Security
+
 - **No Backend Database**: All data stays in your browser
 - **Client-Side Storage**: API keys stored securely in browser local storage only
 - **No Data Collection**: Your documents and queries never touch our servers
 
 ### 🚀 Core Features
+
 - **📁 Store Management**: Create, view, and delete File Search Stores with ease
 - **📤 Document Upload**: Drag & drop multiple files (up to 10 files, 50MB each)
 - **🤖 AI-Powered Search**: Query your documents using Gemini's RAG capabilities
@@ -61,6 +63,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ### 3. Enter Your API Key
 
 On first visit, you'll be prompted to enter your Gemini API Key. This key is:
+
 - ✅ Stored only in your browser's local storage
 - ✅ Never sent to any backend server
 - ✅ Only used for direct API calls to Google's Gemini API
@@ -116,90 +119,10 @@ This application supports **4 languages** with complete UI translation:
 
 ---
 
-## 🛠️ Tech Stack
-
-| Technology | Purpose |
-|-----------|---------|
-| [Next.js 16](https://nextjs.org/) | React framework with App Router |
-| [React 19](https://react.dev/) | UI library |
-| [TypeScript](https://www.typescriptlang.org/) | Type safety |
-| [Zustand](https://zustand.docs.pmnd.rs/) | State management |
-| [Tailwind CSS](https://tailwindcss.com/) | Styling |
-| [shadcn/ui](https://ui.shadcn.com/) | UI components |
-| [next-intl](https://next-intl-docs.vercel.app/) | Internationalization |
-| [Gemini API](https://ai.google.dev/) | File search & AI queries |
-
----
-
-## 📁 Project Structure
-
-```
-Gemini-API-File-Search/
-├── app/
-│   ├── [locale]/              # Internationalized pages
-│   │   ├── stores/            # Store management page
-│   │   ├── workspace/         # Query workspace page
-│   │   └── documents/         # Document management page
-│   └── api/                   # API route handlers
-│       └── stores/            # Store-related APIs
-├── components/                # React components
-│   ├── ui/                    # shadcn/ui components
-│   ├── ApiKeyModal.tsx        # API key input modal
-│   ├── app-header.tsx         # App header with navigation
-│   └── language-toggle.tsx    # Language switcher
-├── i18n/                      # Internationalization config
-│   ├── routing.ts             # Locale routing
-│   └── request.ts             # Request config
-├── messages/                  # Translation files
-│   ├── en.json                # English
-│   ├── ko.json                # Korean
-│   ├── zh.json                # Chinese
-│   └── ja.json                # Japanese
-├── store/                     # Zustand state management
-│   └── slices/                # State slices
-├── types/                     # TypeScript definitions
-└── lib/                       # Utility functions
-```
-
----
-
-## 🔌 API Endpoints
-
-All API endpoints communicate directly with Google's Gemini API:
-
-### Stores
-```
-GET    /api/stores                      # List all stores
-POST   /api/stores                      # Create new store
-GET    /api/stores/:displayName         # Get store details
-DELETE /api/stores/:displayName         # Delete store
-```
-
-### Documents
-```
-POST   /api/stores/:displayName/upload     # Upload files
-GET    /api/stores/:displayName/documents  # List documents
-DELETE /api/stores/:displayName/documents/:docName  # Delete document
-```
-
-### Queries
-```
-POST   /api/stores/:displayName/query   # Execute RAG query
-```
-
-**Example Query Request**:
-```json
-{
-  "query": "What are the main features?",
-  "metadataFilter": "doc_type=\"manual\"" // Optional
-}
-```
-
----
-
 ## 💰 Pricing
 
 Google Gemini File Search API pricing:
+
 - **File Storage & Embeddings**: Free
 - **Initial File Indexing**: $0.15 per 1M tokens
 - **Query Execution**: Based on Gemini model usage
@@ -236,16 +159,19 @@ npm run type-check       # TypeScript type checking
 ## 🐛 Troubleshooting
 
 ### API Key Issues
+
 - Make sure your API key starts with `AIza`
 - Verify the key is active at [Google AI Studio](https://aistudio.google.com/apikey)
 - Clear browser cache and re-enter the key
 
 ### Upload Failures
+
 - Check file size (max 50MB per file)
 - Ensure file type is supported
 - Try uploading fewer files at once
 
 ### Module Not Found
+
 ```bash
 rm -rf .next node_modules package-lock.json
 npm install
@@ -253,10 +179,13 @@ npm run dev
 ```
 
 ### Clear Local Storage (Reset Everything)
+
 Open browser console and run:
+
 ```javascript
-localStorage.clear()
+localStorage.clear();
 ```
+
 Then refresh the page.
 
 ---
@@ -275,11 +204,8 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📚 Resources
 
-- [Next.js Documentation](https://nextjs.org/docs)
 - [Gemini API Documentation](https://ai.google.dev/docs)
 - [Google AI Studio](https://aistudio.google.com/)
-- [Tailwind CSS Documentation](https://tailwindcss.com/)
-- [shadcn/ui Components](https://ui.shadcn.com/)
 
 ---
 
@@ -296,6 +222,7 @@ If you find this project useful, please consider giving it a star! ⭐
 ---
 
 <a name="korean"></a>
+
 ## 한국어
 
 Google의 Gemini File Search API를 쉽게 관리할 수 있는 웹 기반 도구입니다.
@@ -303,6 +230,7 @@ Google의 Gemini File Search API를 쉽게 관리할 수 있는 웹 기반 도�
 **🔒 개인정보 보호**: API 키와 모든 데이터는 브라우저 로컬 스토리지에만 저장됩니다. 데이터베이스나 백엔드 서버에는 절대 저장되지 않습니다.
 
 ### 주요 기능
+
 - 파일 검색 스토어 생성/관리/삭제
 - 문서 업로드 (파일당 최대 50MB, 최대 10개)
 - Gemini AI를 사용한 문서 질의응답
@@ -314,6 +242,7 @@ Google의 Gemini File Search API를 쉽게 관리할 수 있는 웹 기반 도�
 ---
 
 <a name="chinese"></a>
+
 ## 中文
 
 基于 Web 的 Google Gemini File Search API 管理工具。
@@ -321,6 +250,7 @@ Google의 Gemini File Search API를 쉽게 관리할 수 있는 웹 기반 도�
 **🔒 隐私优先**：您的 API 密钥和所有数据仅存储在浏览器的本地存储中。没有数据库，没有后端存储，完全客户端安全。
 
 ### 主要功能
+
 - 创建/管理/删除文件搜索存储库
 - 上传文档（每个文件最大 50MB，最多 10 个）
 - 使用 Gemini AI 查询文档
@@ -332,6 +262,7 @@ Google의 Gemini File Search API를 쉽게 관리할 수 있는 웹 기반 도�
 ---
 
 <a name="japanese"></a>
+
 ## 日本語
 
 Google の Gemini File Search API を簡単に管理できる Web ベースのツールです。
@@ -339,6 +270,7 @@ Google の Gemini File Search API を簡単に管理できる Web ベースの�
 **🔒 プライバシー重視**：API キーとすべてのデータはブラウザのローカルストレージにのみ保存されます。データベースやバックエンドストレージはなく、完全にクライアント側で安全です。
 
 ### 主な機能
+
 - ファイル検索ストアの作成/管理/削除
 - ドキュメントのアップロード（ファイルあたり最大50MB、最大10個）
 - Gemini AI を使用したドキュメントクエリ
