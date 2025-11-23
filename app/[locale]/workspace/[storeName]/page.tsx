@@ -286,6 +286,19 @@ export default function WorkspacePage() {
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="filter" className="text-sm">
+                  {t("metadataFilter")}
+                </Label>
+                <Input
+                  id="filter"
+                  placeholder={t("metadataFilterPlaceholder")}
+                  value={metadataFilter}
+                  onChange={(e) => setMetadataFilter(e.target.value)}
+                  className="text-sm md:text-base"
+                />
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="query" className="text-sm">
                   {t("questionLabel")}
                 </Label>
@@ -311,19 +324,6 @@ export default function WorkspacePage() {
                     <Send className="h-4 w-4" />
                   </Button>
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="filter" className="text-sm">
-                  {t("metadataFilter")}
-                </Label>
-                <Input
-                  id="filter"
-                  placeholder={t("metadataFilterPlaceholder")}
-                  value={metadataFilter}
-                  onChange={(e) => setMetadataFilter(e.target.value)}
-                  className="text-sm md:text-base"
-                />
               </div>
 
               {/* Advanced Options */}
@@ -366,8 +366,7 @@ export default function WorkspacePage() {
                     {/* Temperature */}
                     <div className="space-y-2">
                       <Label htmlFor="temperature" className="text-sm">
-                        {t("temperature")} (
-                        {temperature ?? t("temperatureDefault")})
+                        {t("temperature")}
                       </Label>
                       <div className="flex gap-2 items-center">
                         <Input
