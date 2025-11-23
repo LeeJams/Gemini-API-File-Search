@@ -8,6 +8,8 @@ import type {
   FileSearchStore,
   FileSearchDocument,
   QueryResponse,
+  GenerationConfig,
+  SafetySetting,
 } from "./gemini";
 
 /**
@@ -57,6 +59,12 @@ export interface QueryRequest {
   query: string;
   metadataFilter?: string | null;
   model?: string;
+  /** 시스템 지시사항 */
+  systemInstruction?: string;
+  /** 생성 구성 옵션 */
+  generationConfig?: GenerationConfig;
+  /** 안전 설정 */
+  safetySettings?: SafetySetting[];
 }
 
 /**

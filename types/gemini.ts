@@ -141,3 +141,73 @@ export interface Operation {
   /** 메타데이터 */
   metadata?: Record<string, any>;
 }
+
+/**
+ * HarmCategory
+ * 유해 콘텐츠의 카테고리
+ */
+export enum HarmCategory {
+  HARM_CATEGORY_UNSPECIFIED = "HARM_CATEGORY_UNSPECIFIED",
+  HARM_CATEGORY_HATE_SPEECH = "HARM_CATEGORY_HATE_SPEECH",
+  HARM_CATEGORY_SEXUALLY_EXPLICIT = "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+  HARM_CATEGORY_DANGEROUS_CONTENT = "HARM_CATEGORY_DANGEROUS_CONTENT",
+  HARM_CATEGORY_HARASSMENT = "HARM_CATEGORY_HARASSMENT",
+  HARM_CATEGORY_CIVIC_INTEGRITY = "HARM_CATEGORY_CIVIC_INTEGRITY",
+}
+
+/**
+ * HarmBlockThreshold
+ * 유해 콘텐츠 차단 임계값
+ */
+export enum HarmBlockThreshold {
+  HARM_BLOCK_THRESHOLD_UNSPECIFIED = "HARM_BLOCK_THRESHOLD_UNSPECIFIED",
+  BLOCK_LOW_AND_ABOVE = "BLOCK_LOW_AND_ABOVE",
+  BLOCK_MEDIUM_AND_ABOVE = "BLOCK_MEDIUM_AND_ABOVE",
+  BLOCK_ONLY_HIGH = "BLOCK_ONLY_HIGH",
+  BLOCK_NONE = "BLOCK_NONE",
+  OFF = "OFF",
+}
+
+/**
+ * SafetySetting
+ * 안전 설정
+ */
+export interface SafetySetting {
+  /** 카테고리 */
+  category: HarmCategory | string;
+  /** 차단 임계값 */
+  threshold: HarmBlockThreshold | string;
+}
+
+/**
+ * GenerationConfig
+ * 모델 생성 및 출력 구성 옵션
+ */
+export interface GenerationConfig {
+  /** 출력 생성을 중지할 문자 시퀀스 (최대 5개) */
+  stopSequences?: string[];
+  /** 생성된 후보 텍스트의 MIME 유형 */
+  responseMimeType?: string;
+  /** 생성된 후보 텍스트의 출력 스키마 */
+  responseSchema?: Record<string, any>;
+  /** 생성할 응답 후보 수 */
+  candidateCount?: number;
+  /** 응답 후보에 포함할 최대 토큰 수 */
+  maxOutputTokens?: number;
+  /** 출력의 무작위성 제어 (0.0~2.0) */
+  temperature?: number;
+  /** 샘플링 시 고려할 토큰의 최대 누적 확률 */
+  topP?: number;
+  /** 샘플링 시 고려할 최대 토큰 수 */
+  topK?: number;
+  /** 디코딩에 사용되는 시드 */
+  seed?: number;
+  /** 프레즌스 페널티 */
+  presencePenalty?: number;
+  /** 빈도 페널티 */
+  frequencyPenalty?: number;
+  /** logprobs 결과 내보내기 여부 */
+  responseLogprobs?: boolean;
+  /** 반환할 상위 logprobs 수 (0~20) */
+  logprobs?: number;
+}

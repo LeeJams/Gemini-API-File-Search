@@ -379,6 +379,9 @@ export async function uploadWithCustomChunking(
  * @param metadataFilter - 메타데이터 필터 (선택사항)
  * @param apiKey - Gemini API 키
  * @param model - 사용할 Gemini 모델 (기본값: gemini-2.5-flash)
+ * @param systemInstruction - 시스템 지시사항 (선택사항)
+ * @param generationConfig - 생성 구성 옵션 (선택사항)
+ * @param safetySettings - 안전 설정 (선택사항)
  * @returns AI 생성 응답 객체
  */
 export async function generateContentWithFileSearch(
@@ -386,7 +389,10 @@ export async function generateContentWithFileSearch(
   query: string,
   metadataFilter: string | null = null,
   apiKey?: string,
-  model: string = "gemini-2.5-flash"
+  model: string = "gemini-2.5-flash",
+  systemInstruction?: string,
+  generationConfig?: any,
+  safetySettings?: any[]
 ): Promise<QueryResponse> {
   console.log(`\n💬 쿼리로 콘텐츠 생성 중: "${query}" (모델: ${model})`);
 
@@ -402,16 +408,35 @@ export async function generateContentWithFileSearch(
     toolsConfig.fileSearch.metadataFilter = metadataFilter;
   }
 
+  // config 객체 구성
+  const config: any = {
+    tools: [toolsConfig],
+  };
+
+  // systemInstruction 설정 (제공된 경우 사용, 아니면 기본값)
+  if (systemInstruction) {
+    config.systemInstruction = systemInstruction;
+  } else {
+    config.systemInstruction =
+      "답변은 다음 형식으로 작성해주세요: 답변을 md형식으로 작성해주세요. 답변은 짧고 요점을 명확하게 작성해주세요. 순서대로 정리되게 작성해주세요.";
+  }
+
+  // generationConfig 추가 (제공된 경우)
+  if (generationConfig) {
+    config.generationConfig = generationConfig;
+  }
+
+  // safetySettings 추가 (제공된 경우)
+  if (safetySettings && safetySettings.length > 0) {
+    config.safetySettings = safetySettings;
+  }
+
   // 재시도 로직 적용하여 쿼리 실행
   const response = await retryWithBackoff(async () => {
     return await ai.models.generateContent({
       model,
       contents: query,
-      config: {
-        tools: [toolsConfig],
-        systemInstruction:
-          "답변은 다음 형식으로 작성해주세요: 답변을 md형식으로 작성해주세요. 답변은 짧고 요점을 명확하게 작성해주세요. 순서대로 정리되게 작성해주세요.",
-      },
+      config,
     });
   });
 
