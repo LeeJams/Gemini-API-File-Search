@@ -323,7 +323,7 @@ export default function WorkspacePage() {
                 >
                   <span className="flex items-center gap-2">
                     <Settings className="h-4 w-4" />
-                    Advanced Options
+                    {t("advancedOptions")}
                   </span>
                   <ChevronDown
                     className={`h-4 w-4 transition-transform ${
@@ -337,24 +337,24 @@ export default function WorkspacePage() {
                     {/* System Instruction */}
                     <div className="space-y-2">
                       <Label htmlFor="systemInstruction" className="text-sm">
-                        System Instruction
+                        {t("systemInstruction")}
                       </Label>
                       <Input
                         id="systemInstruction"
-                        placeholder="Custom system instruction for the model..."
+                        placeholder={t("systemInstructionPlaceholder")}
                         value={systemInstruction}
                         onChange={(e) => setSystemInstruction(e.target.value)}
                         className="text-sm"
                       />
                       <p className="text-xs text-muted-foreground">
-                        Optional: Override the default system instruction
+                        {t("systemInstructionHint")}
                       </p>
                     </div>
 
                     {/* Temperature */}
                     <div className="space-y-2">
                       <Label htmlFor="temperature" className="text-sm">
-                        Temperature ({temperature ?? "default"})
+                        {t("temperature")} ({temperature ?? t("temperatureDefault")})
                       </Label>
                       <div className="flex gap-2 items-center">
                         <Input
@@ -363,7 +363,7 @@ export default function WorkspacePage() {
                           min="0"
                           max="2"
                           step="0.1"
-                          placeholder="0.0 - 2.0"
+                          placeholder={t("temperaturePlaceholder")}
                           value={temperature ?? ""}
                           onChange={(e) =>
                             setTemperature(
@@ -378,26 +378,26 @@ export default function WorkspacePage() {
                             size="sm"
                             onClick={() => setTemperature(undefined)}
                           >
-                            Reset
+                            {t("reset")}
                           </Button>
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Controls randomness (0.0 = deterministic, 2.0 = very random)
+                        {t("temperatureHint")}
                       </p>
                     </div>
 
                     {/* Max Output Tokens */}
                     <div className="space-y-2">
                       <Label htmlFor="maxOutputTokens" className="text-sm">
-                        Max Output Tokens
+                        {t("maxOutputTokens")}
                       </Label>
                       <div className="flex gap-2 items-center">
                         <Input
                           id="maxOutputTokens"
                           type="number"
                           min="1"
-                          placeholder="e.g., 2048"
+                          placeholder={t("maxOutputTokensPlaceholder")}
                           value={maxOutputTokens ?? ""}
                           onChange={(e) =>
                             setMaxOutputTokens(
@@ -412,19 +412,19 @@ export default function WorkspacePage() {
                             size="sm"
                             onClick={() => setMaxOutputTokens(undefined)}
                           >
-                            Reset
+                            {t("reset")}
                           </Button>
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Maximum number of tokens in the response
+                        {t("maxOutputTokensHint")}
                       </p>
                     </div>
 
                     {/* Top P */}
                     <div className="space-y-2">
                       <Label htmlFor="topP" className="text-sm">
-                        Top P ({topP ?? "default"})
+                        {t("topP")} ({topP ?? t("temperatureDefault")})
                       </Label>
                       <div className="flex gap-2 items-center">
                         <Input
@@ -433,7 +433,7 @@ export default function WorkspacePage() {
                           min="0"
                           max="1"
                           step="0.01"
-                          placeholder="0.0 - 1.0"
+                          placeholder={t("topPPlaceholder")}
                           value={topP ?? ""}
                           onChange={(e) =>
                             setTopP(
@@ -448,26 +448,26 @@ export default function WorkspacePage() {
                             size="sm"
                             onClick={() => setTopP(undefined)}
                           >
-                            Reset
+                            {t("reset")}
                           </Button>
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Nucleus sampling parameter
+                        {t("topPHint")}
                       </p>
                     </div>
 
                     {/* Top K */}
                     <div className="space-y-2">
                       <Label htmlFor="topK" className="text-sm">
-                        Top K
+                        {t("topK")}
                       </Label>
                       <div className="flex gap-2 items-center">
                         <Input
                           id="topK"
                           type="number"
                           min="1"
-                          placeholder="e.g., 40"
+                          placeholder={t("topKPlaceholder")}
                           value={topK ?? ""}
                           onChange={(e) =>
                             setTopK(
@@ -482,12 +482,12 @@ export default function WorkspacePage() {
                             size="sm"
                             onClick={() => setTopK(undefined)}
                           >
-                            Reset
+                            {t("reset")}
                           </Button>
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Maximum number of tokens to consider when sampling
+                        {t("topKHint")}
                       </p>
                     </div>
                   </div>
