@@ -14,6 +14,8 @@ import { Languages } from "lucide-react";
 const languages = [
   { code: 'ko', name: '한국어', flag: '🇰🇷' },
   { code: 'en', name: 'English', flag: '🇺🇸' },
+  { code: 'zh', name: '中文', flag: '🇨🇳' },
+  { code: 'ja', name: '日本語', flag: '🇯🇵' },
 ];
 
 /**
@@ -28,7 +30,7 @@ export function LanguageToggle() {
 
   const handleLanguageChange = (newLocale: string) => {
     // Remove the current locale from pathname and replace with new locale
-    const pathnameWithoutLocale = pathname.replace(/^\/(ko|en)/, '');
+    const pathnameWithoutLocale = pathname.replace(/^\/(ko|en|zh|ja)/, '');
     const newPathname = `/${newLocale}${pathnameWithoutLocale}`;
     router.push(newPathname);
   };
