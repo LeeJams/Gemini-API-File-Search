@@ -91,8 +91,6 @@ export function ApiKeyModal({ open, onOpenChange }: ApiKeyModalProps) {
           </DialogTitle>
           <DialogDescription className="text-sm">
             {t('description')}
-            <br />
-            {t('securityNote')}
           </DialogDescription>
           <a
             href="https://aistudio.google.com/apikey"
@@ -105,7 +103,19 @@ export function ApiKeyModal({ open, onOpenChange }: ApiKeyModalProps) {
           </a>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        {/* Privacy Notice */}
+        <div className="rounded-lg bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 p-3 space-y-1">
+          <p className="text-sm font-semibold text-green-900 dark:text-green-100">
+            {t('privacyTitle')}
+          </p>
+          <div className="space-y-0.5 text-xs text-green-800 dark:text-green-200">
+            <p>{t('privacyPoint1')}</p>
+            <p>{t('privacyPoint2')}</p>
+            <p>{t('privacyPoint3')}</p>
+          </div>
+        </div>
+
+        <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="apiKey">{t('apiKey')}</Label>
             <div className="flex gap-2">

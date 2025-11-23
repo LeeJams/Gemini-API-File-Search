@@ -1,330 +1,352 @@
-# Gemini File Search - Next.js 16
+# Gemini File Search Manager
 
-**Google Gemini API를 활용한 현대적인 RAG (Retrieval-Augmented Generation) 시스템**
+**A modern web-based management tool for Google's Gemini File Search API**
 
-Next.js 16, TypeScript, Zustand, Tailwind CSS로 구축된 문서 저장, 인덱싱, AI 기반 질의응답 플랫폼입니다.
+> 🔒 **Privacy-First**: Your API key and all data are stored only in your browser's local storage. No database, no backend storage, completely client-side secure.
 
-## ✨ 주요 기능
+An intuitive interface to manage File Search Stores, upload documents, and query them using Google's powerful Gemini AI with RAG (Retrieval-Augmented Generation) capabilities.
 
-- 🚀 **Next.js 16** App Router + React 19
-- 💎 **TypeScript** strict mode로 완벽한 타입 안전성
-- 🎨 **Tailwind CSS** + **shadcn/ui**로 세련된 UI
-- 🌙 **다크모드** 지원 (next-themes)
-- 📁 **File Search Store** 관리 (생성, 조회, 삭제)
-- 📤 **멀티 파일 업로드** (커스텀 청킹 전략)
-- 🤖 **RAG 기반 쿼리** (메타데이터 필터링 지원)
-- 📝 **문서 CRUD** 작업
-- ⚡ **서버 사이드 캐싱**으로 최적화된 성능
-- 🔄 **API Route Handlers**로 RESTful 엔드포인트 제공
-- 📊 **마크다운 렌더링** 및 인용 추적
+[![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)](https://www.typescriptlang.org/)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-## 📋 필수 요구사항
+[English](#english) | [한국어](#korean) | [中文](#chinese) | [日本語](#japanese)
 
-- Node.js 18.17 이상
-- npm 9.0 이상
-- Gemini API 키 ([여기서 발급받기](https://aistudio.google.com/))
+---
 
-## 🚀 빠른 시작
+## <a name="english"></a>🌟 Features
 
-### 1. 설치
+### 🔐 Privacy & Security
+- **No Backend Database**: All data stays in your browser
+- **Client-Side Storage**: API keys stored securely in browser local storage only
+- **No Data Collection**: Your documents and queries never touch our servers
+
+### 🚀 Core Features
+- **📁 Store Management**: Create, view, and delete File Search Stores with ease
+- **📤 Document Upload**: Drag & drop multiple files (up to 10 files, 50MB each)
+- **🤖 AI-Powered Search**: Query your documents using Gemini's RAG capabilities
+- **🌍 Multilingual**: Full support for Korean, English, Chinese, and Japanese
+- **🌙 Dark Mode**: Eye-friendly theme switching
+- **📱 Responsive**: Works seamlessly on desktop, tablet, and mobile
+- **⚡ Fast**: Built with Next.js 16 and React 19 for optimal performance
+
+---
+
+## 📋 Prerequisites
+
+- **Node.js** 18.17 or higher
+- **npm** 9.0 or higher
+- **Gemini API Key** - Get yours at [Google AI Studio](https://aistudio.google.com/apikey)
+
+---
+
+## 🚀 Quick Start
+
+### 1. Clone & Install
 
 ```bash
-# 의존성 설치
+git clone https://github.com/LeeJams/Gemini-API-File-Search.git
+cd Gemini-API-File-Search
 npm install
 ```
 
-### 2. 환경 변수 설정
-
-```bash
-# 환경 변수 파일 생성
-cp .env.local.example .env.local
-
-# .env.local 파일을 열어서 API 키 입력
-# GEMINI_API_KEY=your_actual_api_key_here
-```
-
-### 3. 개발 서버 실행
+### 2. Run Development Server
 
 ```bash
 npm run dev
 ```
 
-브라우저에서 [http://localhost:3000](http://localhost:3000)에 접속하세요.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## 📁 프로젝트 구조
+### 3. Enter Your API Key
+
+On first visit, you'll be prompted to enter your Gemini API Key. This key is:
+- ✅ Stored only in your browser's local storage
+- ✅ Never sent to any backend server
+- ✅ Only used for direct API calls to Google's Gemini API
+
+> **Get Your API Key**: Visit [Google AI Studio](https://aistudio.google.com/apikey) to generate a free API key.
+
+---
+
+## 📖 How to Use
+
+### Step 1: Create a File Search Store
+
+1. Click **"Add New Store"** on the Stores page
+2. Enter a unique store name (alphanumeric, hyphens, and underscores only)
+3. Click **"Create"**
+
+### Step 2: Upload Documents
+
+1. Click **"Document Management"** on your store card
+2. Drag and drop files or click to browse
+3. Select up to 10 files (max 50MB each)
+4. Click **"Upload"**
+
+**Supported file types**: `.md`, `.txt`, `.pdf`, `.csv`, `.json`, `.html`, `.doc`, `.docx`, `.xls`, `.xlsx`
+
+### Step 3: Query Your Documents
+
+1. Click **"Query Workspace"** on your store card
+2. Type your question in the query input
+3. (Optional) Add metadata filters for more precise results
+4. Press **Enter** or click **Send**
+5. View AI-generated responses with source citations
+
+### Step 4: Manage Your Data
+
+- **View Documents**: Check all uploaded documents with details (size, date, metadata)
+- **Delete Documents**: Remove individual documents you no longer need
+- **Delete Stores**: Remove entire stores when done with a project
+- **Query History**: Access your previous queries in the sidebar
+
+---
+
+## 🌍 Language Support
+
+This application supports **4 languages** with complete UI translation:
+
+- 🇰🇷 **Korean** (한국어) - Default
+- 🇺🇸 **English**
+- 🇨🇳 **Chinese** (中文)
+- 🇯🇵 **Japanese** (日本語)
+
+**Switch languages** using the language selector in the header.
+
+---
+
+## 🛠️ Tech Stack
+
+| Technology | Purpose |
+|-----------|---------|
+| [Next.js 16](https://nextjs.org/) | React framework with App Router |
+| [React 19](https://react.dev/) | UI library |
+| [TypeScript](https://www.typescriptlang.org/) | Type safety |
+| [Zustand](https://zustand.docs.pmnd.rs/) | State management |
+| [Tailwind CSS](https://tailwindcss.com/) | Styling |
+| [shadcn/ui](https://ui.shadcn.com/) | UI components |
+| [next-intl](https://next-intl-docs.vercel.app/) | Internationalization |
+| [Gemini API](https://ai.google.dev/) | File search & AI queries |
+
+---
+
+## 📁 Project Structure
 
 ```
-├── app/                      # Next.js App Router
-│   ├── api/                  # API Route Handlers
-│   │   ├── health/           # 헬스 체크
-│   │   └── stores/           # Store 관련 API
-│   ├── stores/               # Store 목록 페이지
-│   ├── workspace/            # RAG 쿼리 페이지
-│   ├── documents/            # 문서 관리 페이지
-│   ├── layout.tsx            # 루트 레이아웃
-│   ├── page.tsx              # 홈 페이지
-│   └── globals.css           # 전역 스타일
-│
-├── components/               # React 컴포넌트
-│   ├── ui/                   # shadcn/ui 컴포넌트
-│   └── providers.tsx         # 전역 프로바이더
-│
-├── lib/                      # 핵심 로직
-│   ├── gemini.ts             # Gemini API 통합
-│   └── utils.ts              # 유틸리티 함수
-│
-├── store/                    # Zustand 상태 관리
-│   ├── slices/               # 상태 슬라이스
-│   └── index.ts              # 메인 스토어
-│
-├── types/                    # TypeScript 타입 정의
-│   ├── gemini.ts
-│   ├── api.ts
-│   └── store.ts
-│
-├── next.config.ts            # Next.js 설정
-├── tailwind.config.ts        # Tailwind 설정
-└── tsconfig.json             # TypeScript 설정
+Gemini-API-File-Search/
+├── app/
+│   ├── [locale]/              # Internationalized pages
+│   │   ├── stores/            # Store management page
+│   │   ├── workspace/         # Query workspace page
+│   │   └── documents/         # Document management page
+│   └── api/                   # API route handlers
+│       └── stores/            # Store-related APIs
+├── components/                # React components
+│   ├── ui/                    # shadcn/ui components
+│   ├── ApiKeyModal.tsx        # API key input modal
+│   ├── app-header.tsx         # App header with navigation
+│   └── language-toggle.tsx    # Language switcher
+├── i18n/                      # Internationalization config
+│   ├── routing.ts             # Locale routing
+│   └── request.ts             # Request config
+├── messages/                  # Translation files
+│   ├── en.json                # English
+│   ├── ko.json                # Korean
+│   ├── zh.json                # Chinese
+│   └── ja.json                # Japanese
+├── store/                     # Zustand state management
+│   └── slices/                # State slices
+├── types/                     # TypeScript definitions
+└── lib/                       # Utility functions
 ```
 
-## 🎯 사용 가능한 스크립트
+---
 
-```bash
-# 개발
-npm run dev              # Turbopack으로 개발 서버 시작
-npm run build            # 프로덕션 빌드
-npm run start            # 프로덕션 서버 시작
+## 🔌 API Endpoints
 
-# 코드 품질
-npm run lint             # ESLint 실행
-npm run format           # Prettier로 코드 포맷팅
-npm run type-check       # TypeScript 타입 체크
+All API endpoints communicate directly with Google's Gemini API:
+
+### Stores
+```
+GET    /api/stores                      # List all stores
+POST   /api/stores                      # Create new store
+GET    /api/stores/:displayName         # Get store details
+DELETE /api/stores/:displayName         # Delete store
 ```
 
-## 📱 페이지 구조
-
-### 1. Stores 페이지 (`/stores`)
-- File Search Store 목록 조회
-- 새 스토어 생성
-- 기존 스토어 삭제
-- 스토어 카드 클릭으로 워크스페이스 이동
-
-### 2. Workspace 페이지 (`/workspace/{storeName}`)
-- RAG 쿼리 실행
-- AI 응답을 마크다운으로 렌더링
-- 메타데이터 필터링 지원
-- 쿼리 히스토리 관리
-- 인용 및 grounding 메타데이터 표시
-
-### 3. Documents 페이지 (`/documents/{storeName}`)
-- 파일 업로드 (최대 10개, 각 50MB)
-- 문서 목록 조회
-- 문서 관리 (업데이트, 삭제 예정)
-
-## 🔌 API 엔드포인트
-
-### 헬스 체크
+### Documents
 ```
-GET /api/health
+POST   /api/stores/:displayName/upload     # Upload files
+GET    /api/stores/:displayName/documents  # List documents
+DELETE /api/stores/:displayName/documents/:docName  # Delete document
 ```
 
-### Store 관리
+### Queries
 ```
-GET    /api/stores                      # 모든 스토어 조회
-POST   /api/stores                      # 스토어 생성
-GET    /api/stores/:displayName         # 특정 스토어 조회
-DELETE /api/stores/:displayName         # 스토어 삭제
+POST   /api/stores/:displayName/query   # Execute RAG query
 ```
 
-### 파일 업로드
-```
-POST   /api/stores/:displayName/upload  # 파일 업로드 (최대 10개, 각 50MB)
-```
-
-### RAG 쿼리
-```
-POST   /api/stores/:displayName/query
-Body: {
-  "query": "질문 내용",
-  "metadataFilter": "doc_type='manual'" (선택사항)
-}
-```
-
-### 문서 관리
-```
-GET    /api/stores/:displayName/documents  # 문서 목록 조회
-```
-
-### API 응답 형식
-
-**성공 응답**
+**Example Query Request**:
 ```json
 {
-  "success": true,
-  "message": "작업 설명",
-  "data": { /* 응답 데이터 */ }
+  "query": "What are the main features?",
+  "metadataFilter": "doc_type=\"manual\"" // Optional
 }
 ```
 
-**에러 응답**
-```json
-{
-  "success": false,
-  "error": "에러 메시지"
-}
-```
+---
 
-## 🎨 UI 컴포넌트 (shadcn/ui)
+## 💰 Pricing
 
-프로젝트에 포함된 컴포넌트:
-- **Button** - 다양한 변형 (default, outline, ghost 등)
-- **Input** - 검증 기능이 있는 폼 입력
-- **Label** - 접근 가능한 폼 레이블
-- **Dialog** - 모달 다이얼로그
-- **Card** - 콘텐츠 컨테이너
-- **Select** - 드롭다운 선택
-- **Toast** - 알림 메시지
+Google Gemini File Search API pricing:
+- **File Storage & Embeddings**: Free
+- **Initial File Indexing**: $0.15 per 1M tokens
+- **Query Execution**: Based on Gemini model usage
 
-추가 컴포넌트 설치:
+> **Tip**: Delete unused stores to avoid unnecessary costs.
+
+---
+
+## ⚠️ Limitations
+
+- Maximum **10 File Search Stores** per project
+- Maximum **50MB** per file
+- Maximum **10 files** per upload
+- Some file types may have size/content restrictions
+
+---
+
+## 🎨 Available Scripts
+
 ```bash
-npx shadcn@latest add [컴포넌트명]
+# Development
+npm run dev              # Start dev server with Turbopack
+npm run build            # Build for production
+npm run start            # Start production server
 
-# 예시:
-npx shadcn@latest add progress
-npx shadcn@latest add tabs
-npx shadcn@latest add badge
+# Code Quality
+npm run lint             # Run ESLint
+npm run format           # Format with Prettier
+npm run type-check       # TypeScript type checking
 ```
 
-## 🗂️ 상태 관리 (Zustand)
+---
 
-### 슬라이스 구조
-1. **UI State** - 로딩, 에러 상태 (미저장)
-2. **Stores State** - 스토어 목록, 현재 스토어 (로컬 저장)
-3. **Documents State** - 문서 목록 (미저장)
-4. **Query State** - 쿼리 히스토리 (로컬 저장)
+## 🐛 Troubleshooting
 
-### 사용 예시
-```typescript
-import { useStoresState, useUIState } from "@/store";
+### API Key Issues
+- Make sure your API key starts with `AIza`
+- Verify the key is active at [Google AI Studio](https://aistudio.google.com/apikey)
+- Clear browser cache and re-enter the key
 
-function MyComponent() {
-  const { stores, setStores } = useStoresState();
-  const { isLoading, setLoading } = useUIState();
+### Upload Failures
+- Check file size (max 50MB per file)
+- Ensure file type is supported
+- Try uploading fewer files at once
 
-  // 비즈니스 로직
-}
-```
-
-## 🌙 다크모드
-
-next-themes를 사용한 다크모드 토글:
-
-```typescript
-import { useTheme } from "next-themes";
-
-function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
-
-  return (
-    <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
-      테마 전환
-    </button>
-  );
-}
-```
-
-## 🔧 설정
-
-### TypeScript
-- Strict mode 활성화
-- Path aliases 설정 (@/*)
-- 타입 안전성 보장
-
-### ESLint
-- Next.js 권장 규칙
-- TypeScript 통합
-- Prettier 통합
-
-### Tailwind CSS
-- 커스텀 컬러 스킴
-- 다크모드 지원
-- 커스텀 애니메이션
-- 반응형 유틸리티
-
-## 📝 환경 변수
-
-### 필수
-```bash
-GEMINI_API_KEY=your_api_key     # Gemini API 키
-```
-
-### 선택사항
-```bash
-NODE_ENV=development            # 환경 모드
-NEXT_PUBLIC_API_URL=http://...  # API 기본 URL
-```
-
-## 🐛 문제 해결
-
-### Module not found 오류
+### Module Not Found
 ```bash
 rm -rf .next node_modules package-lock.json
 npm install
-```
-
-### TypeScript 오류
-```bash
-npm run type-check
-```
-
-### PostCSS 오류
-```bash
-rm -rf node_modules package-lock.json .next
-npm install
-```
-
-### 스타일 문제
-```bash
-# 개발 서버 재시작
-# tailwind.config.ts의 content 경로 확인
-```
-
-### 캐시 문제
-```bash
-rm -rf .next
 npm run dev
 ```
 
-## 💰 비용 정보
-
-- 파일 저장 및 쿼리 시 임베딩 생성: **무료**
-- 초기 파일 인덱싱: **$0.15 per 1M tokens**
-
-## ⚠️ 제한 사항
-
-- 프로젝트당 최대 **10개의 File Search Store**
-- 파일당 최대 **50MB**
-- 업로드당 최대 **10개 파일**
-- 개발 완료 후 미사용 Store 삭제 권장
-
-## 📚 참고 자료
-
-- [Next.js 공식 문서](https://nextjs.org/docs)
-- [Zustand 문서](https://zustand.docs.pmnd.rs/)
-- [shadcn/ui](https://ui.shadcn.com/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [Gemini API 문서](https://ai.google.dev/docs)
-- [Google AI Studio](https://aistudio.google.com/)
-
-## 🤝 기여하기
-
-1. 기능 브랜치 생성
-2. 변경사항 작성
-3. Lint 및 타입 체크 실행
-4. Pull Request 제출
-
-## 📄 라이선스
-
-MIT
+### Clear Local Storage (Reset Everything)
+Open browser console and run:
+```javascript
+localStorage.clear()
+```
+Then refresh the page.
 
 ---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+
+## 📚 Resources
+
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Gemini API Documentation](https://ai.google.dev/docs)
+- [Google AI Studio](https://aistudio.google.com/)
+- [Tailwind CSS Documentation](https://tailwindcss.com/)
+- [shadcn/ui Components](https://ui.shadcn.com/)
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🌟 Star History
+
+If you find this project useful, please consider giving it a star! ⭐
+
+---
+
+<a name="korean"></a>
+## 한국어
+
+Google의 Gemini File Search API를 쉽게 관리할 수 있는 웹 기반 도구입니다.
+
+**🔒 개인정보 보호**: API 키와 모든 데이터는 브라우저 로컬 스토리지에만 저장됩니다. 데이터베이스나 백엔드 서버에는 절대 저장되지 않습니다.
+
+### 주요 기능
+- 파일 검색 스토어 생성/관리/삭제
+- 문서 업로드 (파일당 최대 50MB, 최대 10개)
+- Gemini AI를 사용한 문서 질의응답
+- 한국어, 영어, 중국어, 일본어 지원
+- 다크모드 지원
+
+자세한 사용법은 위의 영문 섹션을 참고하세요.
+
+---
+
+<a name="chinese"></a>
+## 中文
+
+基于 Web 的 Google Gemini File Search API 管理工具。
+
+**🔒 隐私优先**：您的 API 密钥和所有数据仅存储在浏览器的本地存储中。没有数据库，没有后端存储，完全客户端安全。
+
+### 主要功能
+- 创建/管理/删除文件搜索存储库
+- 上传文档（每个文件最大 50MB，最多 10 个）
+- 使用 Gemini AI 查询文档
+- 支持韩语、英语、中文、日语
+- 支持深色模式
+
+详细使用方法请参考上面的英文部分。
+
+---
+
+<a name="japanese"></a>
+## 日本語
+
+Google の Gemini File Search API を簡単に管理できる Web ベースのツールです。
+
+**🔒 プライバシー重視**：API キーとすべてのデータはブラウザのローカルストレージにのみ保存されます。データベースやバックエンドストレージはなく、完全にクライアント側で安全です。
+
+### 主な機能
+- ファイル検索ストアの作成/管理/削除
+- ドキュメントのアップロード（ファイルあたり最大50MB、最大10個）
+- Gemini AI を使用したドキュメントクエリ
+- 韓国語、英語、中国語、日本語に対応
+- ダークモード対応
+
+詳しい使用方法は上記の英語セクションをご参照ください。
+
+---
+
+Made with ❤️ by [LeeJams](https://github.com/LeeJams)
