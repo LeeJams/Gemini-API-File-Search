@@ -475,8 +475,8 @@ export default function DocumentsPage() {
 
                 {/* Custom Metadata Section */}
                 <div className="space-y-4 pt-2">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
+                  <div className="space-y-3">
+                    <div>
                       <Label className="text-base font-semibold">
                         {t("customMetadata")}
                       </Label>
@@ -489,7 +489,7 @@ export default function DocumentsPage() {
                       variant="outline"
                       onClick={handleAddMetadata}
                       disabled={customMetadata.length >= 20}
-                      className="shrink-0"
+                      className="w-full"
                     >
                       <Plus className="h-4 w-4 mr-2" />
                       {t("addMetadata")}
