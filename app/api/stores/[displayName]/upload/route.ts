@@ -7,10 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { writeFile, unlink, mkdir } from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
-import {
-  findStoreByDisplayName,
-  uploadWithCustomChunking,
-} from "@/lib/gemini";
+import { findStoreByDisplayName, uploadWithCustomChunking } from "@/lib/gemini";
 import type { ApiResponse, UploadFileResult } from "@/types";
 
 const UPLOAD_DIR = path.join(process.cwd(), "uploads");
@@ -75,7 +72,10 @@ export async function POST(
             result.numericValue = parseFloat(meta.value);
           } else if (meta.type === "stringList") {
             // Parse comma-separated values
-            const values = meta.value.split(",").map((v: string) => v.trim()).filter((v: string) => v);
+            const values = meta.value
+              .split(",")
+              .map((v: string) => v.trim())
+              .filter((v: string) => v);
             result.stringListValue = { values };
           } else {
             result.stringValue = meta.value;
@@ -118,10 +118,16 @@ export async function POST(
 
         try {
           // Upload to Gemini
-          await uploadWithCustomChunking(store, tempFilePath, {
-            displayName: file.name,
-            customMetadata: customMetadata.length > 0 ? customMetadata : undefined,
-          }, apiKey);
+          await uploadWithCustomChunking(
+            store,
+            tempFilePath,
+            {
+              displayName: file.name,
+              customMetadata:
+                customMetadata.length > 0 ? customMetadata : undefined,
+            },
+            apiKey
+          );
 
           results.push({
             fileName: file.name,
@@ -149,9 +155,9 @@ export async function POST(
     // 실패한 파일이 있으면 에러로 처리
     if (failCount > 0) {
       const failedFiles = results
-        .filter(r => !r.success)
-        .map(r => `• ${r.fileName}: ${r.error}`)
-        .join('\n');
+        .filter((r) => !r.success)
+        .map((r) => `• ${r.fileName}: ${r.error}`)
+        .join("\n");
 
       return NextResponse.json<ApiResponse>(
         {
@@ -180,7 +186,10 @@ export async function POST(
     console.error("파일 업로드 오류:", error);
 
     // HTTP 상태 코드별 에러 처리
-    const status = error.status || error.statusCode || (error.message?.includes("찾을 수 없습니다") ? 404 : 500);
+    const status =
+      error.status ||
+      error.statusCode ||
+      (error.message?.includes("찾을 수 없습니다") ? 404 : 500);
     let errorMessage = error.message || "파일 업로드 중 오류가 발생했습니다";
 
     switch (status) {
@@ -191,19 +200,23 @@ export async function POST(
         errorMessage = "API 키가 유효하지 않습니다. 환경 변수를 확인해주세요.";
         break;
       case 403:
-        errorMessage = "API 키 권한이 없거나 File Search가 활성화되지 않았습니다.";
+        errorMessage =
+          "API 키 권한이 없거나 File Search가 활성화되지 않았습니다.";
         break;
       case 404:
         // Keep the original error message for 404
         break;
       case 413:
-        errorMessage = "파일 크기가 너무 큽니다. 50MB 이하의 파일만 업로드 가능합니다.";
+        errorMessage =
+          "파일 크기가 너무 큽니다. 50MB 이하의 파일만 업로드 가능합니다.";
         break;
       case 429:
-        errorMessage = "API 호출 한도를 초과했습니다. 잠시 후 다시 시도해주세요.";
+        errorMessage =
+          "API 호출 한도를 초과했습니다. 잠시 후 다시 시도해주세요.";
         break;
       case 503:
-        errorMessage = "Google AI 서비스가 일시적으로 사용 불가합니다. 잠시 후 다시 시도해주세요.";
+        errorMessage =
+          "Google AI 서비스가 일시적으로 사용 불가합니다. 잠시 후 다시 시도해주세요.";
         break;
     }
 
@@ -216,12 +229,3 @@ export async function POST(
     );
   }
 }
-
-// Set max file size for Next.js body parser
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: "50mb",
-    },
-  },
-};

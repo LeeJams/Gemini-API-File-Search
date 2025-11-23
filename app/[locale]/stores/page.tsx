@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslations } from 'next-intl';
-import { Link, useRouter } from '@/i18n/routing';
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/routing";
 import { useStoresState, useUIState, useAppStore } from "@/store";
 import { ApiKeyModal } from "@/components/ApiKeyModal";
 import { Button } from "@/components/ui/button";
@@ -32,8 +32,8 @@ import type { FileSearchStore } from "@/types";
  * File Search Store 목록 및 관리
  */
 export default function StoresPage() {
-  const t = useTranslations('stores');
-  const tCommon = useTranslations('common');
+  const t = useTranslations("stores");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const { stores, setStores, setCurrentStore, isCacheValid, removeStore } =
     useStoresState();
@@ -67,7 +67,7 @@ export default function StoresPage() {
       return;
     }
 
-    setLoading(true, t('loadingList'));
+    setLoading(true, t("loadingList"));
     clearError();
 
     try {
@@ -79,12 +79,14 @@ export default function StoresPage() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || `HTTP ${response.status}: ${response.statusText}`);
+        throw new Error(
+          data.error || `HTTP ${response.status}: ${response.statusText}`
+        );
       }
 
       setStores(data.data.data);
     } catch (error: any) {
-      setError(error.message || tCommon('networkError'));
+      setError(error.message || tCommon("networkError"));
     } finally {
       setLoading(false);
     }
@@ -94,7 +96,7 @@ export default function StoresPage() {
 
   async function handleCreateStore() {
     if (!newStoreName.trim()) {
-      setError(t('errorEmptyName'));
+      setError(t("errorEmptyName"));
       return;
     }
 
@@ -109,7 +111,7 @@ export default function StoresPage() {
     }
 
     setIsCreating(true);
-    setLoading(true, t('creating'));
+    setLoading(true, t("creating"));
     clearError();
 
     try {
@@ -126,14 +128,16 @@ export default function StoresPage() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || `HTTP ${response.status}: ${response.statusText}`);
+        throw new Error(
+          data.error || `HTTP ${response.status}: ${response.statusText}`
+        );
       }
 
       await loadStores(true); // Force refresh list
       setIsCreateModalOpen(false);
       setNewStoreName("");
     } catch (error: any) {
-      setError(error.message || tCommon('networkError'));
+      setError(error.message || tCommon("networkError"));
     } finally {
       setLoading(false);
       setIsCreating(false);
@@ -146,7 +150,7 @@ export default function StoresPage() {
       return;
     }
 
-    setLoading(true, t('deleting'));
+    setLoading(true, t("deleting"));
     clearError();
 
     try {
@@ -161,13 +165,15 @@ export default function StoresPage() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || `HTTP ${response.status}: ${response.statusText}`);
+        throw new Error(
+          data.error || `HTTP ${response.status}: ${response.statusText}`
+        );
       }
 
       removeStore(store.displayName);
       setDeleteConfirm(null);
     } catch (error: any) {
-      setError(error.message || tCommon('networkError'));
+      setError(error.message || tCommon("networkError"));
     } finally {
       setLoading(false);
     }
@@ -201,10 +207,10 @@ export default function StoresPage() {
       <div className="mb-6 md:mb-8 space-y-4 md:flex md:items-center md:justify-between md:space-y-0">
         <div>
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-            {t('title')}
+            {t("title")}
           </h1>
           <p className="mt-2 text-sm md:text-base text-muted-foreground">
-            {t('description')}
+            {t("description")}
           </p>
         </div>
         <Button
@@ -212,7 +218,8 @@ export default function StoresPage() {
           size="lg"
           className="w-full md:w-auto"
         >
-          <Plus className="mr-2 h-4 w-4" />{t('addNewStore')}
+          <Plus className="mr-2 h-4 w-4" />
+          {t("addNewStore")}
         </Button>
       </div>
 
@@ -221,13 +228,13 @@ export default function StoresPage() {
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Database className="mb-4 h-12 w-12 text-muted-foreground" />
-            <h3 className="mb-2 text-lg font-semibold">{t('emptyTitle')}</h3>
+            <h3 className="mb-2 text-lg font-semibold">{t("emptyTitle")}</h3>
             <p className="mb-4 text-sm text-muted-foreground">
-              {t('emptyDescription')}
+              {t("emptyDescription")}
             </p>
             <Button onClick={() => setIsCreateModalOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
-              {t('addStore')}
+              {t("addStore")}
             </Button>
           </CardContent>
         </Card>
@@ -272,7 +279,7 @@ export default function StoresPage() {
                   onClick={() => navigateToWorkspace(store)}
                 >
                   <FileText className="mr-2 h-4 w-4" />
-                  <span className="truncate">{t('queryWorkspace')}</span>
+                  <span className="truncate">{t("queryWorkspace")}</span>
                 </Button>
                 <Button
                   variant="outline"
@@ -280,7 +287,7 @@ export default function StoresPage() {
                   onClick={() => navigateToDocuments(store)}
                 >
                   <Database className="mr-2 h-4 w-4" />
-                  <span className="truncate">{t('documentManagement')}</span>
+                  <span className="truncate">{t("documentManagement")}</span>
                 </Button>
               </CardContent>
             </Card>
@@ -292,17 +299,17 @@ export default function StoresPage() {
       <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
         <DialogContent className="w-[calc(100%-2rem)] max-w-md">
           <DialogHeader>
-            <DialogTitle>{t('createModalTitle')}</DialogTitle>
+            <DialogTitle>{t("createModalTitle")}</DialogTitle>
             <DialogDescription className="text-sm">
-              {t('createModalDescription')}
+              {t("createModalDescription")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="storeName">{t('storeName')}</Label>
+              <Label htmlFor="storeName">{t("storeName")}</Label>
               <Input
                 id="storeName"
-                placeholder={t('storeNamePlaceholder')}
+                placeholder={t("storeNamePlaceholder")}
                 value={newStoreName}
                 onChange={(e) => setNewStoreName(e.target.value)}
                 onKeyDown={(e) => {
@@ -313,7 +320,7 @@ export default function StoresPage() {
                 }}
               />
               <p className="text-xs text-muted-foreground">
-                {t('storeNameHint')}
+                {t("storeNameHint")}
               </p>
             </div>
             <Button
@@ -322,7 +329,7 @@ export default function StoresPage() {
               size="lg"
               disabled={isCreating}
             >
-              {tCommon('create')}
+              {tCommon("create")}
             </Button>
           </div>
         </DialogContent>
@@ -335,12 +342,12 @@ export default function StoresPage() {
       >
         <DialogContent className="w-[calc(100%-2rem)] max-w-md">
           <DialogHeader>
-            <DialogTitle>{t('deleteConfirmTitle')}</DialogTitle>
+            <DialogTitle>{t("deleteConfirmTitle")}</DialogTitle>
             <DialogDescription className="text-sm">
-              {t('deleteConfirmMessage', { name: deleteConfirm?.displayName })}
+              {t("deleteConfirmMessage", { name: deleteConfirm?.displayName })}
               <br />
               <span className="font-semibold text-destructive">
-                {t('deleteConfirmWarning')}
+                {t("deleteConfirmWarning")}
               </span>
             </DialogDescription>
           </DialogHeader>
@@ -350,14 +357,14 @@ export default function StoresPage() {
               onClick={() => setDeleteConfirm(null)}
               className="w-full sm:w-auto"
             >
-              {tCommon('cancel')}
+              {tCommon("cancel")}
             </Button>
             <Button
               variant="destructive"
               onClick={() => deleteConfirm && handleDeleteStore(deleteConfirm)}
               className="w-full sm:w-auto"
             >
-              {tCommon('delete')}
+              {tCommon("delete")}
             </Button>
           </div>
         </DialogContent>
