@@ -32,15 +32,16 @@ export function formatFileSize(bytes: number, decimals: number = 2): string {
 }
 
 /**
- * Format date to Korean locale string
+ * Format date with locale support
  *
  * @param date - Date string or Date object
+ * @param locale - Locale string (default: "ko-KR")
  * @returns Formatted date string
  */
-export function formatDate(date: string | Date): string {
+export function formatDate(date: string | Date, locale: string = "ko-KR"): string {
   const d = typeof date === "string" ? new Date(date) : date;
 
-  return new Intl.DateTimeFormat("ko-KR", {
+  return new Intl.DateTimeFormat(locale, {
     year: "numeric",
     month: "long",
     day: "numeric",

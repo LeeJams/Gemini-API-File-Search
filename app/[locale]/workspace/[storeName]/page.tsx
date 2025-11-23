@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 import {
   useStoresState,
   useQueryState,
@@ -27,6 +29,8 @@ export default function WorkspacePage() {
   const params = useParams();
   const router = useRouter();
   const storeName = decodeURIComponent(params.storeName as string);
+  const t = useTranslations("workspace");
+  const tCommon = useTranslations("common");
 
   const { currentStore, setCurrentStore } = useStoresState();
   const { history, addToHistory, currentResult, setCurrentResult } =
@@ -57,7 +61,7 @@ export default function WorkspacePage() {
       return;
     }
 
-    setLoading(true, "스토어 로딩 중...");
+    setLoading(true, t("loadingStore"));
     clearError();
 
     try {
@@ -78,7 +82,7 @@ export default function WorkspacePage() {
 
       setCurrentStore(data.data);
     } catch (error: any) {
-      setError(error.message || "네트워크 오류가 발생했습니다");
+      setError(error.message || tCommon("networkError"));
     } finally {
       setLoading(false);
     }
@@ -86,7 +90,7 @@ export default function WorkspacePage() {
 
   async function handleExecuteQuery() {
     if (!query.trim()) {
-      setError("쿼리를 입력해주세요");
+      setError(t("errorEmptyQuery"));
       return;
     }
 
@@ -95,7 +99,7 @@ export default function WorkspacePage() {
       return;
     }
 
-    setLoading(true, "쿼리 실행 중...");
+    setLoading(true, t("executingQuery"));
     clearError();
 
     try {
@@ -141,7 +145,7 @@ export default function WorkspacePage() {
       // Clear query input
       setQuery("");
     } catch (error: any) {
-      setError(error.message || "네트워크 오류가 발생했습니다");
+      setError(error.message || tCommon("networkError"));
     } finally {
       setLoading(false);
     }
@@ -189,7 +193,7 @@ export default function WorkspacePage() {
             <h1 className="text-2xl md:text-3xl font-bold truncate">
               {currentStore.displayName}
             </h1>
-            <p className="text-sm text-muted-foreground">쿼리 워크스페이스</p>
+            <p className="text-sm text-muted-foreground">{t("title")}</p>
           </div>
         </div>
       </div>
@@ -200,17 +204,17 @@ export default function WorkspacePage() {
           {/* Query Input */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg md:text-xl">쿼리 입력</CardTitle>
+              <CardTitle className="text-lg md:text-xl">{t("queryInput")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="query" className="text-sm">
-                  질문을 입력하세요
+                  {t("questionLabel")}
                 </Label>
                 <div className="flex gap-2">
                   <Input
                     id="query"
-                    placeholder="문서에 대해 질문하세요..."
+                    placeholder={t("questionPlaceholder")}
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={(e) => {
@@ -233,11 +237,11 @@ export default function WorkspacePage() {
 
               <div className="space-y-2">
                 <Label htmlFor="filter" className="text-sm">
-                  메타데이터 필터 (선택사항)
+                  {t("metadataFilter")}
                 </Label>
                 <Input
                   id="filter"
-                  placeholder='예: doc_type="manual"'
+                  placeholder={t("metadataFilterPlaceholder")}
                   value={metadataFilter}
                   onChange={(e) => setMetadataFilter(e.target.value)}
                   className="text-sm md:text-base"
@@ -252,7 +256,7 @@ export default function WorkspacePage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
                   <FileText className="h-5 w-5" />
-                  AI 응답
+                  {t("aiResponse")}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -263,10 +267,10 @@ export default function WorkspacePage() {
                 {currentResult.groundingMetadata && (
                   <div className="mt-4 border-t pt-4">
                     <h4 className="mb-2 text-sm font-semibold">
-                      참조 문서 정보
+                      {t("groundingMetadataTitle")}
                     </h4>
                     <p className="text-xs text-muted-foreground">
-                      Grounding metadata가 포함되어 있습니다
+                      {t("groundingMetadataDescription")}
                     </p>
                   </div>
                 )}
@@ -284,10 +288,10 @@ export default function WorkspacePage() {
               <CardContent className="flex flex-col items-center justify-center py-8 md:py-12">
                 <Send className="mb-3 md:mb-4 h-10 md:h-12 w-10 md:w-12 text-muted-foreground" />
                 <h3 className="mb-2 text-base md:text-lg font-semibold">
-                  쿼리를 실행해보세요
+                  {t("emptyTitle")}
                 </h3>
                 <p className="text-sm text-muted-foreground text-center">
-                  업로드된 문서에 대해 질문하세요
+                  {t("emptyDescription")}
                 </p>
               </CardContent>
             </Card>
@@ -298,13 +302,13 @@ export default function WorkspacePage() {
         <Card className="h-fit lg:sticky lg:top-4">
           <CardHeader>
             <CardTitle className="text-base md:text-lg">
-              쿼리 히스토리
+              {t("queryHistory")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             {history.filter((h) => h.storeName === storeName).length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                히스토리가 없습니다
+                {t("historyEmpty")}
               </p>
             ) : (
               <div className="space-y-2">
