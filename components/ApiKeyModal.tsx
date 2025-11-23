@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from 'next-intl';
 import {
   Dialog,
   DialogContent,
@@ -25,6 +26,7 @@ interface ApiKeyModalProps {
  * Gemini API 키를 입력받는 모달
  */
 export function ApiKeyModal({ open, onOpenChange }: ApiKeyModalProps) {
+  const t = useTranslations('apiKeyModal');
   const { apiKey, setApiKey } = useAppStore();
   const [inputValue, setInputValue] = useState("");
   const [error, setError] = useState("");
@@ -43,13 +45,13 @@ export function ApiKeyModal({ open, onOpenChange }: ApiKeyModalProps) {
     const trimmedKey = inputValue.trim();
 
     if (!trimmedKey) {
-      setError("API 키를 입력해주세요");
+      setError(t('errorEmpty'));
       return;
     }
 
     // Basic validation: Gemini API keys typically start with "AIza"
     if (!trimmedKey.startsWith("AIza")) {
-      setError("올바른 Gemini API 키 형식이 아닙니다");
+      setError(t('errorInvalidFormat'));
       return;
     }
 
@@ -85,12 +87,12 @@ export function ApiKeyModal({ open, onOpenChange }: ApiKeyModalProps) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Key className="h-5 w-5" />
-            Gemini API 키 입력
+            {t('title')}
           </DialogTitle>
           <DialogDescription className="text-sm">
-            Gemini File Search를 사용하려면 API 키가 필요합니다.
+            {t('description')}
             <br />
-            API 키는 브라우저에 안전하게 저장됩니다.
+            {t('securityNote')}
           </DialogDescription>
           <a
             href="https://aistudio.google.com/apikey"
@@ -98,19 +100,19 @@ export function ApiKeyModal({ open, onOpenChange }: ApiKeyModalProps) {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
           >
-            API 키 발급받기
+            {t('getApiKey')}
             <ExternalLink className="h-3 w-3" />
           </a>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="apiKey">API 키</Label>
+            <Label htmlFor="apiKey">{t('apiKey')}</Label>
             <div className="flex gap-2">
               <Input
                 id="apiKey"
                 type={isApiKeyVisible ? "text" : "password"}
-                placeholder="AIza..."
+                placeholder={t('placeholder')}
                 value={inputValue}
                 onChange={(e) => {
                   setInputValue(e.target.value);
@@ -124,7 +126,7 @@ export function ApiKeyModal({ open, onOpenChange }: ApiKeyModalProps) {
                 variant="outline"
                 size="icon"
                 onClick={() => setIsApiKeyVisible((prev) => !prev)}
-                aria-label={isApiKeyVisible ? "API 키 숨기기" : "API 키 보이기"}
+                aria-label={isApiKeyVisible ? t('hideApiKey') : t('showApiKey')}
               >
                 {isApiKeyVisible ? (
                   <EyeOff className="h-4 w-4" />
@@ -137,13 +139,13 @@ export function ApiKeyModal({ open, onOpenChange }: ApiKeyModalProps) {
               <p className="text-xs text-destructive font-medium">{error}</p>
             )}
             <p className="text-xs text-muted-foreground">
-              API 키는 &quot;AIza&quot;로 시작합니다
+              {t('hint')}
             </p>
           </div>
 
           <div className="flex flex-col gap-2">
             <Button onClick={handleSave} className="w-full" size="lg">
-              저장
+              {t('save')}
             </Button>
             {apiKey && (
               <Button
@@ -151,7 +153,7 @@ export function ApiKeyModal({ open, onOpenChange }: ApiKeyModalProps) {
                 onClick={() => onOpenChange?.(false)}
                 className="w-full"
               >
-                취소
+                {t('cancel')}
               </Button>
             )}
           </div>

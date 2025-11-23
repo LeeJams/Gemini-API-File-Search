@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useTranslations } from 'next-intl';
+import { Link, useRouter } from '@/i18n/routing';
 import { useStoresState, useUIState, useAppStore } from "@/store";
 import { ApiKeyModal } from "@/components/ApiKeyModal";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,8 @@ import type { FileSearchStore } from "@/types";
  * File Search Store 목록 및 관리
  */
 export default function StoresPage() {
+  const t = useTranslations('stores');
+  const tCommon = useTranslations('common');
   const router = useRouter();
   const { stores, setStores, setCurrentStore, isCacheValid, removeStore } =
     useStoresState();
@@ -64,7 +67,7 @@ export default function StoresPage() {
       return;
     }
 
-    setLoading(true, "스토어 목록 로딩 중...");
+    setLoading(true, t('loadingList'));
     clearError();
 
     try {
@@ -81,7 +84,7 @@ export default function StoresPage() {
 
       setStores(data.data.data);
     } catch (error: any) {
-      setError(error.message || "네트워크 오류가 발생했습니다");
+      setError(error.message || tCommon('networkError'));
     } finally {
       setLoading(false);
     }
@@ -91,7 +94,7 @@ export default function StoresPage() {
 
   async function handleCreateStore() {
     if (!newStoreName.trim()) {
-      setError("스토어 이름을 입력해주세요");
+      setError(t('errorEmptyName'));
       return;
     }
 
@@ -106,7 +109,7 @@ export default function StoresPage() {
     }
 
     setIsCreating(true);
-    setLoading(true, "스토어 생성 중...");
+    setLoading(true, t('creating'));
     clearError();
 
     try {
@@ -130,7 +133,7 @@ export default function StoresPage() {
       setIsCreateModalOpen(false);
       setNewStoreName("");
     } catch (error: any) {
-      setError(error.message || "네트워크 오류가 발생했습니다");
+      setError(error.message || tCommon('networkError'));
     } finally {
       setLoading(false);
       setIsCreating(false);
@@ -143,7 +146,7 @@ export default function StoresPage() {
       return;
     }
 
-    setLoading(true, "스토어 삭제 중...");
+    setLoading(true, t('deleting'));
     clearError();
 
     try {
@@ -164,7 +167,7 @@ export default function StoresPage() {
       removeStore(store.displayName);
       setDeleteConfirm(null);
     } catch (error: any) {
-      setError(error.message || "네트워크 오류가 발생했습니다");
+      setError(error.message || tCommon('networkError'));
     } finally {
       setLoading(false);
     }
@@ -198,10 +201,10 @@ export default function StoresPage() {
       <div className="mb-6 md:mb-8 space-y-4 md:flex md:items-center md:justify-between md:space-y-0">
         <div>
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-            Stores
+            {t('title')}
           </h1>
           <p className="mt-2 text-sm md:text-base text-muted-foreground">
-            File Search Store를 선택하거나 새로운 스토어를 추가하세요
+            {t('description')}
           </p>
         </div>
         <Button
@@ -209,7 +212,7 @@ export default function StoresPage() {
           size="lg"
           className="w-full md:w-auto"
         >
-          <Plus className="mr-2 h-4 w-4" />새 스토어 추가
+          <Plus className="mr-2 h-4 w-4" />{t('addNewStore')}
         </Button>
       </div>
 
@@ -218,13 +221,13 @@ export default function StoresPage() {
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Database className="mb-4 h-12 w-12 text-muted-foreground" />
-            <h3 className="mb-2 text-lg font-semibold">스토어가 없습니다</h3>
+            <h3 className="mb-2 text-lg font-semibold">{t('emptyTitle')}</h3>
             <p className="mb-4 text-sm text-muted-foreground">
-              새 스토어를 추가하여 시작하세요
+              {t('emptyDescription')}
             </p>
             <Button onClick={() => setIsCreateModalOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
-              스토어 추가
+              {t('addStore')}
             </Button>
           </CardContent>
         </Card>
@@ -269,7 +272,7 @@ export default function StoresPage() {
                   onClick={() => navigateToWorkspace(store)}
                 >
                   <FileText className="mr-2 h-4 w-4" />
-                  <span className="truncate">쿼리 워크스페이스</span>
+                  <span className="truncate">{t('queryWorkspace')}</span>
                 </Button>
                 <Button
                   variant="outline"
@@ -277,7 +280,7 @@ export default function StoresPage() {
                   onClick={() => navigateToDocuments(store)}
                 >
                   <Database className="mr-2 h-4 w-4" />
-                  <span className="truncate">문서 관리</span>
+                  <span className="truncate">{t('documentManagement')}</span>
                 </Button>
               </CardContent>
             </Card>
@@ -289,17 +292,17 @@ export default function StoresPage() {
       <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
         <DialogContent className="w-[calc(100%-2rem)] max-w-md">
           <DialogHeader>
-            <DialogTitle>새 스토어 추가</DialogTitle>
+            <DialogTitle>{t('createModalTitle')}</DialogTitle>
             <DialogDescription className="text-sm">
-              새로운 File Search Store를 생성합니다
+              {t('createModalDescription')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="storeName">스토어 이름</Label>
+              <Label htmlFor="storeName">{t('storeName')}</Label>
               <Input
                 id="storeName"
-                placeholder="my-store"
+                placeholder={t('storeNamePlaceholder')}
                 value={newStoreName}
                 onChange={(e) => setNewStoreName(e.target.value)}
                 onKeyDown={(e) => {
@@ -310,7 +313,7 @@ export default function StoresPage() {
                 }}
               />
               <p className="text-xs text-muted-foreground">
-                영문, 숫자, 하이픈(-), 언더스코어(_)만 사용 가능
+                {t('storeNameHint')}
               </p>
             </div>
             <Button
@@ -319,7 +322,7 @@ export default function StoresPage() {
               size="lg"
               disabled={isCreating}
             >
-              생성
+              {tCommon('create')}
             </Button>
           </div>
         </DialogContent>
@@ -332,13 +335,12 @@ export default function StoresPage() {
       >
         <DialogContent className="w-[calc(100%-2rem)] max-w-md">
           <DialogHeader>
-            <DialogTitle>스토어 삭제 확인</DialogTitle>
+            <DialogTitle>{t('deleteConfirmTitle')}</DialogTitle>
             <DialogDescription className="text-sm">
-              정말로 &quot;{deleteConfirm?.displayName}&quot; 스토어를
-              삭제하시겠습니까?
+              {t('deleteConfirmMessage', { name: deleteConfirm?.displayName })}
               <br />
               <span className="font-semibold text-destructive">
-                이 작업은 되돌릴 수 없으며, 모든 문서가 삭제됩니다.
+                {t('deleteConfirmWarning')}
               </span>
             </DialogDescription>
           </DialogHeader>
@@ -348,14 +350,14 @@ export default function StoresPage() {
               onClick={() => setDeleteConfirm(null)}
               className="w-full sm:w-auto"
             >
-              취소
+              {tCommon('cancel')}
             </Button>
             <Button
               variant="destructive"
               onClick={() => deleteConfirm && handleDeleteStore(deleteConfirm)}
               className="w-full sm:w-auto"
             >
-              삭제
+              {tCommon('delete')}
             </Button>
           </div>
         </DialogContent>

@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from 'next-intl';
 import {
   Dialog,
   DialogContent,
@@ -30,6 +33,8 @@ export function DocumentDetailModal({
   open,
   onOpenChange,
 }: DocumentDetailModalProps) {
+  const t = useTranslations('documentDetail');
+
   if (!document) return null;
 
   return (
@@ -38,7 +43,7 @@ export function DocumentDetailModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <File className="h-5 w-5" />
-            문서 상세 정보
+            {t('title')}
           </DialogTitle>
         </DialogHeader>
 
@@ -46,14 +51,14 @@ export function DocumentDetailModal({
           {/* Basic Information */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">기본 정보</CardTitle>
+              <CardTitle className="text-base">{t('documentName')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* File Name */}
                 <div className="space-y-1">
                   <p className="text-sm font-medium text-muted-foreground">
-                    파일명
+                    {t('documentName')}
                   </p>
                   <p className="text-base font-semibold break-all">
                     {document.displayName}
@@ -65,7 +70,7 @@ export function DocumentDetailModal({
                   <div className="space-y-1">
                     <p className="text-sm font-medium text-muted-foreground flex items-center gap-1">
                       <HardDrive className="h-4 w-4" />
-                      파일 크기
+                      {t('fileSize')}
                     </p>
                     <p className="text-base">
                       {formatFileSize(document.sizeBytes)}
@@ -78,7 +83,7 @@ export function DocumentDetailModal({
                   <div className="space-y-1">
                     <p className="text-sm font-medium text-muted-foreground flex items-center gap-1">
                       <FileType className="h-4 w-4" />
-                      파일 타입
+                      {t('mimeType')}
                     </p>
                     <p className="text-sm font-mono bg-muted px-2 py-1 rounded inline-block">
                       {document.mimeType}
@@ -90,7 +95,7 @@ export function DocumentDetailModal({
                 <div className="space-y-1">
                   <p className="text-sm font-medium text-muted-foreground flex items-center gap-1">
                     <Calendar className="h-4 w-4" />
-                    생성일
+                    {t('createTime')}
                   </p>
                   <p className="text-base">{formatDate(document.createTime)}</p>
                 </div>
@@ -99,7 +104,7 @@ export function DocumentDetailModal({
                 <div className="space-y-1">
                   <p className="text-sm font-medium text-muted-foreground flex items-center gap-1">
                     <Clock className="h-4 w-4" />
-                    수정일
+                    {t('createTime')}
                   </p>
                   <p className="text-base">{formatDate(document.updateTime)}</p>
                 </div>
@@ -108,7 +113,7 @@ export function DocumentDetailModal({
               {/* Document Name (Internal ID) */}
               <div className="space-y-1 pt-2 border-t">
                 <p className="text-sm font-medium text-muted-foreground">
-                  문서 ID
+                  {t('resourceName')}
                 </p>
                 <p className="text-xs font-mono bg-muted px-2 py-1 rounded break-all">
                   {document.name}
@@ -123,7 +128,7 @@ export function DocumentDetailModal({
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <Tag className="h-4 w-4" />
-                  메타데이터
+                  {t('metadata')}
                 </CardTitle>
               </CardHeader>
               <CardContent>

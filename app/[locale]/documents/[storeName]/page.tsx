@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/routing";
 import {
   useStoresState,
   useDocumentsState,
@@ -39,6 +41,8 @@ import type { FileSearchDocument } from "@/types";
 export default function DocumentsPage() {
   const params = useParams();
   const router = useRouter();
+  const t = useTranslations("documents");
+  const tCommon = useTranslations("common");
   const storeName = decodeURIComponent(params.storeName as string);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -81,7 +85,7 @@ export default function DocumentsPage() {
       return;
     }
 
-    setLoading(true, "스토어 로딩 중...");
+    setLoading(true, t("loadingStore"));
     clearError();
 
     try {
@@ -102,7 +106,7 @@ export default function DocumentsPage() {
 
       setCurrentStore(data.data);
     } catch (error: any) {
-      setError(error.message || "네트워크 오류가 발생했습니다");
+      setError(error.message || tCommon("networkError"));
     } finally {
       setLoading(false);
     }
@@ -113,7 +117,7 @@ export default function DocumentsPage() {
       return;
     }
 
-    setLoading(true, "문서 목록 로딩 중...");
+    setLoading(true, t("loadingDocuments"));
     clearError();
 
     try {
@@ -134,7 +138,7 @@ export default function DocumentsPage() {
 
       setDocuments(data.data.data);
     } catch (error: any) {
-      setError(error.message || "네트워크 오류가 발생했습니다");
+      setError(error.message || tCommon("networkError"));
     } finally {
       setLoading(false);
     }
@@ -147,7 +151,7 @@ export default function DocumentsPage() {
     // Check max files (기존 파일 + 새 파일)
     if (uploadFiles.length + files.length > 10) {
       setError(
-        `최대 10개의 파일만 업로드 가능합니다 (현재 ${uploadFiles.length}개 선택됨)`
+        t("errorMaxFiles", { count: uploadFiles.length })
       );
       return;
     }
@@ -157,7 +161,7 @@ export default function DocumentsPage() {
     const oversized = files.filter((f) => f.size > maxSize);
     if (oversized.length > 0) {
       setError(
-        `파일 크기는 50MB를 초과할 수 없습니다: ${oversized.map((f) => f.name).join(", ")}`
+        t("errorFileSize", { files: oversized.map((f) => f.name).join(", ") })
       );
       return;
     }
@@ -167,7 +171,7 @@ export default function DocumentsPage() {
     const duplicates = files.filter((f) => existingNames.includes(f.name));
     if (duplicates.length > 0) {
       setError(
-        `이미 선택된 파일입니다: ${duplicates.map((f) => f.name).join(", ")}`
+        t("errorDuplicate", { files: duplicates.map((f) => f.name).join(", ") })
       );
       return;
     }
@@ -194,7 +198,7 @@ export default function DocumentsPage() {
 
   async function handleUpload() {
     if (uploadFiles.length === 0) {
-      setError("업로드할 파일을 선택해주세요");
+      setError(t("errorSelectFile"));
       return;
     }
 
@@ -203,7 +207,7 @@ export default function DocumentsPage() {
       return;
     }
 
-    setLoading(true, `${uploadFiles.length}개 파일 업로드 중...`);
+    setLoading(true, t("uploading", { count: uploadFiles.length }));
     clearError();
 
     try {
@@ -252,7 +256,7 @@ export default function DocumentsPage() {
         }
       }
     } catch (error: any) {
-      setError(error.message || "네트워크 오류가 발생했습니다");
+      setError(error.message || tCommon("networkError"));
     } finally {
       setLoading(false);
     }
@@ -264,7 +268,7 @@ export default function DocumentsPage() {
       return;
     }
 
-    setLoading(true, "문서 삭제 중...");
+    setLoading(true, t("deleting"));
     clearError();
 
     try {
@@ -291,7 +295,7 @@ export default function DocumentsPage() {
       setDeleteConfirm(null);
       await loadDocuments(); // Refresh list
     } catch (error: any) {
-      setError(error.message || "네트워크 오류가 발생했습니다");
+      setError(error.message || tCommon("networkError"));
     } finally {
       setLoading(false);
     }
@@ -335,14 +339,14 @@ export default function DocumentsPage() {
             <h1 className="text-2xl md:text-3xl font-bold truncate">
               {currentStore.displayName}
             </h1>
-            <p className="text-sm text-muted-foreground">문서 관리</p>
+            <p className="text-sm text-muted-foreground">{t("title")}</p>
           </div>
         </div>
         <Button
           onClick={() => router.push(`/workspace/${storeName}`)}
           className="w-full md:w-auto flex-shrink-0"
         >
-          쿼리 워크스페이스로 이동
+          {t("goToWorkspace")}
         </Button>
       </div>
 
@@ -350,7 +354,7 @@ export default function DocumentsPage() {
         {/* Upload Section */}
         <Card className="min-w-0">
           <CardHeader>
-            <CardTitle className="text-lg md:text-xl">파일 업로드</CardTitle>
+            <CardTitle className="text-lg md:text-xl">{t("fileUpload")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="rounded-lg border-2 border-dashed p-4 md:p-6 text-center">
@@ -368,10 +372,10 @@ export default function DocumentsPage() {
                 htmlFor="file-upload"
                 className="cursor-pointer text-sm text-muted-foreground hover:text-foreground block"
               >
-                클릭하여 파일 추가
+                {t("clickToAdd")}
                 <br />
                 <span className="text-xs">
-                  여러 번 선택 가능 · 최대 10개 · 파일당 50MB 이하
+                  {t("uploadHint")}
                 </span>
               </label>
             </div>
@@ -380,7 +384,7 @@ export default function DocumentsPage() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">
-                    선택된 파일 ({uploadFiles.length}개)
+                    {t("selectedFilesCount", { count: uploadFiles.length })}
                   </p>
                   <Button
                     variant="ghost"
@@ -388,7 +392,7 @@ export default function DocumentsPage() {
                     onClick={handleClearAllFiles}
                     className="h-auto py-1 text-xs text-destructive hover:text-destructive"
                   >
-                    전체 삭제
+                    {t("deleteAll")}
                   </Button>
                 </div>
                 <div className="max-h-[200px] space-y-1 overflow-y-auto">
@@ -418,7 +422,7 @@ export default function DocumentsPage() {
                 </div>
                 <Button onClick={handleUpload} className="w-full">
                   <Upload className="mr-2 h-4 w-4" />
-                  {uploadFiles.length}개 파일 업로드
+                  {t("uploadButton", { count: uploadFiles.length })}
                 </Button>
               </div>
             )}
@@ -429,7 +433,7 @@ export default function DocumentsPage() {
         <Card className="min-w-0">
           <CardHeader>
             <CardTitle className="text-lg md:text-xl">
-              문서 목록 ({documents.length}개)
+              {t("documentList", { count: documents.length })}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -437,10 +441,10 @@ export default function DocumentsPage() {
               <div className="flex flex-col items-center justify-center py-8 md:py-12 text-center">
                 <File className="mb-3 md:mb-4 h-10 md:h-12 w-10 md:w-12 text-muted-foreground" />
                 <h3 className="mb-2 text-base md:text-lg font-semibold">
-                  문서가 없습니다
+                  {t("emptyTitle")}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  파일을 업로드하여 시작하세요
+                  {t("emptyDescription")}
                 </p>
               </div>
             ) : (
@@ -521,13 +525,12 @@ export default function DocumentsPage() {
       >
         <DialogContent className="w-[calc(100%-2rem)] max-w-md">
           <DialogHeader>
-            <DialogTitle>문서 삭제 확인</DialogTitle>
+            <DialogTitle>{t("deleteConfirmTitle")}</DialogTitle>
             <DialogDescription className="text-sm">
-              정말로 &quot;{deleteConfirm?.displayName}&quot; 문서를
-              삭제하시겠습니까?
+              {t("deleteConfirmMessage", { name: deleteConfirm?.displayName })}
               <br />
               <span className="font-semibold text-destructive">
-                이 작업은 되돌릴 수 없습니다.
+                {t("deleteConfirmWarning")}
               </span>
             </DialogDescription>
           </DialogHeader>
@@ -537,7 +540,7 @@ export default function DocumentsPage() {
               onClick={() => setDeleteConfirm(null)}
               className="w-full sm:w-auto"
             >
-              취소
+              {tCommon("cancel")}
             </Button>
             <Button
               variant="destructive"
@@ -546,7 +549,7 @@ export default function DocumentsPage() {
               }
               className="w-full sm:w-auto"
             >
-              삭제
+              {tCommon("delete")}
             </Button>
           </div>
         </DialogContent>
