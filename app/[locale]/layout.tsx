@@ -9,6 +9,7 @@ import { Providers } from "@/components/providers";
 import { LoadingOverlay } from "@/components/loading-overlay";
 import { Toaster } from "@/components/ui/toaster";
 import { AppHeader } from "@/components/app-header";
+import { AppFooter } from "@/components/app-footer";
 import { cn } from "@/lib/utils";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -59,6 +60,7 @@ export default async function LocaleLayout({
             <div className="relative flex min-h-screen flex-col">
               <AppHeader />
               <main className="flex-1">{children}</main>
+              <AppFooter />
             </div>
             <LoadingOverlay />
             <Toaster />
