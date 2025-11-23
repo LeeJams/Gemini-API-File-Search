@@ -105,14 +105,40 @@ export interface QueryResponse {
 }
 
 /**
+ * CustomMetadata Value Type
+ * 커스텀 메타데이터 값 타입
+ */
+export type CustomMetadataValue =
+  | { stringValue: string }
+  | { stringListValue: { values: string[] } }
+  | { numericValue: number };
+
+/**
+ * CustomMetadata
+ * 사용자 지정 메타데이터 (key-value 쌍)
+ */
+export interface CustomMetadata {
+  /** 메타데이터 키 */
+  key: string;
+  /** 메타데이터 값 (문자열, 문자열 리스트, 또는 숫자) */
+  value?: CustomMetadataValue;
+  /** 간단한 문자열 값 (UI에서 사용) */
+  stringValue?: string;
+  /** 문자열 리스트 값 (UI에서 사용) */
+  stringListValue?: { values: string[] };
+  /** 숫자 값 (UI에서 사용) */
+  numericValue?: number;
+}
+
+/**
  * Upload Options
  * 파일 업로드 시 옵션
  */
 export interface UploadOptions {
   /** 파일 표시 이름 */
   displayName?: string;
-  /** 커스텀 메타데이터 */
-  customMetadata?: Array<{ key: string; value: string }>;
+  /** 커스텀 메타데이터 (최대 20개) */
+  customMetadata?: CustomMetadata[];
   /** 청크당 최대 토큰 수 */
   maxTokensPerChunk?: number;
   /** 청크 간 겹치는 최대 토큰 수 */

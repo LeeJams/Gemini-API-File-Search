@@ -20,6 +20,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   ArrowLeft,
   Upload,
@@ -28,6 +30,8 @@ import {
   HardDrive,
   Trash2,
   Eye,
+  Plus,
+  X,
 } from "lucide-react";
 import { formatDate, formatFileSize } from "@/lib/utils";
 import { DocumentDetailModal } from "@/components/DocumentDetailModal";
@@ -59,6 +63,9 @@ export default function DocumentsPage() {
   const [selectedDocument, setSelectedDocument] =
     useState<FileSearchDocument | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [customMetadata, setCustomMetadata] = useState<
+    Array<{ key: string; value: string; type: "string" | "number" | "stringList" }>
+  >([]);
 
   useEffect(() => {
     if (!hasApiKey()) {
@@ -191,15 +198,54 @@ export default function DocumentsPage() {
 
   function handleClearAllFiles() {
     setUploadFiles([]);
+    setCustomMetadata([]);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+  }
+
+  function handleAddMetadata() {
+    if (customMetadata.length >= 20) {
+      setError(t("errorMetadataMax"));
+      return;
+    }
+    setCustomMetadata([...customMetadata, { key: "", value: "", type: "string" }]);
+  }
+
+  function handleRemoveMetadata(index: number) {
+    setCustomMetadata(customMetadata.filter((_, idx) => idx !== index));
+  }
+
+  function handleMetadataChange(
+    index: number,
+    field: "key" | "value" | "type",
+    value: string
+  ) {
+    const updated = [...customMetadata];
+    if (field === "type") {
+      updated[index][field] = value as "string" | "number" | "stringList";
+    } else {
+      updated[index][field] = value;
+    }
+    setCustomMetadata(updated);
   }
 
   async function handleUpload() {
     if (uploadFiles.length === 0) {
       setError(t("errorSelectFile"));
       return;
+    }
+
+    // Validate metadata
+    for (const meta of customMetadata) {
+      if (!meta.key.trim()) {
+        setError(t("errorMetadataKeyEmpty"));
+        return;
+      }
+      if (!meta.value.trim()) {
+        setError(t("errorMetadataValueEmpty"));
+        return;
+      }
     }
 
     if (!hasApiKey()) {
@@ -215,6 +261,11 @@ export default function DocumentsPage() {
       uploadFiles.forEach((file) => {
         formData.append("files", file);
       });
+
+      // Add metadata if any
+      if (customMetadata.length > 0) {
+        formData.append("customMetadata", JSON.stringify(customMetadata));
+      }
 
       const headers: HeadersInit = {
         "x-api-key": apiKey || "",
@@ -235,6 +286,7 @@ export default function DocumentsPage() {
       if (data.success) {
         // 모든 파일 업로드 성공
         setUploadFiles([]);
+        setCustomMetadata([]);
         if (fileInputRef.current) {
           fileInputRef.current.value = "";
         }
@@ -420,6 +472,95 @@ export default function DocumentsPage() {
                     </div>
                   ))}
                 </div>
+
+                {/* Custom Metadata Section */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-sm font-medium">
+                        {t("customMetadata")}
+                      </Label>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {t("customMetadataHint")}
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleAddMetadata}
+                      disabled={customMetadata.length >= 20}
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      {t("addMetadata")}
+                    </Button>
+                  </div>
+
+                  {customMetadata.length > 0 && (
+                    <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                      {customMetadata.map((meta, idx) => (
+                        <div
+                          key={idx}
+                          className="flex gap-2 p-2 rounded-md border bg-background"
+                        >
+                          <div className="flex-1 space-y-2">
+                            <Input
+                              placeholder={t("metadataKeyPlaceholder")}
+                              value={meta.key}
+                              onChange={(e) =>
+                                handleMetadataChange(idx, "key", e.target.value)
+                              }
+                              className="h-8 text-sm"
+                            />
+                            {meta.type === "stringList" ? (
+                              <Input
+                                placeholder={t("metadataValueListPlaceholder")}
+                                value={meta.value}
+                                onChange={(e) =>
+                                  handleMetadataChange(idx, "value", e.target.value)
+                                }
+                                className="h-8 text-sm"
+                              />
+                            ) : (
+                              <Input
+                                type={meta.type === "number" ? "number" : "text"}
+                                placeholder={t("metadataValuePlaceholder")}
+                                value={meta.value}
+                                onChange={(e) =>
+                                  handleMetadataChange(idx, "value", e.target.value)
+                                }
+                                className="h-8 text-sm"
+                              />
+                            )}
+                            <select
+                              value={meta.type}
+                              onChange={(e) =>
+                                handleMetadataChange(idx, "type", e.target.value)
+                              }
+                              className="w-full h-8 text-sm rounded-md border border-input bg-background px-3 py-1"
+                            >
+                              <option value="string">{t("metadataTypeString")}</option>
+                              <option value="number">{t("metadataTypeNumber")}</option>
+                              <option value="stringList">
+                                {t("metadataTypeStringList")}
+                              </option>
+                            </select>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleRemoveMetadata(idx)}
+                            className="h-8 w-8 shrink-0"
+                          >
+                            <X className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 <Button onClick={handleUpload} className="w-full">
                   <Upload className="mr-2 h-4 w-4" />
                   {t("uploadButton", { count: uploadFiles.length })}

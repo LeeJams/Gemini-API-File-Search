@@ -37,6 +37,7 @@ export async function POST(
     // Parse FormData
     const formData = await request.formData();
     const files = formData.getAll("files") as File[];
+    const customMetadataStr = formData.get("customMetadata") as string | null;
 
     if (!files || files.length === 0) {
       return NextResponse.json<ApiResponse>(
@@ -60,6 +61,32 @@ export async function POST(
 
     // Find store
     const store = await findStoreByDisplayName(displayName, apiKey);
+
+    // Parse custom metadata
+    let customMetadata: Array<{ key: string; value: any }> = [];
+    if (customMetadataStr) {
+      try {
+        const parsed = JSON.parse(customMetadataStr);
+        // Convert to API format
+        customMetadata = parsed.map((meta: any) => {
+          const result: any = { key: meta.key };
+
+          if (meta.type === "number") {
+            result.numericValue = parseFloat(meta.value);
+          } else if (meta.type === "stringList") {
+            // Parse comma-separated values
+            const values = meta.value.split(",").map((v: string) => v.trim()).filter((v: string) => v);
+            result.stringListValue = { values };
+          } else {
+            result.stringValue = meta.value;
+          }
+
+          return result;
+        });
+      } catch (error) {
+        console.error("Failed to parse customMetadata:", error);
+      }
+    }
 
     // Process files
     const results: UploadFileResult[] = [];
@@ -93,6 +120,7 @@ export async function POST(
           // Upload to Gemini
           await uploadWithCustomChunking(store, tempFilePath, {
             displayName: file.name,
+            customMetadata: customMetadata.length > 0 ? customMetadata : undefined,
           }, apiKey);
 
           results.push({
