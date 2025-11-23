@@ -227,11 +227,11 @@ export default function WorkspacePage() {
                       variant="outline"
                       className="w-full justify-between text-sm md:text-base"
                     >
-                      {selectedModel}
-                      <ChevronDown className="ml-2 h-4 w-4" />
+                      <span className="truncate">{selectedModel}</span>
+                      <ChevronDown className="ml-2 h-4 w-4 flex-shrink-0" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-full">
+                  <DropdownMenuContent align="start" className="min-w-[300px] md:min-w-[400px]">
                     {SUPPORTED_MODELS.map((model) => (
                       <DropdownMenuItem
                         key={model}
