@@ -205,13 +205,7 @@ export default function StoresPage() {
       {/* API Key Modal */}
       <ApiKeyModal
         open={isApiKeyModalOpen}
-        onOpenChange={(open) => {
-          setIsApiKeyModalOpen(open);
-          // Reload stores after API key is set
-          if (!open && hasApiKey()) {
-            loadStores(true);
-          }
-        }}
+        onOpenChange={setIsApiKeyModalOpen}
       />
 
       {/* Header */}
