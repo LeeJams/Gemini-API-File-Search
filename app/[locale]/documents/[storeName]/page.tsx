@@ -64,7 +64,11 @@ export default function DocumentsPage() {
     useState<FileSearchDocument | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [customMetadata, setCustomMetadata] = useState<
-    Array<{ key: string; value: string; type: "string" | "number" | "stringList" }>
+    Array<{
+      key: string;
+      value: string;
+      type: "string" | "number" | "stringList";
+    }>
   >([]);
 
   useEffect(() => {
@@ -157,9 +161,7 @@ export default function DocumentsPage() {
 
     // Check max files (기존 파일 + 새 파일)
     if (uploadFiles.length + files.length > 10) {
-      setError(
-        t("errorMaxFiles", { count: uploadFiles.length })
-      );
+      setError(t("errorMaxFiles", { count: uploadFiles.length }));
       return;
     }
 
@@ -209,7 +211,10 @@ export default function DocumentsPage() {
       setError(t("errorMetadataMax"));
       return;
     }
-    setCustomMetadata([...customMetadata, { key: "", value: "", type: "string" }]);
+    setCustomMetadata([
+      ...customMetadata,
+      { key: "", value: "", type: "string" },
+    ]);
   }
 
   function handleRemoveMetadata(index: number) {
@@ -221,13 +226,16 @@ export default function DocumentsPage() {
     field: "key" | "value" | "type",
     value: string
   ) {
-    const updated = [...customMetadata];
-    if (field === "type") {
-      updated[index][field] = value as "string" | "number" | "stringList";
-    } else {
-      updated[index][field] = value;
-    }
-    setCustomMetadata(updated);
+    setCustomMetadata((prev) =>
+      prev.map((item, i) => {
+        if (i !== index) return item;
+
+        if (field === "type") {
+          return { ...item, type: value as "string" | "number" | "stringList" };
+        }
+        return { ...item, [field]: value };
+      })
+    );
   }
 
   async function handleUpload() {
@@ -394,19 +402,15 @@ export default function DocumentsPage() {
             <p className="text-sm text-muted-foreground">{t("title")}</p>
           </div>
         </div>
-        <Button
-          onClick={() => router.push(`/workspace/${storeName}`)}
-          className="w-full md:w-auto flex-shrink-0"
-        >
-          {t("goToWorkspace")}
-        </Button>
       </div>
 
       <div className="grid gap-4 md:gap-6 lg:grid-cols-[minmax(300px,400px)_1fr]">
         {/* Upload Section */}
         <Card className="min-w-0">
           <CardHeader>
-            <CardTitle className="text-lg md:text-xl">{t("fileUpload")}</CardTitle>
+            <CardTitle className="text-lg md:text-xl">
+              {t("fileUpload")}
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="rounded-lg border-2 border-dashed p-4 md:p-6 text-center">
@@ -426,9 +430,7 @@ export default function DocumentsPage() {
               >
                 {t("clickToAdd")}
                 <br />
-                <span className="text-xs">
-                  {t("uploadHint")}
-                </span>
+                <span className="text-xs">{t("uploadHint")}</span>
               </label>
             </div>
 
@@ -512,7 +514,11 @@ export default function DocumentsPage() {
                                 placeholder={t("metadataKeyPlaceholder")}
                                 value={meta.key}
                                 onChange={(e) =>
-                                  handleMetadataChange(idx, "key", e.target.value)
+                                  handleMetadataChange(
+                                    idx,
+                                    "key",
+                                    e.target.value
+                                  )
                                 }
                                 className="h-10"
                               />
@@ -523,20 +529,32 @@ export default function DocumentsPage() {
                               </Label>
                               {meta.type === "stringList" ? (
                                 <Input
-                                  placeholder={t("metadataValueListPlaceholder")}
+                                  placeholder={t(
+                                    "metadataValueListPlaceholder"
+                                  )}
                                   value={meta.value}
                                   onChange={(e) =>
-                                    handleMetadataChange(idx, "value", e.target.value)
+                                    handleMetadataChange(
+                                      idx,
+                                      "value",
+                                      e.target.value
+                                    )
                                   }
                                   className="h-10"
                                 />
                               ) : (
                                 <Input
-                                  type={meta.type === "number" ? "number" : "text"}
+                                  type={
+                                    meta.type === "number" ? "number" : "text"
+                                  }
                                   placeholder={t("metadataValuePlaceholder")}
                                   value={meta.value}
                                   onChange={(e) =>
-                                    handleMetadataChange(idx, "value", e.target.value)
+                                    handleMetadataChange(
+                                      idx,
+                                      "value",
+                                      e.target.value
+                                    )
                                   }
                                   className="h-10"
                                 />
@@ -549,12 +567,20 @@ export default function DocumentsPage() {
                               <select
                                 value={meta.type}
                                 onChange={(e) =>
-                                  handleMetadataChange(idx, "type", e.target.value)
+                                  handleMetadataChange(
+                                    idx,
+                                    "type",
+                                    e.target.value
+                                  )
                                 }
                                 className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                               >
-                                <option value="string">{t("metadataTypeString")}</option>
-                                <option value="number">{t("metadataTypeNumber")}</option>
+                                <option value="string">
+                                  {t("metadataTypeString")}
+                                </option>
+                                <option value="number">
+                                  {t("metadataTypeNumber")}
+                                </option>
                                 <option value="stringList">
                                   {t("metadataTypeStringList")}
                                 </option>
@@ -683,7 +709,9 @@ export default function DocumentsPage() {
           <DialogHeader>
             <DialogTitle>{t("deleteConfirmTitle")}</DialogTitle>
             <DialogDescription className="text-sm">
-              {t("deleteConfirmMessage", { name: deleteConfirm?.displayName })}
+              {t("deleteConfirmMessage", {
+                name: deleteConfirm?.displayName || "",
+              })}
               <br />
               <span className="font-semibold text-destructive">
                 {t("deleteConfirmWarning")}
