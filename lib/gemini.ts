@@ -146,11 +146,15 @@ export async function createFileSearchStore(
 
   console.log(`✅ 스토어가 생성되었습니다: ${createStoreOp.name}`);
 
+  if (!createStoreOp.name) {
+    throw new Error("Failed to create store: Name is missing");
+  }
+
   const store: FileSearchStore = {
     name: createStoreOp.name,
-    displayName: createStoreOp.displayName,
-    createTime: createStoreOp.createTime,
-    updateTime: createStoreOp.updateTime,
+    displayName: createStoreOp.displayName || displayName,
+    createTime: createStoreOp.createTime || new Date().toISOString(),
+    updateTime: createStoreOp.updateTime || new Date().toISOString(),
   };
 
   // 캐시에 저장
@@ -187,12 +191,12 @@ export async function findStoreByDisplayName(
 
   searchLoop: while (true) {
     for (const store of page) {
-      if (store.displayName === displayName) {
+      if (store.displayName === displayName && store.name) {
         fileStore = {
           name: store.name,
           displayName: store.displayName,
-          createTime: store.createTime,
-          updateTime: store.updateTime,
+          createTime: store.createTime || new Date().toISOString(),
+          updateTime: store.updateTime || new Date().toISOString(),
         };
         break searchLoop;
       }
@@ -219,7 +223,9 @@ export async function findStoreByDisplayName(
  * @param apiKey - Gemini API 키
  * @returns 스토어 목록
  */
-export async function listAllStores(apiKey?: string): Promise<FileSearchStore[]> {
+export async function listAllStores(
+  apiKey?: string
+): Promise<FileSearchStore[]> {
   console.log("\n📋 스토어 목록 조회 중...");
 
   const ai = getAI(apiKey);
@@ -229,12 +235,14 @@ export async function listAllStores(apiKey?: string): Promise<FileSearchStore[]>
 
   while (true) {
     for (const store of page) {
-      stores.push({
-        name: store.name,
-        displayName: store.displayName,
-        createTime: store.createTime,
-        updateTime: store.updateTime,
-      });
+      if (store.name && store.displayName) {
+        stores.push({
+          name: store.name,
+          displayName: store.displayName,
+          createTime: store.createTime || new Date().toISOString(),
+          updateTime: store.updateTime || new Date().toISOString(),
+        });
+      }
     }
     if (!pager.hasNextPage()) break;
     page = await pager.nextPage();
@@ -448,9 +456,9 @@ export async function generateContentWithFileSearch(
   }
 
   return {
-    text: response.text,
-    groundingMetadata: response.candidates?.[0]?.groundingMetadata,
-    candidates: response.candidates,
+    text: response.text || "",
+    groundingMetadata: response.candidates?.[0]?.groundingMetadata as any,
+    candidates: response.candidates as any,
   };
 }
 
@@ -476,27 +484,33 @@ export async function findDocumentByDisplayName(
 
   const ai = getAI(apiKey);
   let targetDoc: FileSearchDocument | null = null;
-  let documentPager = await ai.fileSearchStores.documents.list({
+  const documentPager = await ai.fileSearchStores.documents.list({
     parent: fileStore.name,
   });
+  let page = documentPager.page;
 
   searchDocsLoop: while (true) {
-    for (const document of documentPager.page) {
-      if (document.displayName === displayName) {
+    for (const document of page) {
+      if (document.displayName === displayName && document.name) {
         targetDoc = {
           name: document.name,
           displayName: document.displayName,
-          createTime: document.createTime,
-          updateTime: document.updateTime,
-          metadata: document.metadata,
+          createTime: document.createTime || new Date().toISOString(),
+          updateTime: document.updateTime || new Date().toISOString(),
+          metadata: (document as any).metadata as
+            | Record<string, string>
+            | undefined,
           mimeType: document.mimeType,
-          sizeBytes: document.sizeBytes,
+          sizeBytes:
+            typeof document.sizeBytes === "string"
+              ? parseInt(document.sizeBytes)
+              : document.sizeBytes,
         };
         break searchDocsLoop;
       }
     }
     if (!documentPager.hasNextPage()) break;
-    documentPager = await documentPager.nextPage();
+    page = await documentPager.nextPage();
   }
 
   if (!targetDoc) {
@@ -523,24 +537,30 @@ export async function listDocuments(
 
   const ai = getAI(apiKey);
   const documents: FileSearchDocument[] = [];
-  let documentPager = await ai.fileSearchStores.documents.list({
+  const documentPager = await ai.fileSearchStores.documents.list({
     parent: fileStore.name,
   });
+  let page = documentPager.page;
 
   while (true) {
-    for (const doc of documentPager.page) {
-      documents.push({
-        name: doc.name,
-        displayName: doc.displayName,
-        createTime: doc.createTime,
-        updateTime: doc.updateTime,
-        metadata: doc.metadata,
-        mimeType: doc.mimeType,
-        sizeBytes: doc.sizeBytes,
-      });
+    for (const doc of page) {
+      if (doc.name && doc.displayName) {
+        documents.push({
+          name: doc.name,
+          displayName: doc.displayName,
+          createTime: doc.createTime || new Date().toISOString(),
+          updateTime: doc.updateTime || new Date().toISOString(),
+          metadata: (doc as any).metadata as Record<string, string> | undefined,
+          mimeType: doc.mimeType,
+          sizeBytes:
+            typeof doc.sizeBytes === "string"
+              ? parseInt(doc.sizeBytes)
+              : doc.sizeBytes,
+        });
+      }
     }
     if (!documentPager.hasNextPage()) break;
-    documentPager = await documentPager.nextPage();
+    page = await documentPager.nextPage();
   }
 
   console.log(`✅ ${documents.length}개의 문서를 찾았습니다`);
@@ -589,20 +609,21 @@ export async function updateDocument(
   const ai = getAI(apiKey);
 
   // 1. 기존 문서 찾기
-  let documentPager = await ai.fileSearchStores.documents.list({
+  const documentPager = await ai.fileSearchStores.documents.list({
     parent: fileStore.name,
   });
+  let page = documentPager.page;
   let foundDoc: any = null;
 
   findLoop: while (true) {
-    for (const doc of documentPager.page) {
+    for (const doc of page) {
       if (doc.displayName === docDisplayName) {
         foundDoc = doc;
         break findLoop;
       }
     }
     if (!documentPager.hasNextPage()) break;
-    documentPager = await documentPager.nextPage();
+    page = await documentPager.nextPage();
   }
 
   // 2. 기존 문서가 있으면 삭제

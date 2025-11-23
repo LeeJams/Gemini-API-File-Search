@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import { useUIState } from "@/store";
-import { cn } from "@/lib/utils";
 import { X, AlertCircle } from "lucide-react";
 
 /**
@@ -22,6 +21,7 @@ export function LoadingOverlay() {
 
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [error, clearError]);
 
   // 로딩 오버레이

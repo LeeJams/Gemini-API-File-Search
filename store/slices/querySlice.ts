@@ -12,12 +12,9 @@ const MAX_HISTORY_SIZE = 50;
  *
  * persist middleware가 적용됨
  */
-export const createQuerySlice: StateCreator<
-  AppStore,
-  [],
-  [],
-  QueryState
-> = (set, get) => ({
+export const createQuerySlice: StateCreator<AppStore, [], [], QueryState> = (
+  set
+) => ({
   // Initial state
   history: [],
   currentResult: null,

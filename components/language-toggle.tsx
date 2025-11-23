@@ -1,7 +1,7 @@
 "use client";
 
-import { useLocale } from 'next-intl';
-import { useRouter, usePathname } from 'next/navigation';
+import { useLocale } from "next-intl";
+import { useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -12,10 +12,10 @@ import {
 import { Languages } from "lucide-react";
 
 const languages = [
-  { code: 'ko', name: '한국어', flag: '🇰🇷' },
-  { code: 'en', name: 'English', flag: '🇺🇸' },
-  { code: 'zh', name: '中文', flag: '🇨🇳' },
-  { code: 'ja', name: '日本語', flag: '🇯🇵' },
+  { code: "ko", name: "한국어", flag: "🇰🇷" },
+  { code: "en", name: "English", flag: "🇺🇸" },
+  { code: "zh", name: "中文", flag: "🇨🇳" },
+  { code: "ja", name: "日本語", flag: "🇯🇵" },
 ];
 
 /**
@@ -30,12 +30,15 @@ export function LanguageToggle() {
 
   const handleLanguageChange = (newLocale: string) => {
     // Remove the current locale from pathname and replace with new locale
-    const pathnameWithoutLocale = pathname.replace(/^\/(ko|en|zh|ja)/, '');
+    const pathnameWithoutLocale = pathname.replace(/^\/(ko|en|zh|ja)/, "");
     const newPathname = `/${newLocale}${pathnameWithoutLocale}`;
     router.push(newPathname);
   };
 
-  const currentLanguage = languages.find(lang => lang.code === locale) || languages[0];
+  const currentLanguage =
+    languages.find((lang) => lang.code === locale) || languages[0];
+
+  if (!currentLanguage) return null;
 
   return (
     <DropdownMenu>

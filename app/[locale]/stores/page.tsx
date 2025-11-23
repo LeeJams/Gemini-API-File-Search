@@ -181,12 +181,18 @@ export default function StoresPage() {
 
   function navigateToWorkspace(store: FileSearchStore) {
     setCurrentStore(store);
-    router.push(`/workspace/${encodeURIComponent(store.displayName)}`);
+    router.push({
+      pathname: "/workspace/[storeName]",
+      params: { storeName: store.displayName },
+    });
   }
 
   function navigateToDocuments(store: FileSearchStore) {
     setCurrentStore(store);
-    router.push(`/documents/${encodeURIComponent(store.displayName)}`);
+    router.push({
+      pathname: "/documents/[storeName]",
+      params: { storeName: store.displayName },
+    });
   }
 
   return (
@@ -344,7 +350,9 @@ export default function StoresPage() {
           <DialogHeader>
             <DialogTitle>{t("deleteConfirmTitle")}</DialogTitle>
             <DialogDescription className="text-sm">
-              {t("deleteConfirmMessage", { name: deleteConfirm?.displayName })}
+              {t("deleteConfirmMessage", {
+                name: deleteConfirm?.displayName || "",
+              })}
               <br />
               <span className="font-semibold text-destructive">
                 {t("deleteConfirmWarning")}

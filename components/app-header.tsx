@@ -1,7 +1,7 @@
 "use client";
 
-import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/routing';
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/routing";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -25,8 +25,8 @@ import {
  * 전역 헤더 - 네비게이션 및 테마 토글
  */
 export function AppHeader() {
-  const t = useTranslations('header');
-  const tCommon = useTranslations('common');
+  const t = useTranslations("header");
+  const tCommon = useTranslations("common");
   const pathname = usePathname();
   const { hasApiKey, clearApiKey } = useAppStore();
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
@@ -35,8 +35,8 @@ export function AppHeader() {
 
   const navItems = [
     {
-      href: "/stores",
-      label: tCommon('stores'),
+      href: "/stores" as const,
+      label: tCommon("stores"),
       icon: Database,
     },
   ];
@@ -63,7 +63,7 @@ export function AppHeader() {
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-6">
           <Link href="/stores" className="flex items-center">
-            <span className="font-bold text-xl">{t('title')}</span>
+            <span className="font-bold text-xl">{t("title")}</span>
           </Link>
 
           <nav className="flex items-center gap-4">
@@ -94,7 +94,7 @@ export function AppHeader() {
           >
             <Key className="h-4 w-4" />
             <span className="hidden sm:inline">
-              {isHydrated && hasApiKey() ? t('apiKeyReset') : t('apiKeyInput')}
+              {isHydrated && hasApiKey() ? t("apiKeyReset") : t("apiKeyInput")}
             </span>
           </Button>
           <LanguageToggle />
@@ -112,11 +112,11 @@ export function AppHeader() {
       <Dialog open={isConfirmDeleteOpen} onOpenChange={setIsConfirmDeleteOpen}>
         <DialogContent className="w-[calc(100%-2rem)] max-w-md">
           <DialogHeader>
-            <DialogTitle>{t('resetConfirmTitle')}</DialogTitle>
+            <DialogTitle>{t("resetConfirmTitle")}</DialogTitle>
             <DialogDescription className="text-sm">
-              {t('resetConfirmMessage')}
+              {t("resetConfirmMessage")}
               <br />
-              {t('resetConfirmDescription')}
+              {t("resetConfirmDescription")}
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
@@ -125,7 +125,7 @@ export function AppHeader() {
               onClick={() => setIsConfirmDeleteOpen(false)}
               className="w-full sm:w-auto"
             >
-              {tCommon('cancel')}
+              {tCommon("cancel")}
             </Button>
             <Button
               variant="destructive"
@@ -133,7 +133,7 @@ export function AppHeader() {
               className="w-full sm:w-auto gap-2"
             >
               <Trash2 className="h-4 w-4" />
-              {t('reset')}
+              {t("reset")}
             </Button>
           </div>
         </DialogContent>
