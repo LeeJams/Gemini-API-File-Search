@@ -49,6 +49,8 @@
     "addStore": "添加存储库",
     "queryWorkspace": "查询工作区",
     "documentManagement": "文档管理",
+    "statsDocuments": "文档 {count} 个",
+    "statsSize": "已使用 {size}",
     "createModalTitle": "添加新存储库",
     "createModalDescription": "创建新的文件搜索存储库",
     "storeName": "存储库名称",

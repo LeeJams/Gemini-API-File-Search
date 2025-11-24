@@ -43,7 +43,7 @@ import type { QueryHistoryItem, GenerationConfig } from "@/types";
 export default function WorkspacePage() {
   const params = useParams();
   const router = useRouter();
-  const storeName = decodeURIComponent(params.storeName as string);
+  const storeId = decodeURIComponent(params.storeId as string);
   const t = useTranslations("workspace");
   const tCommon = useTranslations("common");
 
@@ -80,10 +80,10 @@ export default function WorkspacePage() {
     }
 
     loadStore();
-  }, [_hasHydrated, storeName, apiKey, router]);
+  }, [_hasHydrated, storeId, apiKey, router]);
 
   async function loadStore() {
-    if (currentStore?.displayName === storeName) {
+    if (currentStore?.name === storeId) {
       return;
     }
 
@@ -100,7 +100,7 @@ export default function WorkspacePage() {
         "x-api-key": apiKey || "",
       };
 
-      const response = await fetch(`/api/stores/${storeName}`, { headers });
+      const response = await fetch(`/api/stores/${storeId}`, { headers });
       const data = await response.json();
 
       if (!response.ok || !data.success) {
@@ -161,7 +161,7 @@ export default function WorkspacePage() {
         requestBody.generationConfig = generationConfig;
       }
 
-      const response = await fetch(`/api/stores/${storeName}/query`, {
+      const response = await fetch(`/api/stores/${storeId}/query`, {
         method: "POST",
         headers,
         body: JSON.stringify(requestBody),
@@ -188,7 +188,7 @@ export default function WorkspacePage() {
         query: query.trim(),
         response: data.data.text,
         timestamp: Date.now(),
-        storeName,
+        storeName: storeId,
       };
       addToHistory(historyItem);
 
@@ -577,14 +577,14 @@ export default function WorkspacePage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {history.filter((h) => h.storeName === storeName).length === 0 ? (
+            {history.filter((h) => h.storeName === storeId).length === 0 ? (
               <p className="text-sm text-muted-foreground">
                 {t("historyEmpty")}
               </p>
             ) : (
               <div className="space-y-2">
                 {history
-                  .filter((h) => h.storeName === storeName)
+                  .filter((h) => h.storeName === storeId)
                   .slice(0, 10)
                   .map((item) => (
                     <button

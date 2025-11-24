@@ -49,6 +49,8 @@
     "addStore": "ストアを追加",
     "queryWorkspace": "クエリワークスペース",
     "documentManagement": "ドキュメント管理",
+    "statsDocuments": "ドキュメント {count} 件",
+    "statsSize": "{size} 使用中",
     "createModalTitle": "新しいストアを追加",
     "createModalDescription": "新しいファイル検索ストアを作成",
     "storeName": "ストア名",

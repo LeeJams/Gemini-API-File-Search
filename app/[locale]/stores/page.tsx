@@ -23,7 +23,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus, Trash2, Database, FileText, Calendar } from "lucide-react";
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatFileSize } from "@/lib/utils";
 import type { FileSearchStore } from "@/types";
 
 /**
@@ -163,7 +163,7 @@ export default function StoresPage() {
         "x-api-key": apiKey || "",
       };
 
-      const response = await fetch(`/api/stores/${store.displayName}`, {
+      const response = await fetch(`/api/stores/${store.name}`, {
         method: "DELETE",
         headers,
       });
@@ -187,16 +187,16 @@ export default function StoresPage() {
   function navigateToWorkspace(store: FileSearchStore) {
     setCurrentStore(store);
     router.push({
-      pathname: "/workspace/[storeName]",
-      params: { storeName: store.displayName },
+      pathname: "/workspace/[storeId]",
+      params: { storeId: store.name },
     });
   }
 
   function navigateToDocuments(store: FileSearchStore) {
     setCurrentStore(store);
     router.push({
-      pathname: "/documents/[storeName]",
-      params: { storeName: store.displayName },
+      pathname: "/documents/[storeId]",
+      params: { storeId: store.name },
     });
   }
 
@@ -278,7 +278,29 @@ export default function StoresPage() {
                   {formatDate(store.createTime)}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-2">
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <FileText className="h-3 w-3" />
+                    <span>
+                      {t("statsDocuments", {
+                        count: store.activeDocumentsCount ?? 0,
+                      })}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Database className="h-3 w-3" />
+                    <span>
+                      {t("statsSize", {
+                        size: formatFileSize(
+                          typeof store.sizeBytes === "string"
+                            ? parseInt(store.sizeBytes || "0") || 0
+                            : (store.sizeBytes ?? 0)
+                        ),
+                      })}
+                    </span>
+                  </div>
+                </div>
                 <Button
                   className="w-full"
                   onClick={() => navigateToWorkspace(store)}

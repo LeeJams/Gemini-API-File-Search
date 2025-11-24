@@ -49,6 +49,8 @@
     "addStore": "스토어 추가",
     "queryWorkspace": "쿼리 워크스페이스",
     "documentManagement": "문서 관리",
+    "statsDocuments": "문서 {count}개",
+    "statsSize": "{size} 사용 중",
     "createModalTitle": "새 스토어 추가",
     "createModalDescription": "새로운 File Search Store를 생성합니다",
     "storeName": "스토어 이름",

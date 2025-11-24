@@ -1,26 +1,34 @@
 /**
  * Query API Route
- * POST /api/stores/[displayName]/query - Execute RAG query
+ * POST /api/stores/[storeId]/query - Execute RAG query
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import {
-  findStoreByDisplayName,
-  generateContentWithFileSearch,
-} from "@/lib/gemini";
-import type { ApiResponse, QueryRequest } from "@/types";
+import { generateContentWithFileSearch } from "@/lib/gemini";
+import type { ApiResponse, QueryRequest, FileSearchStore } from "@/types";
 
 /**
- * POST /api/stores/[displayName]/query
+ * POST /api/stores/[storeId]/query
  * Execute RAG query on store
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ displayName: string }> }
+  { params }: { params: Promise<{ storeId: string }> }
 ) {
   try {
-    const apiKey = request.headers.get("x-api-key") || undefined;
-    const { displayName } = await params;
+    const apiKey = request.headers.get("x-api-key");
+
+    if (!apiKey) {
+      return NextResponse.json<ApiResponse>(
+        {
+          success: false,
+          error: "API 키가 필요합니다. x-api-key 헤더를 포함해주세요.",
+        },
+        { status: 401 }
+      );
+    }
+
+    const { storeId } = await params;
     const body: QueryRequest = await request.json();
     const {
       query,
@@ -41,12 +49,18 @@ export async function POST(
       );
     }
 
-    const store = await findStoreByDisplayName(displayName, apiKey);
+    const store: FileSearchStore = {
+      name: storeId,
+      displayName: storeId,
+      createTime: new Date().toISOString(),
+      updateTime: new Date().toISOString(),
+    };
+
     const response = await generateContentWithFileSearch(
       store,
       query.trim(),
-      metadataFilter || null,
       apiKey,
+      metadataFilter || null,
       model || "gemini-2.5-flash",
       systemInstruction,
       generationConfig,
@@ -85,7 +99,8 @@ export async function POST(
         break;
       case 429:
         statusCode = 429;
-        errorMessage = "API 호출 한도를 초과했습니다. 잠시 후 다시 시도해주세요.";
+        errorMessage =
+          "API 호출 한도를 초과했습니다. 잠시 후 다시 시도해주세요.";
         break;
       case 500:
         statusCode = 500;

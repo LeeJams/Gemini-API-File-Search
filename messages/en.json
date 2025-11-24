@@ -49,6 +49,8 @@
     "addStore": "Add Store",
     "queryWorkspace": "Query Workspace",
     "documentManagement": "Document Management",
+    "statsDocuments": "{count} document(s)",
+    "statsSize": "{size} used",
     "createModalTitle": "Add New Store",
     "createModalDescription": "Create a new File Search Store",
     "storeName": "Store Name",

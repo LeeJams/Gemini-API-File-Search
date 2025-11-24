@@ -1,50 +1,50 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  findStoreByDisplayName,
-  findDocumentByDisplayName,
-  deleteDocument,
-} from "@/lib/gemini";
+import { findDocumentByDisplayName, deleteDocument } from "@/lib/gemini";
+import type { FileSearchStore } from "@/types";
 
 /**
- * DELETE /api/stores/:displayName/documents/:docName
+ * DELETE /api/stores/:storeId/documents/:docName
  *
  * 문서 삭제
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ displayName: string; docName: string }> }
+  { params }: { params: Promise<{ storeId: string; docName: string }> }
 ) {
   try {
-    const { displayName, docName } = await params;
+    const apiKey = request.headers.get("x-api-key");
 
-    console.log(`\n🗑️  문서 삭제 요청: ${decodeURIComponent(docName)}`);
-
-    const apiKey = request.headers.get("x-api-key") || undefined;
-
-    // 스토어 검색
-    const fileStore = await findStoreByDisplayName(
-      decodeURIComponent(displayName),
-      apiKey
-    );
-
-    if (!fileStore) {
+    if (!apiKey) {
       return NextResponse.json(
         {
           success: false,
-          error: "스토어를 찾을 수 없습니다",
+          error: "API 키가 필요합니다. x-api-key 헤더를 포함해주세요.",
         },
-        { status: 404 }
+        { status: 401 }
       );
     }
+
+    const { storeId, docName } = await params;
+
+    console.log(`\n🗑️  문서 삭제 요청: ${decodeURIComponent(docName)}`);
+
+    // 스토어 객체 생성
+    const fileStore: FileSearchStore = {
+      name: storeId,
+      displayName: storeId,
+      createTime: new Date().toISOString(),
+      updateTime: new Date().toISOString(),
+    };
 
     // 문서 검색
     const document = await findDocumentByDisplayName(
       fileStore,
-      decodeURIComponent(docName)
+      decodeURIComponent(docName),
+      apiKey
     );
 
     // 문서 삭제
-    await deleteDocument(document);
+    await deleteDocument(document, apiKey);
 
     console.log(`✅ 문서 삭제 완료`);
 
@@ -64,7 +64,7 @@ export async function DELETE(
 
     switch (status) {
       case 401:
-        errorMessage = "API 키가 유효하지 않습니다. 환경 변수를 확인해주세요.";
+        errorMessage = "API 키가 유효하지 않습니다.";
         break;
       case 403:
         errorMessage =

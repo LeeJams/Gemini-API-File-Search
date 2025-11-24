@@ -47,7 +47,7 @@ export default function DocumentsPage() {
   const router = useRouter();
   const t = useTranslations("documents");
   const tCommon = useTranslations("common");
-  const storeName = decodeURIComponent(params.storeName as string);
+  const storeId = decodeURIComponent(params.storeId as string);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { currentStore, setCurrentStore } = useStoresState();
@@ -72,6 +72,10 @@ export default function DocumentsPage() {
   >([]);
 
   useEffect(() => {
+    console.log("[DocumentsPage] storeId param (decoded):", storeId);
+  }, [storeId]);
+
+  useEffect(() => {
     // Wait for hydration to complete before checking API key
     if (!_hasHydrated) {
       return;
@@ -83,7 +87,7 @@ export default function DocumentsPage() {
     }
 
     loadStore();
-  }, [_hasHydrated, storeName, apiKey, router]);
+  }, [_hasHydrated, storeId, apiKey, router]);
 
   useEffect(() => {
     if (currentStore && hasApiKey()) {
@@ -92,7 +96,7 @@ export default function DocumentsPage() {
   }, [currentStore]);
 
   async function loadStore() {
-    if (currentStore?.displayName === storeName) {
+    if (currentStore?.name === storeId) {
       return;
     }
 
@@ -109,7 +113,7 @@ export default function DocumentsPage() {
         "x-api-key": apiKey || "",
       };
 
-      const response = await fetch(`/api/stores/${storeName}`, { headers });
+      const response = await fetch(`/api/stores/${storeId}`, { headers });
       const data = await response.json();
 
       if (!response.ok || !data.success) {
@@ -141,7 +145,7 @@ export default function DocumentsPage() {
         "x-api-key": apiKey || "",
       };
 
-      const response = await fetch(`/api/stores/${storeName}/documents`, {
+      const response = await fetch(`/api/stores/${storeId}/documents`, {
         headers,
       });
       const data = await response.json();
@@ -284,7 +288,7 @@ export default function DocumentsPage() {
         "x-api-key": apiKey || "",
       };
 
-      const response = await fetch(`/api/stores/${storeName}/upload`, {
+      const response = await fetch(`/api/stores/${storeId}/upload`, {
         method: "POST",
         headers,
         body: formData,
@@ -342,7 +346,7 @@ export default function DocumentsPage() {
       };
 
       const response = await fetch(
-        `/api/stores/${storeName}/documents/${encodeURIComponent(doc.displayName)}`,
+        `/api/stores/${storeId}/documents/${encodeURIComponent(doc.displayName)}`,
         {
           method: "DELETE",
           headers,

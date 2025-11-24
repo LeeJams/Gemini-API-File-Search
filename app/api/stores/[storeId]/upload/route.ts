@@ -1,26 +1,42 @@
 /**
  * Upload API Route
- * POST /api/stores/[displayName]/upload - Upload files to store
+ * POST /api/stores/[storeId]/upload - Upload files to store
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { findStoreByDisplayName, uploadWithCustomChunking } from "@/lib/gemini";
-import type { ApiResponse, UploadFileResult } from "@/types";
+import { uploadWithCustomChunking } from "@/lib/gemini";
+import type { ApiResponse, UploadFileResult, FileSearchStore } from "@/types";
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 const MAX_FILES = 10;
 
 /**
- * POST /api/stores/[displayName]/upload
+ * POST /api/stores/[storeId]/upload
  * Upload multiple files to store
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ displayName: string }> }
+  { params }: { params: Promise<{ storeId: string }> }
 ) {
   try {
-    const apiKey = request.headers.get("x-api-key") || undefined;
-    const { displayName } = await params;
+    const apiKey = request.headers.get("x-api-key");
+
+    if (!apiKey) {
+      return NextResponse.json<ApiResponse>(
+        {
+          success: false,
+          error: "API 키가 필요합니다. x-api-key 헤더를 포함해주세요.",
+        },
+        { status: 401 }
+      );
+    }
+
+    const { storeId } = await params;
+
+    console.log("\n📥 파일 업로드 요청 수신", {
+      storeId,
+      hasApiKey: !!apiKey,
+    });
 
     // Parse FormData
     const formData = await request.formData();
@@ -47,8 +63,13 @@ export async function POST(
       );
     }
 
-    // Find store
-    const store = await findStoreByDisplayName(displayName, apiKey);
+    // Create store object
+    const store: FileSearchStore = {
+      name: storeId,
+      displayName: storeId,
+      createTime: new Date().toISOString(),
+      updateTime: new Date().toISOString(),
+    };
 
     // Parse custom metadata
     let customMetadata: Array<{ key: string; value: any }> = [];
@@ -100,6 +121,12 @@ export async function POST(
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
 
+        console.log(`\n📤 파일 업로드 준비:`, {
+          fileName: file.name,
+          fileSize: file.size,
+          mimeType: file.type,
+        });
+
         // Upload to Gemini directly using buffer
         await uploadWithCustomChunking(
           store,
@@ -112,6 +139,8 @@ export async function POST(
           },
           apiKey
         );
+
+        console.log(`✅ 파일 업로드 완료: ${file.name}`);
 
         results.push({
           fileName: file.name,
@@ -175,7 +204,7 @@ export async function POST(
         errorMessage = `잘못된 요청입니다: ${error.message}`;
         break;
       case 401:
-        errorMessage = "API 키가 유효하지 않습니다. 환경 변수를 확인해주세요.";
+        errorMessage = "API 키가 유효하지 않습니다.";
         break;
       case 403:
         errorMessage =

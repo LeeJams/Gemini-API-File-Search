@@ -1,18 +1,21 @@
 /**
- * Stores API Route
- * GET /api/stores - List all stores
- * POST /api/stores - Create new store
+ * Store Detail API Route
+ * GET /api/stores/[storeId] - Get store details
+ * DELETE /api/stores/[storeId] - Delete store
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createFileSearchStore, listAllStores } from "@/lib/gemini";
-import type { ApiResponse, CreateStoreRequest } from "@/types";
+import { deleteFileSearchStore } from "@/lib/gemini";
+import type { ApiResponse, FileSearchStore } from "@/types";
 
 /**
- * GET /api/stores
- * List all File Search Stores
+ * GET /api/stores/[storeId]
+ * Get specific store details
  */
-export async function GET(request: NextRequest) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ storeId: string }> }
+) {
   try {
     const apiKey = request.headers.get("x-api-key");
 
@@ -26,22 +29,34 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const stores = await listAllStores(apiKey);
+    const { storeId } = await params;
+
+    // ID만 가지고 있으므로 displayName은 클라이언트에서 관리
+    const store: FileSearchStore = {
+      name: storeId,
+      displayName: storeId, // 실제 displayName은 클라이언트에서 관리
+      createTime: new Date().toISOString(),
+      updateTime: new Date().toISOString(),
+    };
 
     return NextResponse.json<ApiResponse>({
       success: true,
       data: {
-        data: stores,
-        count: stores.length,
+        name: store.name,
+        displayName: store.displayName,
+        createTime: store.createTime,
+        updateTime: store.updateTime,
       },
     });
   } catch (error: any) {
-    console.error("스토어 목록 조회 오류:", error);
+    console.error("스토어 조회 오류:", error);
 
     // HTTP 상태 코드별 에러 처리
-    const status = error.status || error.statusCode || 500;
-    let errorMessage =
-      error.message || "스토어 목록 조회 중 오류가 발생했습니다";
+    const status =
+      error.status ||
+      error.statusCode ||
+      (error.message?.includes("찾을 수 없습니다") ? 404 : 500);
+    let errorMessage = error.message || "스토어 조회 중 오류가 발생했습니다";
 
     switch (status) {
       case 401:
@@ -50,6 +65,9 @@ export async function GET(request: NextRequest) {
       case 403:
         errorMessage =
           "API 키 권한이 없거나 File Search가 활성화되지 않았습니다.";
+        break;
+      case 404:
+        // Keep the original error message for 404
         break;
       case 429:
         errorMessage =
@@ -72,10 +90,13 @@ export async function GET(request: NextRequest) {
 }
 
 /**
- * POST /api/stores
- * Create a new File Search Store
+ * DELETE /api/stores/[storeId]
+ * Delete a store
  */
-export async function POST(request: NextRequest) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ storeId: string }> }
+) {
   try {
     const apiKey = request.headers.get("x-api-key");
 
@@ -89,46 +110,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body: CreateStoreRequest = await request.json();
-    const { displayName } = body;
+    const { storeId } = await params;
 
-    if (!displayName || !displayName.trim()) {
-      return NextResponse.json<ApiResponse>(
-        {
-          success: false,
-          error: "displayName이 필요합니다",
-        },
-        { status: 400 }
-      );
-    }
+    const store: FileSearchStore = {
+      name: storeId,
+      displayName: storeId,
+      createTime: new Date().toISOString(),
+      updateTime: new Date().toISOString(),
+    };
 
-    const store = await createFileSearchStore(displayName.trim(), apiKey);
+    await deleteFileSearchStore(store, apiKey);
 
     return NextResponse.json<ApiResponse>({
       success: true,
-      message: "스토어가 생성되었습니다",
-      data: {
-        name: store.name,
-        displayName: store.displayName,
-      },
+      message: "스토어가 삭제되었습니다",
     });
   } catch (error: any) {
-    console.error("스토어 생성 오류:", error);
+    console.error("스토어 삭제 오류:", error);
 
     // HTTP 상태 코드별 에러 처리
-    const status = error.status || error.statusCode || 500;
-    let errorMessage = error.message || "스토어 생성 중 오류가 발생했습니다";
+    const status =
+      error.status ||
+      error.statusCode ||
+      (error.message?.includes("찾을 수 없습니다") ? 404 : 500);
+    let errorMessage = error.message || "스토어 삭제 중 오류가 발생했습니다";
 
     switch (status) {
-      case 400:
-        errorMessage = `잘못된 요청입니다: ${error.message}`;
-        break;
       case 401:
         errorMessage = "API 키가 유효하지 않습니다.";
         break;
       case 403:
         errorMessage =
           "API 키 권한이 없거나 File Search가 활성화되지 않았습니다.";
+        break;
+      case 404:
+        // Keep the original error message for 404
         break;
       case 429:
         errorMessage =

@@ -9,10 +9,17 @@
  * Gemini API에서 관리하는 파일 검색 스토어
  */
 export interface FileSearchStore {
-  /** Store의 고유 식별자 (예: fileSearchStores/abc123) */
+  /**
+   * Store의 고유 ID (예: "test-aec0gqdpt7m4")
+   * API 호출 시 자동으로 "fileSearchStores/" 프리픽스가 추가됩니다
+   */
   name: string;
   /** 사용자가 지정한 표시 이름 */
   displayName: string;
+  /** 활성 문서 개수 */
+  activeDocumentsCount?: number;
+  /** 스토어 전체 크기 (바이트) */
+  sizeBytes?: number;
   /** 생성 시각 */
   createTime: string;
   /** 마지막 업데이트 시각 */
