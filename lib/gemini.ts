@@ -312,35 +312,46 @@ function getMimeType(filePath: string): string {
  * 커스텀 청킹 전략으로 파일 업로드
  *
  * @param fileStore - 업로드할 대상 스토어 객체
- * @param filePath - 업로드할 파일의 경로
+ * @param file - 업로드할 파일 (경로 문자열 또는 Uint8Array/Buffer)
  * @param options - 업로드 옵션
  * @param apiKey - Gemini API 키
  * @returns 업로드 완료된 operation 결과
  */
 export async function uploadWithCustomChunking(
   fileStore: FileSearchStore,
-  filePath: string,
+  file: string | Uint8Array,
   options: UploadOptions = {},
   apiKey?: string
 ): Promise<Operation> {
-  console.log(`\n📄 커스텀 청킹으로 업로드 중: ${filePath}`);
+  const isFilePath = typeof file === "string";
+  const displayVal = isFilePath ? file : "uploaded_file";
+  console.log(
+    `\n📄 커스텀 청킹으로 업로드 중: ${options.displayName || displayVal}`
+  );
 
   const {
-    displayName = filePath.substring(filePath.lastIndexOf("/") + 1),
+    displayName = isFilePath
+      ? file.substring(file.lastIndexOf("/") + 1)
+      : "file",
     customMetadata = [],
     maxTokensPerChunk = 500,
     maxOverlapTokens = 50,
     mimeType,
   } = options;
 
-  const resolvedMimeType = mimeType || getMimeType(filePath);
+  const resolvedMimeType =
+    mimeType || (isFilePath ? getMimeType(file) : "application/octet-stream");
 
   const ai = getAI(apiKey);
+
+  const fileInput: string | Blob = isFilePath
+    ? file
+    : new Blob([file as any], { type: resolvedMimeType });
 
   // 재시도 로직 적용하여 업로드
   let advancedUploadOp = await retryWithBackoff(async () => {
     return await ai.fileSearchStores.uploadToFileSearchStore({
-      file: filePath,
+      file: fileInput,
       fileSearchStoreName: fileStore.name,
       config: {
         displayName,

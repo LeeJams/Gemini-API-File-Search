@@ -4,13 +4,9 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile, unlink, mkdir } from "fs/promises";
-import { existsSync } from "fs";
-import path from "path";
 import { findStoreByDisplayName, uploadWithCustomChunking } from "@/lib/gemini";
 import type { ApiResponse, UploadFileResult } from "@/types";
 
-const UPLOAD_DIR = path.join(process.cwd(), "uploads");
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 const MAX_FILES = 10;
 
@@ -25,11 +21,6 @@ export async function POST(
   try {
     const apiKey = request.headers.get("x-api-key") || undefined;
     const { displayName } = await params;
-
-    // Ensure uploads directory exists
-    if (!existsSync(UPLOAD_DIR)) {
-      await mkdir(UPLOAD_DIR, { recursive: true });
-    }
 
     // Parse FormData
     const formData = await request.formData();
@@ -106,41 +97,28 @@ export async function POST(
           continue;
         }
 
-        // Save file temporarily
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
-        const tempFilePath = path.join(
-          UPLOAD_DIR,
-          `${Date.now()}-${file.name}`
+
+        // Upload to Gemini directly using buffer
+        await uploadWithCustomChunking(
+          store,
+          buffer,
+          {
+            displayName: file.name,
+            mimeType: file.type,
+            customMetadata:
+              customMetadata.length > 0 ? customMetadata : undefined,
+          },
+          apiKey
         );
 
-        await writeFile(tempFilePath, buffer);
+        results.push({
+          fileName: file.name,
+          success: true,
+        });
 
-        try {
-          // Upload to Gemini
-          await uploadWithCustomChunking(
-            store,
-            tempFilePath,
-            {
-              displayName: file.name,
-              customMetadata:
-                customMetadata.length > 0 ? customMetadata : undefined,
-            },
-            apiKey
-          );
-
-          results.push({
-            fileName: file.name,
-            success: true,
-          });
-
-          successCount++;
-        } finally {
-          // Clean up temp file
-          if (existsSync(tempFilePath)) {
-            await unlink(tempFilePath);
-          }
-        }
+        successCount++;
       } catch (error: any) {
         console.error(`파일 업로드 오류 (${file.name}):`, error);
         results.push({
