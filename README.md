@@ -1,3 +1,5 @@
+[👉 Open the Gemini File Search Manager](https://gemini-api-file-search.vercel.app)
+
 # Gemini File Search Manager
 
 **A modern web-based management tool for Google's Gemini File Search API**
