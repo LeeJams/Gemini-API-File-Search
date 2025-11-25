@@ -4,47 +4,47 @@
 
 @layer base {
   :root {
-    --background: 0 0% 98%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 0 0% 100%;
+    --foreground: 224 71.4% 4.1%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 224 71.4% 4.1%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 224 71.4% 4.1%;
     --primary: 150 45% 42%;
     --primary-foreground: 0 0% 100%;
     --secondary: 150 25% 90%;
     --secondary-foreground: 150 45% 15%;
-    --muted: 210 40% 93%;
-    --muted-foreground: 215.4 16.3% 40%;
+    --muted: 220 14.3% 95.9%;
+    --muted-foreground: 220 8.9% 46.1%;
     --accent: 150 25% 90%;
     --accent-foreground: 150 45% 15%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 85%;
-    --input: 214.3 31.8% 85%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
     --ring: 150 45% 42%;
-    --radius: 0.5rem;
+    --radius: 0.75rem;
   }
 
   .dark {
-    --background: 0 0% 8%;
-    --foreground: 0 0% 92%;
-    --card: 0 0% 12%;
-    --card-foreground: 0 0% 92%;
-    --popover: 0 0% 12%;
-    --popover-foreground: 0 0% 92%;
+    --background: 224 71.4% 4.1%;
+    --foreground: 210 20% 98%;
+    --card: 224 71.4% 4.1%;
+    --card-foreground: 210 20% 98%;
+    --popover: 224 71.4% 4.1%;
+    --popover-foreground: 210 20% 98%;
     --primary: 150 35% 45%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 18%;
-    --secondary-foreground: 0 0% 88%;
-    --muted: 0 0% 18%;
-    --muted-foreground: 0 0% 68%;
-    --accent: 0 0% 18%;
-    --accent-foreground: 0 0% 88%;
-    --destructive: 0 63% 51%;
-    --destructive-foreground: 0 0% 92%;
-    --border: 0 0% 22%;
-    --input: 0 0% 22%;
+    --secondary: 150 25% 90%;
+    --secondary-foreground: 150 45% 15%;
+    --muted: 215 27.9% 16.9%;
+    --muted-foreground: 217.9 10.6% 64.9%;
+    --accent: 150 25% 90%;
+    --accent-foreground: 150 45% 15%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 215 27.9% 16.9%;
+    --input: 215 27.9% 16.9%;
     --ring: 150 35% 45%;
   }
 }
@@ -53,6 +53,7 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
@@ -60,6 +61,7 @@
 }
 
 @layer utilities {
+
   /* Custom scrollbar */
   .scrollbar-thin {
     scrollbar-width: thin;
@@ -95,7 +97,12 @@
   }
 
   @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
   }
 }

@@ -51,7 +51,7 @@ export default async function LocaleLayout({
     <html lang={locale} suppressHydrationWarning>
       <body
         className={cn(
-          "min-h-screen bg-background font-sans antialiased",
+          "min-h-screen bg-background font-sans antialiased selection:bg-primary/20 selection:text-primary",
           inter.variable
         )}
       >

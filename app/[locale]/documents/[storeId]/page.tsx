@@ -25,13 +25,14 @@ import { Label } from "@/components/ui/label";
 import {
   ArrowLeft,
   Upload,
-  File,
+  File as FileIcon,
   Calendar,
   HardDrive,
   Trash2,
   Eye,
   Plus,
   X,
+  FileText,
 } from "lucide-react";
 import { formatDate, formatFileSize } from "@/lib/utils";
 import { DocumentDetailModal } from "@/components/DocumentDetailModal";
@@ -380,7 +381,7 @@ export default function DocumentsPage() {
   }
 
   return (
-    <div className="container py-6 md:py-8">
+    <div className="container py-6 md:py-8 max-w-7xl">
       {/* API Key Modal */}
       <ApiKeyModal
         open={isApiKeyModalOpen}
@@ -394,18 +395,18 @@ export default function DocumentsPage() {
       />
 
       {/* Header */}
-      <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => router.push("/stores")}
-            className="flex-shrink-0"
+            className="flex-shrink-0 rounded-full hover:bg-accent"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="min-w-0 flex-1">
-            <h1 className="text-2xl md:text-3xl font-bold truncate">
+            <h1 className="text-2xl md:text-3xl font-bold truncate tracking-tight">
               {currentStore.displayName}
             </h1>
             <p className="text-sm text-muted-foreground">{t("title")}</p>
@@ -413,17 +414,18 @@ export default function DocumentsPage() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:gap-6 lg:grid-cols-[minmax(300px,400px)_1fr]">
+      <div className="grid gap-6 md:gap-8 lg:grid-cols-[minmax(320px,400px)_1fr]">
         {/* Upload Section */}
-        <Card className="min-w-0">
-          <CardHeader>
-            <CardTitle className="text-lg md:text-xl">
+        <Card className="min-w-0 border-border/40 shadow-sm h-fit">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg font-semibold flex items-center gap-2">
+              <Upload className="h-5 w-5 text-primary" />
               {t("fileUpload")}
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="rounded-lg border-2 border-dashed p-4 md:p-6 text-center">
-              <Upload className="mx-auto mb-3 md:mb-4 h-10 md:h-12 w-10 md:w-12 text-muted-foreground" />
+          <CardContent className="space-y-5">
+            <div className="rounded-xl border-2 border-dashed border-primary/20 bg-primary/5 p-6 md:p-8 text-center transition-colors hover:border-primary/40 hover:bg-primary/10">
+              <Upload className="mx-auto mb-4 h-12 w-12 text-primary/60" />
               <input
                 ref={fileInputRef}
                 type="file"
@@ -435,112 +437,140 @@ export default function DocumentsPage() {
               />
               <label
                 htmlFor="file-upload"
-                className="cursor-pointer text-sm text-muted-foreground hover:text-foreground block"
+                className="cursor-pointer block"
               >
-                {t("clickToAdd")}
+                <span className="text-base font-medium text-foreground hover:text-primary transition-colors">
+                  {t("clickToAdd")}
+                </span>
                 <br />
-                <span className="text-xs">{t("uploadHint")}</span>
+                <span className="text-xs text-muted-foreground mt-2 block">{t("uploadHint")}</span>
               </label>
             </div>
 
             {uploadFiles.length > 0 && (
-              <div className="space-y-2">
+              <div className="space-y-3 animate-fade-in">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium">
+                  <p className="text-sm font-medium text-foreground/80">
                     {t("selectedFilesCount", { count: uploadFiles.length })}
                   </p>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={handleClearAllFiles}
-                    className="h-auto py-1 text-xs text-destructive hover:text-destructive"
+                    className="h-auto py-1 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
                   >
                     {t("deleteAll")}
                   </Button>
                 </div>
-                <div className="max-h-[200px] space-y-1 overflow-y-auto">
+                <div className="max-h-[240px] space-y-2 overflow-y-auto pr-1 scrollbar-thin">
                   {uploadFiles.map((file, idx) => (
                     <div
                       key={idx}
-                      className="group flex items-center justify-between gap-2 rounded-md border p-2 text-sm transition-colors hover:bg-accent"
+                      className="group flex items-center justify-between gap-3 rounded-lg border bg-card p-3 text-sm transition-all hover:border-primary/30 hover:shadow-sm"
                     >
-                      <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
-                        <span className="truncate text-xs md:text-sm">
-                          {file.name}
-                        </span>
-                        <span className="text-xs text-muted-foreground whitespace-nowrap">
-                          {formatFileSize(file.size)}
-                        </span>
+                      <div className="flex min-w-0 flex-1 items-center gap-3">
+                        <div className="rounded bg-muted p-1.5">
+                          <FileIcon className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium">
+                            {file.name}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {formatFileSize(file.size)}
+                          </p>
+                        </div>
                       </div>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 shrink-0 opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                        className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                         onClick={() => handleRemoveFile(idx)}
                       >
-                        <Trash2 className="h-3 w-3 text-destructive" />
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   ))}
                 </div>
 
                 {/* Custom Metadata Section */}
-                <div className="space-y-4 pt-2">
-                  <div className="space-y-3">
+                <div className="space-y-4 pt-4 border-t border-border/40">
+                  <div className="flex items-center justify-between">
                     <div>
-                      <Label className="text-base font-semibold">
+                      <Label className="text-sm font-semibold">
                         {t("customMetadata")}
                       </Label>
-                      <p className="text-sm text-muted-foreground mt-1">
+                      <p className="text-xs text-muted-foreground mt-0.5">
                         {t("customMetadataHint")}
                       </p>
                     </div>
                     <Button
                       type="button"
                       variant="outline"
+                      size="sm"
                       onClick={handleAddMetadata}
                       disabled={customMetadata.length >= 20}
-                      className="w-full"
+                      className="h-8"
                     >
-                      <Plus className="h-4 w-4 mr-2" />
+                      <Plus className="h-3.5 w-3.5 mr-1.5" />
                       {t("addMetadata")}
                     </Button>
                   </div>
 
                   {customMetadata.length > 0 && (
-                    <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                    <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1 scrollbar-thin">
                       {customMetadata.map((meta, idx) => (
                         <div
                           key={idx}
-                          className="flex gap-3 p-4 rounded-lg border bg-card"
+                          className="flex gap-2 p-3 rounded-lg border bg-muted/30 relative group"
                         >
-                          <div className="flex-1 space-y-3">
-                            <div>
-                              <Label className="text-xs text-muted-foreground mb-1.5 block">
-                                {t("metadataKey")}
-                              </Label>
-                              <Input
-                                placeholder={t("metadataKeyPlaceholder")}
-                                value={meta.key}
-                                onChange={(e) =>
-                                  handleMetadataChange(
-                                    idx,
-                                    "key",
-                                    e.target.value
-                                  )
-                                }
-                                className="h-10"
-                              />
+                          <div className="flex-1 space-y-2">
+                            <div className="grid grid-cols-2 gap-2">
+                              <div className="space-y-1">
+                                <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                                  {t("metadataKey")}
+                                </Label>
+                                <Input
+                                  placeholder="Key"
+                                  value={meta.key}
+                                  onChange={(e) =>
+                                    handleMetadataChange(
+                                      idx,
+                                      "key",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="h-8 text-xs bg-background"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                                  {t("metadataType")}
+                                </Label>
+                                <select
+                                  value={meta.type}
+                                  onChange={(e) =>
+                                    handleMetadataChange(
+                                      idx,
+                                      "type",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="w-full h-8 rounded-md border border-input bg-background px-2 py-1 text-xs ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                >
+                                  <option value="string">String</option>
+                                  <option value="number">Number</option>
+                                  <option value="stringList">List</option>
+                                </select>
+                              </div>
                             </div>
-                            <div>
-                              <Label className="text-xs text-muted-foreground mb-1.5 block">
+                            <div className="space-y-1">
+                              <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">
                                 {t("metadataValue")}
                               </Label>
                               {meta.type === "stringList" ? (
                                 <Input
-                                  placeholder={t(
-                                    "metadataValueListPlaceholder"
-                                  )}
+                                  placeholder="Value1, Value2, ..."
                                   value={meta.value}
                                   onChange={(e) =>
                                     handleMetadataChange(
@@ -549,14 +579,14 @@ export default function DocumentsPage() {
                                       e.target.value
                                     )
                                   }
-                                  className="h-10"
+                                  className="h-8 text-xs bg-background"
                                 />
                               ) : (
                                 <Input
                                   type={
                                     meta.type === "number" ? "number" : "text"
                                   }
-                                  placeholder={t("metadataValuePlaceholder")}
+                                  placeholder="Value"
                                   value={meta.value}
                                   onChange={(e) =>
                                     handleMetadataChange(
@@ -565,35 +595,9 @@ export default function DocumentsPage() {
                                       e.target.value
                                     )
                                   }
-                                  className="h-10"
+                                  className="h-8 text-xs bg-background"
                                 />
                               )}
-                            </div>
-                            <div>
-                              <Label className="text-xs text-muted-foreground mb-1.5 block">
-                                {t("metadataType")}
-                              </Label>
-                              <select
-                                value={meta.type}
-                                onChange={(e) =>
-                                  handleMetadataChange(
-                                    idx,
-                                    "type",
-                                    e.target.value
-                                  )
-                                }
-                                className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                              >
-                                <option value="string">
-                                  {t("metadataTypeString")}
-                                </option>
-                                <option value="number">
-                                  {t("metadataTypeNumber")}
-                                </option>
-                                <option value="stringList">
-                                  {t("metadataTypeStringList")}
-                                </option>
-                              </select>
                             </div>
                           </div>
                           <Button
@@ -601,9 +605,9 @@ export default function DocumentsPage() {
                             variant="ghost"
                             size="icon"
                             onClick={() => handleRemoveMetadata(idx)}
-                            className="h-10 w-10 shrink-0 mt-6"
+                            className="h-6 w-6 shrink-0 absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
                           >
-                            <X className="h-5 w-5 text-destructive" />
+                            <X className="h-3.5 w-3.5" />
                           </Button>
                         </div>
                       ))}
@@ -611,7 +615,7 @@ export default function DocumentsPage() {
                   )}
                 </div>
 
-                <Button onClick={handleUpload} className="w-full">
+                <Button onClick={handleUpload} className="w-full shadow-sm hover:shadow-md transition-all">
                   <Upload className="mr-2 h-4 w-4" />
                   {t("uploadButton", { count: uploadFiles.length })}
                 </Button>
@@ -621,40 +625,48 @@ export default function DocumentsPage() {
         </Card>
 
         {/* Documents List */}
-        <Card className="min-w-0">
-          <CardHeader>
-            <CardTitle className="text-lg md:text-xl">
-              {t("documentList", { count: documents.length })}
-            </CardTitle>
+        <Card className="min-w-0 border-border/40 shadow-sm">
+          <CardHeader className="pb-4 border-b border-border/40 bg-muted/10">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                <FileText className="h-5 w-5 text-primary" />
+                {t("documentList", { count: documents.length })}
+              </CardTitle>
+              {/* Optional: Add sort/filter controls here */}
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0">
             {documents.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8 md:py-12 text-center">
-                <File className="mb-3 md:mb-4 h-10 md:h-12 w-10 md:w-12 text-muted-foreground" />
-                <h3 className="mb-2 text-base md:text-lg font-semibold">
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <div className="p-4 rounded-full bg-muted/50 mb-4">
+                  <FileIcon className="h-8 w-8 text-muted-foreground/50" />
+                </div>
+                <h3 className="mb-2 text-lg font-semibold text-foreground/80">
                   {t("emptyTitle")}
                 </h3>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground max-w-xs mx-auto">
                   {t("emptyDescription")}
                 </p>
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="divide-y divide-border/40">
                 {documents.map((doc) => (
                   <div
                     key={doc.name}
-                    className="group flex items-center justify-between rounded-lg border p-3 md:p-4 transition-colors hover:bg-accent"
+                    className="group flex items-center justify-between p-4 transition-all hover:bg-muted/30"
                   >
                     <div
-                      className="flex items-center gap-2 md:gap-3 flex-1 min-w-0 cursor-pointer"
+                      className="flex items-center gap-4 flex-1 min-w-0 cursor-pointer"
                       onClick={() => handleDocumentClick(doc)}
                     >
-                      <File className="h-4 md:h-5 w-4 md:w-5 text-primary flex-shrink-0" />
+                      <div className="rounded-lg bg-primary/10 p-2 text-primary group-hover:bg-primary/20 transition-colors">
+                        <FileIcon className="h-5 w-5" />
+                      </div>
                       <div className="min-w-0 flex-1">
-                        <p className="font-medium text-sm md:text-base truncate">
+                        <p className="font-medium text-sm md:text-base truncate text-foreground/90 group-hover:text-primary transition-colors">
                           {doc.displayName}
                         </p>
-                        <div className="flex items-center gap-2 md:gap-3 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
                           <span className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
                             <span className="hidden sm:inline">
@@ -677,7 +689,7 @@ export default function DocumentsPage() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 md:h-10 md:w-10 opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                        className="h-8 w-8 md:h-9 md:w-9 text-muted-foreground hover:text-foreground"
                         onClick={() => handleDocumentClick(doc)}
                       >
                         <Eye className="h-4 w-4" />
@@ -685,13 +697,13 @@ export default function DocumentsPage() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 md:h-10 md:w-10 opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                        className="h-8 w-8 md:h-9 md:w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                         onClick={(e) => {
                           e.stopPropagation();
                           setDeleteConfirm(doc);
                         }}
                       >
-                        <Trash2 className="h-4 w-4 text-destructive" />
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>

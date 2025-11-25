@@ -59,22 +59,27 @@ export function AppHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center gap-6">
-          <Link href="/stores" className="flex items-center">
-            <span className="font-bold text-xl">{t("title")}</span>
+        <div className="flex items-center gap-8">
+          <Link href="/stores" className="flex items-center gap-2 transition-opacity hover:opacity-90">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <Database className="h-5 w-5" />
+            </div>
+            <span className="font-bold text-xl tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+              {t("title")}
+            </span>
           </Link>
 
-          <nav className="flex items-center gap-4">
+          <nav className="flex items-center gap-1">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary",
+                  "flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all hover:bg-accent hover:text-accent-foreground",
                   pathname.endsWith(item.href)
-                    ? "text-foreground"
+                    ? "bg-accent text-accent-foreground"
                     : "text-muted-foreground"
                 )}
               >
@@ -90,15 +95,17 @@ export function AppHeader() {
             variant="outline"
             size="sm"
             onClick={handleApiKeyButtonClick}
-            className="gap-2"
+            className="gap-2 rounded-full border-border/50 bg-background/50 backdrop-blur-sm hover:bg-accent hover:text-accent-foreground"
           >
             <Key className="h-4 w-4" />
             <span className="hidden sm:inline">
               {isHydrated && hasApiKey() ? t("apiKeyReset") : t("apiKeyInput")}
             </span>
           </Button>
-          <LanguageToggle />
-          <ThemeToggle />
+          <div className="flex items-center gap-1 border-l border-border/50 pl-2 ml-2">
+            <LanguageToggle />
+            <ThemeToggle />
+          </div>
         </div>
       </div>
 
