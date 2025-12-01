@@ -47,6 +47,7 @@
     "emptyTitle": "스토어가 없습니다",
     "emptyDescription": "새 스토어를 추가하여 시작하세요",
     "addStore": "스토어 추가",
+    "enterStore": "스토어 입장",
     "queryWorkspace": "쿼리 워크스페이스",
     "documentManagement": "문서 관리",
     "statsDocuments": "문서 {count}개",

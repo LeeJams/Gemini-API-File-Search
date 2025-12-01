@@ -12,8 +12,8 @@ export const routing = defineRouting({
   pathnames: {
     "/": "/",
     "/stores": "/stores",
-    "/workspace/[storeId]": "/workspace/[storeId]",
-    "/documents/[storeId]": "/documents/[storeId]",
+    "/store/[storeId]/workspace": "/store/[storeId]/workspace",
+    "/store/[storeId]/documents": "/store/[storeId]/documents",
   },
 });
 
