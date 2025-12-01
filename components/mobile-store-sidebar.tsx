@@ -17,7 +17,7 @@ import {
   ChevronLeft,
   Menu,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+
 
 interface MobileStoreSidebarProps {
   storeId: string;
@@ -69,7 +69,7 @@ export function MobileStoreSidebar({ storeId, storeName }: MobileStoreSidebarPro
               </div>
               <div className="space-y-1">
                 {items.map((item) => (
-                  <Link key={item.href} href={item.href} onClick={() => setOpen(false)}>
+                  <Link key={item.href} href={item.href as any} onClick={() => setOpen(false)}>
                     <Button
                       variant={pathname?.startsWith(item.href) ? "secondary" : "ghost"}
                       className="w-full justify-start"

@@ -48,7 +48,7 @@ export function StoreSidebar({ storeId, className }: StoreSidebarProps) {
           </div>
           <div className="space-y-1">
             {items.map((item) => (
-              <Link key={item.href} href={item.href}>
+              <Link key={item.href} href={item.href as any}>
                 <Button
                   variant={pathname?.startsWith(item.href) ? "secondary" : "ghost"}
                   className="w-full justify-start"
