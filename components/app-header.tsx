@@ -18,6 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { MobileHeaderMenu } from "@/components/mobile-header-menu";
 
 /**
  * App Header Component
@@ -61,12 +62,12 @@ export function AppHeader() {
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4 md:gap-6">
           <Link href="/stores" className="flex items-center">
-            <span className="font-bold text-xl">{t("title")}</span>
+            <span className="font-bold text-lg md:text-xl">{t("title")}</span>
           </Link>
 
-          <nav className="flex items-center gap-4">
+          <nav className="hidden md:flex items-center gap-4">
             {navItems.map((item) => (
               <Link
                 key={item.href}
@@ -86,19 +87,22 @@ export function AppHeader() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleApiKeyButtonClick}
-            className="gap-2"
-          >
-            <Key className="h-4 w-4" />
-            <span className="hidden sm:inline">
-              {isHydrated && hasApiKey() ? t("apiKeyReset") : t("apiKeyInput")}
-            </span>
-          </Button>
-          <LanguageToggle />
-          <ThemeToggle />
+          <div className="hidden md:flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleApiKeyButtonClick}
+              className="gap-2"
+            >
+              <Key className="h-4 w-4" />
+              <span className="hidden sm:inline">
+                {isHydrated && hasApiKey() ? t("apiKeyReset") : t("apiKeyInput")}
+              </span>
+            </Button>
+            <LanguageToggle />
+            <ThemeToggle />
+          </div>
+          <MobileHeaderMenu />
         </div>
       </div>
 

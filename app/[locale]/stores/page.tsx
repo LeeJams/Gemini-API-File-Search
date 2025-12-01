@@ -187,18 +187,12 @@ export default function StoresPage() {
   function navigateToWorkspace(store: FileSearchStore) {
     setCurrentStore(store);
     router.push({
-      pathname: "/workspace/[storeId]",
+      pathname: "/store/[storeId]/workspace",
       params: { storeId: store.name },
     });
   }
 
-  function navigateToDocuments(store: FileSearchStore) {
-    setCurrentStore(store);
-    router.push({
-      pathname: "/documents/[storeId]",
-      params: { storeId: store.name },
-    });
-  }
+
 
   return (
     <div className="container py-6 md:py-8">
@@ -305,16 +299,7 @@ export default function StoresPage() {
                   className="w-full"
                   onClick={() => navigateToWorkspace(store)}
                 >
-                  <FileText className="mr-2 h-4 w-4" />
-                  <span className="truncate">{t("queryWorkspace")}</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => navigateToDocuments(store)}
-                >
-                  <Database className="mr-2 h-4 w-4" />
-                  <span className="truncate">{t("documentManagement")}</span>
+                  <span className="truncate">{t("enterStore")}</span>
                 </Button>
               </CardContent>
             </Card>

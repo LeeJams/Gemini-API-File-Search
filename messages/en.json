@@ -47,6 +47,7 @@
     "emptyTitle": "No stores available",
     "emptyDescription": "Add a new store to get started",
     "addStore": "Add Store",
+    "enterStore": "Enter Store",
     "queryWorkspace": "Query Workspace",
     "documentManagement": "Document Management",
     "statsDocuments": "{count} document(s)",
