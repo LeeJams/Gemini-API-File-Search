@@ -180,9 +180,33 @@ export const useQueryState = () => {
 export const useModelState = () => {
   const selectedModel = useAppStore((state) => state.selectedModel);
   const setSelectedModel = useAppStore((state) => state.setSelectedModel);
+  const systemInstruction = useAppStore((state) => state.systemInstruction);
+  const setSystemInstruction = useAppStore((state) => state.setSystemInstruction);
+  const temperature = useAppStore((state) => state.temperature);
+  const setTemperature = useAppStore((state) => state.setTemperature);
+  const maxOutputTokens = useAppStore((state) => state.maxOutputTokens);
+  const setMaxOutputTokens = useAppStore((state) => state.setMaxOutputTokens);
+  const topP = useAppStore((state) => state.topP);
+  const setTopP = useAppStore((state) => state.setTopP);
+  const topK = useAppStore((state) => state.topK);
+  const setTopK = useAppStore((state) => state.setTopK);
+  const metadataFilter = useAppStore((state) => state.metadataFilter);
+  const setMetadataFilter = useAppStore((state) => state.setMetadataFilter);
 
   return {
     selectedModel,
     setSelectedModel,
+    systemInstruction,
+    setSystemInstruction,
+    temperature,
+    setTemperature,
+    maxOutputTokens,
+    setMaxOutputTokens,
+    topP,
+    setTopP,
+    topK,
+    setTopK,
+    metadataFilter,
+    setMetadataFilter,
   };
 };

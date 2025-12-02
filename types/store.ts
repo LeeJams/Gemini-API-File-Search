@@ -139,6 +139,20 @@ export interface ModelState {
 
   /** Actions */
   setSelectedModel: (model: string) => void;
+
+  // Advanced Options
+  systemInstruction: string;
+  setSystemInstruction: (instruction: string) => void;
+  temperature: number | undefined;
+  setTemperature: (temp: number | undefined) => void;
+  maxOutputTokens: number | undefined;
+  setMaxOutputTokens: (tokens: number | undefined) => void;
+  topP: number | undefined;
+  setTopP: (topP: number | undefined) => void;
+  topK: number | undefined;
+  setTopK: (topK: number | undefined) => void;
+  metadataFilter: string;
+  setMetadataFilter: (filter: string) => void;
 }
 
 /**
