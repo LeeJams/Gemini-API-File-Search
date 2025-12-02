@@ -100,7 +100,10 @@
     "topK": "Top K",
     "topKPlaceholder": "e.g., 40",
     "topKHint": "Limits the number of highest probability tokens to consider at each step. 40 means only the top 40 most likely tokens are candidates. Lower values (10-20) produce focused responses, higher values (40-80) allow more variety. Default varies by model, typically ~40.",
-    "reset": "Reset"
+    "reset": "Reset",
+    "welcomeTitle": "How can I help you today?",
+    "welcomeDescription": "Ask questions about your documents, analyze data, or generate content using the power of Gemini.",
+    "disclaimer": "Gemini AI generates AI-based answers. Review key details for accuracy."
   },
   "documents": {
     "title": "Document Management",

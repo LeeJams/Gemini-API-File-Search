@@ -13,9 +13,7 @@ import {
 } from "@/store";
 import { SUPPORTED_MODELS } from "@/store/slices/modelSlice";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,12 +23,11 @@ import {
 import ReactMarkdown from "react-markdown";
 import {
   Send,
-  FileText,
-  ChevronRight,
   ChevronDown,
   Settings,
+  Sparkles,
 } from "lucide-react";
-import { formatDate } from "@/lib/utils";
+import { AdvancedSettingsModal } from "@/components/workspace/AdvancedSettingsModal";
 import type { QueryHistoryItem, GenerationConfig } from "@/types";
 
 /**
@@ -46,24 +43,23 @@ export default function WorkspacePage() {
   const tCommon = useTranslations("common");
 
   const { currentStore } = useStoresState();
-  const { history, addToHistory, currentResult, setCurrentResult } =
+  const { addToHistory, currentResult, setCurrentResult } =
     useQueryState();
   const { setLoading, setError, clearError } = useUIState();
   const { apiKey, hasApiKey } = useAppStore();
-  const { selectedModel, setSelectedModel } = useModelState();
+  const {
+    selectedModel,
+    setSelectedModel,
+    systemInstruction,
+    temperature,
+    maxOutputTokens,
+    topP,
+    topK,
+    metadataFilter,
+  } = useModelState();
 
   const [query, setQuery] = useState("");
-  const [metadataFilter, setMetadataFilter] = useState("");
-  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
-
-  // Advanced options state
-  const [systemInstruction, setSystemInstruction] = useState("");
-  const [temperature, setTemperature] = useState<number | undefined>(undefined);
-  const [maxOutputTokens, setMaxOutputTokens] = useState<number | undefined>(
-    undefined
-  );
-  const [topP, setTopP] = useState<number | undefined>(undefined);
-  const [topK, setTopK] = useState<number | undefined>(undefined);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   async function handleExecuteQuery() {
     if (!query.trim()) {
@@ -147,383 +143,130 @@ export default function WorkspacePage() {
     }
   }
 
-  function loadHistoryItem(item: QueryHistoryItem) {
-    setQuery(item.query);
-    setCurrentResult({
-      text: item.response,
-      groundingMetadata: null,
-      timestamp: item.timestamp,
-    });
-  }
-
   if (!currentStore) {
     return null;
   }
 
+  const hasResult = !!currentResult;
+
   return (
-    <div className="flex-1 p-4 md:p-6 w-full max-w-[1800px] mx-auto">
-
-
-      <div className="grid gap-4 md:gap-6 lg:grid-cols-[1fr_350px]">
-        {/* Main Content */}
-        <div className="space-y-4 md:space-y-6">
-          {/* Query Input */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg md:text-xl">
-                {t("queryInput")}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="model" className="text-sm">
-                  {t("modelLabel")}
-                </Label>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-between text-sm md:text-base"
-                    >
-                      <span className="truncate">{selectedModel}</span>
-                      <ChevronDown className="ml-2 h-4 w-4 flex-shrink-0" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="start"
-                    className="min-w-[300px] md:min-w-[400px]"
-                  >
-                    {SUPPORTED_MODELS.map((model) => (
-                      <DropdownMenuItem
-                        key={model}
-                        onClick={() => setSelectedModel(model)}
-                        className={selectedModel === model ? "bg-accent" : ""}
-                      >
-                        {model}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="filter" className="text-sm">
-                  {t("metadataFilter")}
-                </Label>
-                <Input
-                  id="filter"
-                  placeholder={t("metadataFilterPlaceholder")}
-                  value={metadataFilter}
-                  onChange={(e) => setMetadataFilter(e.target.value)}
-                  className="text-sm md:text-base"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="query" className="text-sm">
-                  {t("questionLabel")}
-                </Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="query"
-                    placeholder={t("questionPlaceholder")}
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        handleExecuteQuery();
-                      }
-                    }}
-                    className="flex-1 text-sm md:text-base"
-                  />
-                  <Button
-                    onClick={handleExecuteQuery}
-                    size="icon"
-                    className="flex-shrink-0"
-                  >
-                    <Send className="h-4 w-4" />
+    <div className="flex flex-col h-[calc(100vh-4rem)] relative">
+      <div className="flex-1 overflow-y-auto pb-32">
+        <div className="max-w-5xl mx-auto p-4 md:p-6 w-full">
+          {/* Header / Model Selector */}
+          <div className="flex justify-between items-center mb-8">
+            <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="text-lg font-medium gap-2">
+                    {selectedModel}
+                    <ChevronDown className="h-4 w-4 opacity-50" />
                   </Button>
-                </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  {SUPPORTED_MODELS.map((model) => (
+                    <DropdownMenuItem
+                      key={model}
+                      onClick={() => setSelectedModel(model)}
+                    >
+                      {model}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsSettingsOpen(true)}
+              >
+                <Settings className="h-5 w-5" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Main Content */}
+          {!hasResult ? (
+            <div className="flex flex-col items-center justify-center mt-20 md:mt-32 text-center space-y-6">
+              <div className="h-16 w-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <Sparkles className="h-8 w-8 text-white" />
+              </div>
+              <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
+                {t("welcomeTitle")}
+              </h1>
+              <p className="text-muted-foreground max-w-md">
+                {t("welcomeDescription")}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-8">
+              {/* Result Display */}
+              <div className="prose prose-slate dark:prose-invert max-w-none">
+                <ReactMarkdown>{currentResult.text}</ReactMarkdown>
               </div>
 
-              {/* Advanced Options */}
-              <div className="border-t pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
-                  className="flex w-full items-center justify-between text-sm font-medium hover:opacity-70 transition-opacity"
-                >
-                  <span className="flex items-center gap-2">
-                    <Settings className="h-4 w-4" />
-                    {t("advancedOptions")}
-                  </span>
-                  <ChevronDown
-                    className={`h-4 w-4 transition-transform ${
-                      showAdvancedOptions ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-
-                {showAdvancedOptions && (
-                  <div className="mt-4 space-y-4">
-                    {/* System Instruction */}
-                    <div className="space-y-2">
-                      <Label htmlFor="systemInstruction" className="text-sm">
-                        {t("systemInstruction")}
-                      </Label>
-                      <Input
-                        id="systemInstruction"
-                        placeholder={t("systemInstructionPlaceholder")}
-                        value={systemInstruction}
-                        onChange={(e) => setSystemInstruction(e.target.value)}
-                        className="text-sm"
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        {t("systemInstructionHint")}
-                      </p>
-                    </div>
-
-                    {/* Temperature */}
-                    <div className="space-y-2">
-                      <Label htmlFor="temperature" className="text-sm">
-                        {t("temperature")}
-                      </Label>
-                      <div className="flex gap-2 items-center">
-                        <Input
-                          id="temperature"
-                          type="number"
-                          min="0"
-                          max="2"
-                          step="0.1"
-                          placeholder={t("temperaturePlaceholder")}
-                          value={temperature ?? ""}
-                          onChange={(e) =>
-                            setTemperature(
-                              e.target.value
-                                ? parseFloat(e.target.value)
-                                : undefined
-                            )
-                          }
-                          className="text-sm"
-                        />
-                        {temperature !== undefined && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setTemperature(undefined)}
-                          >
-                            {t("reset")}
-                          </Button>
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {t("temperatureHint")}
-                      </p>
-                    </div>
-
-                    {/* Max Output Tokens */}
-                    <div className="space-y-2">
-                      <Label htmlFor="maxOutputTokens" className="text-sm">
-                        {t("maxOutputTokens")}
-                      </Label>
-                      <div className="flex gap-2 items-center">
-                        <Input
-                          id="maxOutputTokens"
-                          type="number"
-                          min="1"
-                          placeholder={t("maxOutputTokensPlaceholder")}
-                          value={maxOutputTokens ?? ""}
-                          onChange={(e) =>
-                            setMaxOutputTokens(
-                              e.target.value
-                                ? parseInt(e.target.value)
-                                : undefined
-                            )
-                          }
-                          className="text-sm"
-                        />
-                        {maxOutputTokens !== undefined && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setMaxOutputTokens(undefined)}
-                          >
-                            {t("reset")}
-                          </Button>
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {t("maxOutputTokensHint")}
-                      </p>
-                    </div>
-
-                    {/* Top P */}
-                    <div className="space-y-2">
-                      <Label htmlFor="topP" className="text-sm">
-                        {t("topP")}
-                      </Label>
-                      <div className="flex gap-2 items-center">
-                        <Input
-                          id="topP"
-                          type="number"
-                          min="0"
-                          max="1"
-                          step="0.01"
-                          placeholder={t("topPPlaceholder")}
-                          value={topP ?? ""}
-                          onChange={(e) =>
-                            setTopP(
-                              e.target.value
-                                ? parseFloat(e.target.value)
-                                : undefined
-                            )
-                          }
-                          className="text-sm"
-                        />
-                        {topP !== undefined && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setTopP(undefined)}
-                          >
-                            {t("reset")}
-                          </Button>
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {t("topPHint")}
-                      </p>
-                    </div>
-
-                    {/* Top K */}
-                    <div className="space-y-2">
-                      <Label htmlFor="topK" className="text-sm">
-                        {t("topK")}
-                      </Label>
-                      <div className="flex gap-2 items-center">
-                        <Input
-                          id="topK"
-                          type="number"
-                          min="1"
-                          placeholder={t("topKPlaceholder")}
-                          value={topK ?? ""}
-                          onChange={(e) =>
-                            setTopK(
-                              e.target.value
-                                ? parseInt(e.target.value)
-                                : undefined
-                            )
-                          }
-                          className="text-sm"
-                        />
-                        {topK !== undefined && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setTopK(undefined)}
-                          >
-                            {t("reset")}
-                          </Button>
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {t("topKHint")}
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Result */}
-          {currentResult && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
-                  <FileText className="h-5 w-5" />
-                  {t("aiResponse")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="prose prose-sm md:prose prose-slate dark:prose-invert max-w-none">
-                  <ReactMarkdown>{currentResult.text}</ReactMarkdown>
+              {currentResult.groundingMetadata && (
+                <div className="border-t pt-4">
+                  <h4 className="mb-2 text-sm font-semibold">
+                    {t("groundingMetadataTitle")}
+                  </h4>
+                  <p className="text-xs text-muted-foreground">
+                    {t("groundingMetadataDescription")}
+                  </p>
                 </div>
-
-                {currentResult.groundingMetadata && (
-                  <div className="mt-4 border-t pt-4">
-                    <h4 className="mb-2 text-sm font-semibold">
-                      {t("groundingMetadataTitle")}
-                    </h4>
-                    <p className="text-xs text-muted-foreground">
-                      {t("groundingMetadataDescription")}
-                    </p>
-                  </div>
-                )}
-
-                <div className="mt-4 text-xs text-muted-foreground">
-                  {formatDate(new Date(currentResult.timestamp))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Empty State */}
-          {!currentResult && (
-            <Card className="border-dashed">
-              <CardContent className="flex flex-col items-center justify-center py-8 md:py-12">
-                <Send className="mb-3 md:mb-4 h-10 md:h-12 w-10 md:w-12 text-muted-foreground" />
-                <h3 className="mb-2 text-base md:text-lg font-semibold">
-                  {t("emptyTitle")}
-                </h3>
-                <p className="text-sm text-muted-foreground text-center">
-                  {t("emptyDescription")}
-                </p>
-              </CardContent>
-            </Card>
+              )}
+            </div>
           )}
         </div>
-
-        {/* History Sidebar */}
-        <Card className="h-fit lg:sticky lg:top-4">
-          <CardHeader>
-            <CardTitle className="text-base md:text-lg">
-              {t("queryHistory")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {history.filter((h) => h.storeName === storeId).length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                {t("historyEmpty")}
-              </p>
-            ) : (
-              <div className="space-y-2">
-                {history
-                  .filter((h) => h.storeName === storeId)
-                  .slice(0, 10)
-                  .map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => loadHistoryItem(item)}
-                      className="flex w-full items-start gap-2 rounded-lg border p-2 md:p-3 text-left transition-colors hover:bg-accent active:bg-accent"
-                    >
-                      <ChevronRight className="mt-0.5 h-4 w-4 flex-shrink-0 text-muted-foreground" />
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-xs md:text-sm font-medium">
-                          {item.query}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {formatDate(new Date(item.timestamp))}
-                        </p>
-                      </div>
-                    </button>
-                  ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
       </div>
+
+      {/* Input Area (Sticky Bottom) */}
+      <div className="absolute bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm border-t p-4 md:p-6">
+        <div className="max-w-3xl mx-auto space-y-4">
+          <div className="relative rounded-xl border bg-background shadow-sm focus-within:ring-2 focus-within:ring-ring transition-all">
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleExecuteQuery();
+                }
+              }}
+              placeholder={t("questionPlaceholder")}
+              className="border-0 focus-visible:ring-0 shadow-none py-6 pl-4 pr-12 text-base md:text-lg bg-transparent"
+            />
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+              {/* Placeholder buttons for future features */}
+              {/* <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
+                <Paperclip className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
+                <Mic className="h-4 w-4" />
+              </Button> */}
+              <Button
+                onClick={handleExecuteQuery}
+                size="icon"
+                className={query.trim() ? "" : "opacity-50"}
+                disabled={!query.trim()}
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          <div className="text-center">
+             <p className="text-xs text-muted-foreground">
+              {t("disclaimer")}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <AdvancedSettingsModal
+        open={isSettingsOpen}
+        onOpenChange={setIsSettingsOpen}
+      />
     </div>
   );
 }
