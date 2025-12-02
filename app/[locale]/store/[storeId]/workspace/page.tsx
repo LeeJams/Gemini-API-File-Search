@@ -224,8 +224,10 @@ export default function WorkspacePage() {
       {/* Input Area (Sticky Bottom) */}
       <div className="absolute bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm border-t p-4 md:p-6">
         <div className="max-w-3xl mx-auto space-y-4">
-          <div className="relative rounded-xl border bg-background shadow-sm focus-within:ring-2 focus-within:ring-ring transition-all">
+          <div className="relative rounded-2xl border border-input bg-background shadow-sm focus-within:ring-2 focus-within:ring-primary focus-within:border-primary transition-all duration-200">
             <Input
+              id="query-input"
+              name="query"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => {
@@ -235,7 +237,7 @@ export default function WorkspacePage() {
                 }
               }}
               placeholder={t("questionPlaceholder")}
-              className="border-0 focus-visible:ring-0 shadow-none py-6 pl-4 pr-12 text-base md:text-lg bg-transparent"
+              className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none py-6 pl-4 pr-12 text-base md:text-lg bg-transparent"
             />
             <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
               {/* Placeholder buttons for future features */}
