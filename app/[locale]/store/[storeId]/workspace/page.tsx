@@ -240,13 +240,6 @@ export default function WorkspacePage() {
               className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none py-6 pl-4 pr-12 text-base md:text-lg bg-transparent"
             />
             <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-              {/* Placeholder buttons for future features */}
-              {/* <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
-                <Paperclip className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
-                <Mic className="h-4 w-4" />
-              </Button> */}
               <Button
                 onClick={handleExecuteQuery}
                 size="icon"
@@ -256,11 +249,6 @@ export default function WorkspacePage() {
                 <Send className="h-4 w-4" />
               </Button>
             </div>
-          </div>
-          <div className="text-center">
-             <p className="text-xs text-muted-foreground">
-              {t("disclaimer")}
-            </p>
           </div>
         </div>
       </div>
